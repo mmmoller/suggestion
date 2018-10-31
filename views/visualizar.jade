@@ -1,0 +1,108 @@
+extends layout
+block content
+	div.container(style="margin-top: 20px")
+		center
+			div.section-wall
+				h1.section-title Fichas de Embarque autorizadas
+				form(class='form-signin', action='/visualizar', method='GET')
+					input#from(type='text', name='from' class='form-control', placeholder='Data', autocomplete="off")
+					input#data(type='hidden', name='data', class='form-control')
+					br
+					if (trecho == "SLZ-AK")
+						.radio-inline
+							input(type='radio', name='trecho', value='SLZ-AK', checked='checked')
+							| SL x AK
+						.radio-inline
+							input(type='radio', name='trecho', value='AK-SLZ')
+							| AK x SL
+					else
+						.radio-inline
+							input(type='radio', name='trecho', value='SLZ-AK')
+							| SL x AK
+						.radio-inline
+							input(type='radio', name='trecho', value='AK-SLZ', checked='')
+							| AK x SL
+					br
+					br
+					button(class='btn btn-lg btn-primary btn-block', type='submit') Visualizar
+					span.clearfix
+	script.
+		$( function() {
+			var dateFormat = "dd/mm/yy",
+			from = $( "#from" ).datepicker(
+			{ showOtherMonths: true,
+			selectOtherMonths: true,
+			dateFormat: dateFormat,
+			altField: "#data",
+			altFormat: "yy-mm-dd"
+			});
+		});
+	script.
+		$(document).ready(function() {
+			$('#default-table').DataTable( {
+				"language": {
+					"emptyTable": "Nenhuma ficha de embarque"
+				},
+				"ordering": false,
+				"paging": false,
+				dom: 'lBfrtp',
+				buttons: [
+					{
+						extend: 'print',
+						title: "Ficha de Embarque",
+						customize: function ( win ) {
+							$(win.document.body)
+								.css( 'font-size', '8pt' );
+
+							$(win.document.body).find( 'table' )
+								.addClass( 'compact' )
+								.css( 'font-size', 'inherit' )
+								.css( 'page-break-inside', 'auto');
+							
+							$(win.document.body).find( 'tbody:before' )
+								.css( 'line-height', '1em')
+								.css( 'content', '\200c' )
+								.css( 'display', 'block')
+						}
+					},
+					'pdfHtml5'
+				]
+			} );
+		});
+	div.container.default-table-wrapper.section-to-print
+		center
+			table#default-table.display.compact.cell-border
+				thead
+					tr
+						th Nº
+						th Data
+						th Trecho
+						th Nome
+						th Identidade
+						th Grau
+						th Motivo
+						th Responsável
+				tbody
+					-for (var j = 0, index = 1; j < cadastros.length; j++){
+						-for (var i = 0; i < cadastros[j].relacao.length; i+=5, index++){
+							if(cadastros[j].relacao[i+4] == "Aprovado")
+								tr
+									td #{index}
+									td #{moment(cadastros[j].data).format("DD/MM/YYYY")}
+									td #{cadastros[j].trecho}
+									td #{cadastros[j].relacao[i]}
+									td #{cadastros[j].relacao[i+1]}
+									td #{cadastros[j].relacao[i+2]}
+									td #{cadastros[j].relacao[i+3]}
+									td #{cadastros[j].nome}
+							if(cadastros[j].relacao[i+4] == "Reprovado")
+								- index--;
+							
+
+						-}
+					-}
+	if (user == "fiscal")
+		div(style="margin-bottom: 20px")
+			form(action='/logout', method='GET')
+				button(class='btn btn-danger', type='submit', style="width:50%") Sair
+		

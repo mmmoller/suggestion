@@ -1,0 +1,257 @@
+extends layout
+block content
+	script.
+		$( function() {
+			var dateFormat = "dd/mm/yy",
+			from = $( "#from" ).datepicker(
+			{ showOtherMonths: true,
+			selectOtherMonths: true,
+			dateFormat: dateFormat,
+			altField: "#data",
+			altFormat: "yy-mm-dd"
+			});
+		});
+		var index = 4;
+		function createRow(){
+			if (index < 20){
+				var table = document.getElementById("myTable");
+				var tbody = document.getElementById("myTBody")
+				var tr = document.createElement('tr');
+				
+				var td = document.createElement('td');
+				td.setAttribute("colspan", "2")
+				input = document.createElement("input");
+				input.setAttribute("type", "text")
+				input.setAttribute("name", "relacao")
+				input.setAttribute("class", "form-control")
+				input.setAttribute("size", "100")
+				input.setAttribute("required", "")
+				
+				td.appendChild(input);
+				tr.appendChild(td);
+				
+				
+				var td2 = document.createElement('td')
+				td2.setAttribute("colspan", "1")
+				var input2 = document.createElement("input")
+				input2.setAttribute("type", "text")
+				input2.setAttribute("name", "relacao")
+				input2.setAttribute("class", "form-control")
+				input2.setAttribute("size", "50")
+				input2.setAttribute("required", "")
+				
+				td2.appendChild(input2);
+				tr.appendChild(td2)
+				
+				
+				var td3 = document.createElement('td')
+				td3.setAttribute("colspan", "1")
+				var input3 = document.createElement("input")
+				input3.setAttribute("type", "text")
+				input3.setAttribute("name", "relacao")
+				input3.setAttribute("class", "form-control")
+				input3.setAttribute("size", "50")
+				input3.setAttribute("required", "")
+				
+				td3.appendChild(input3);
+				tr.appendChild(td3)
+				
+				
+				var td4 = document.createElement('td')
+				td4.setAttribute("colspan", "2")
+				var input4 = document.createElement("input")
+				input4.setAttribute("type", "text")
+				input4.setAttribute("name", "relacao")
+				input4.setAttribute("class", "form-control")
+				input4.setAttribute("size", "50")
+				input4.setAttribute("required", "")
+				
+				td4.appendChild(input4);
+				tr.appendChild(td4)
+				
+				var td5 = document.createElement('td')
+				td5.setAttribute("colspan", "1")
+				var input5 = document.createElement("input")
+				input5.setAttribute("type", "button")
+				input5.setAttribute("class", "form-control")
+				input5.setAttribute("onclick", "deleteRow(this)")
+				input5.setAttribute("value", "X")
+				input5.setAttribute("class", "btn")
+				input5.setAttribute("class", "btn-danger")
+				
+				td5.appendChild(input5);
+				tr.appendChild(td5)
+				
+				tbody.appendChild(tr)
+				//table.appendChild(tbody);
+				
+				index+=4;
+			}
+		}
+		function deleteRow(r) {
+			var i = r.parentNode.parentNode.rowIndex;
+			document.getElementById("myTable").deleteRow(i);
+			index-=4;
+		}
+	div(style="margin-bottom: 20px; margin-top: 20px")
+		form(action='/consultar', method='GET')
+			button(class='btn btn-primary', type='submit', style="width:50%") Consultar situação de Reserva
+	form(action='/', method='POST')
+		div.container.default-table-wrapper
+			center
+				table.default-table.table-striped.table-bordered
+					tbody
+						tr
+							td(colspan="6")
+								label Ficha de Requisição de Embarque nas Lanchas do GAP-AK
+						tr
+							td(colspan="6") Informações do Solicitante
+						tr
+							td(colspan="6")
+								div.input-group
+									span.input-group-addon Nome/Posto/Graduação
+									input(type='text', name='nome', class = 'form-control', size="500", required)
+						tr
+							td(colspan="2")
+								div.input-group
+									span.input-group-addon Nº Crachá
+									input(type='text', name='cracha', class = 'form-control', size="500", required)
+							td(colspan="2")
+								div.input-group
+									span.input-group-addon SARAM/SIAPE
+									input(type='text', name='identidade', class = 'form-control', size="500", required)
+							td(colspan="2")
+								div.input-group
+									span.input-group-addon Divisão/Subdivisão/Seção
+									input(type='text', name='divisao', class = 'form-control', size="500", required)
+						tr
+							td(colspan="1")
+								.radio-inline
+									input(type='radio', name='trecho', value='SLZ-AK', checked='çhecked')
+									| São Luís -> Alcântara
+							td(colspan="1")
+								.radio-inline
+									input(type='radio', name='trecho', value='AK-SLZ')
+									| Alcântara -> São Luís
+							td(colspan="2")
+								div.input-group
+									span.input-group-addon Data
+									input#from(type='text', name='from' class='form-control', autocomplete="off", size="500", required)
+									input#data(type='hidden', name='data', class='form-control')
+							td(colspan="2")
+								div.input-group
+									span.input-group-addon Email
+									input(type='email', name='email', class = 'form-control', size="500", required)
+						tr
+							td(colspan="6")
+								div.input-group
+									span.input-group-addon Observação opcional
+									input(type='text', name='observacao', class = 'form-control', size="500")
+		div.container.default-table-wrapper
+			center
+				table#myTable.table-striped.table-bordered.default-table
+					tbody#myTBody
+						tr
+							td(colspan="7")
+								label Relação das pessoas que necessitarão embarcar (max. 5)
+						tr
+							td(colspan="2")
+								label Nome
+							td(colspan="1")
+								label Identidade
+							td(colspan="1")
+								label Dependente/Parente
+							td(colspan="2")
+								label Motivo
+							td(colspan="1")
+								label Adicionar/Remover
+						tr
+							td(colspan="2")
+								input(type='text', name='relacao', class = 'form-control', size="100", required)
+							td(colspan="1")
+								input(type='text', name='relacao', class = 'form-control', size="50", required)
+							td(colspan="1")
+								input(type='text', name='relacao', class = 'form-control', size="50", required)
+							td(colspan="2")
+								input(type='text', name='relacao', class = 'form-control', size="50", required)
+							td(coldspan="1")
+								input.btn.btn-primary(type='button', value='+', onclick='createRow()')
+								
+		div.container.default-table-wrapper
+			center
+				table.default-table.table-striped.table-bordered
+					tbody
+						tr
+							td(colspan="3")
+								input(type='checkbox', name='termo', checked=false, style="width: 15px; height: 15px;", required)
+								|  Declaro que estou de acordo com o termo de responsabilidade abaixo
+						tr
+							td(colspan="3")
+								input(type='checkbox', name='traje', checked=false, style="width: 15px; height: 15px;", required)
+								|  Declaro que estou ciente dos   
+								a(href='/trajes', target="blank") trajes permitidos
+						tr
+							td(colspan="3")
+								button(class='btn btn-lg btn-primary', type='submit') Enviar requisição
+		div.container.default-table-wrapper
+			center
+				table.default-table.table-striped.table-bordered
+					tbody
+						tr
+							td(colspan="6")
+								label Termo de Responsabilidade
+						tr
+							td
+								p(style="text-align: justify")
+									| Declaro, para  todos  os  fins,  que  compreendo  e  aceito  os  riscos  decorrentes  da  travessia  da  Baía  de  São Marcos, para todos  os passageiros ora solicitados para embarque, pois tenho conhecimento das dificuldades de navegabilidade  em  razão  da  maré abrupta e intempestiva, da natureza de mar aberto, dos fortes ventos e da existência de toda sorte de vida marinha, além do risco de queda durante o embarque ou desembarque.
+								p(style="text-align: justify")
+									| Compreendo que a embarcação é de propriedade do Grupamento de Apoio de Alcântara e utilizada para o transporte (SL/AK/SL) exclusivo do  efetivo  (militares,  civis  e  dependentes)  do  GAP-AK/CLA,  sendo operada por mestres e marinheiros do  GAP-AK/CLA, treinados e autorizados pela Capitania dos Portos do Maranhão.
+								p(style="text-align: justify")
+									| Reconheço que o respectivo transporte é mera liberalidade da Chefia do GAP-AK, e, por inexistir qualquer contraprestação, caracteriza-se como transporte de cortesia, regrado pelo art. 736 do Código Civil Brasileiro. Portanto, há isenção de qualquer responsabilização objetiva por parte do GAP-AK.
+								p(style="text-align: justify")
+									| Por fim, declaro ter ciência de que o GAP-AK, sua diretoria e/ou funcionários e/ou prepostos, 
+									strong não se responsabilizam 
+									| (civil ou criminalmente) 
+									strong por qualquer dano pessoal 
+									| (mesmo de morte ou de ferimentos físicos) 
+									strong ou material 
+									| (perda ou dano total ou parcial de objetos e pertencentes) 
+									strong ocorridos a bordo da embarcação.
+		div.container.default-table-wrapper
+			center
+				table.default-table.table-striped.table-bordered
+					tbody
+						tr
+							td
+								p(style="text-align: justify")
+									strong OBS1: 
+									| Atentar para a ordem de embarque prevista na 
+									strong NPA-GAP-AK-002
+									|, obedecendo às respectivas prioridades.
+						tr
+							td
+								p(style="text-align: justify")
+									strong OBS2: 
+									| Atentar para o horário de embarque, devendo chegar com, no mínimo, 15 min de antecedência.
+						tr
+							td
+								p(style="text-align: justify")
+									strong OBS3: 
+									| Atentar para o vestuário adequado (calça, camisa com manga e sapato fechado).
+						tr
+							td
+								p(style="text-align: justify")
+									strong OBS4: 
+									| O militar/servidor do efetivo do GAP/CLA ao preencher essa ficha solicitando o embarque de pessoas que não sejam seus dependentes legais, deverá acompanhar o(s) passageiro(s), alvo da solicitação, durante todo o trajeto, caso o transporte seja autorizado.
+						tr
+							td
+								p(style="text-align: justify")
+									strong OBS5: 
+									| Esta autorização se limita apenas ao embarque nas lanchas do GAP-AK, portanto, não autoriza o embarque nas viaturas.
+						tr
+							td
+								p(style="text-align: justify")
+									strong OBS6: 
+									| A requisição deve ser solicitada até 
+									strong 48 horas 
+									| antes do dia que se necessita embarcar.
