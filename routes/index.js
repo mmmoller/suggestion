@@ -1,34 +1,135 @@
 var express = require('express');
 var router = express.Router();
-var User = require('../models/user');
-var Cadastro = require('../models/cadastro');
 var bCrypt = require('bcrypt-nodejs');
 var moment = require('moment');
-var mongoose = require('mongoose');
 var nodemailer = require('nodemailer');
 
+var User = require('../models/user');
+var Infosys = require('../models/infosys');
+var Infodata = require('../models/infodata');
 
-module.exports = function(passport){ // Rotas
+module.exports = function(passport){
+
 	// /TESTE
-	// Testar como se comporta ao guardar uma data no BD
 	router.get('/teste', function(req, res) {
-		/*
-		var tarray = ["a0", "b0", "c0", "d0", "a2", "b2", "c2", "d2", "a3", "b3", "c3", "d3", "a0", "b0", "c0", "d0", "a2", "b2", "c2", "d2", "a3", "b3", "c3", "d3"];
-		for (var i = 0; i < tarray.length; i++){
-			if (i%5 == 3){
-				tarray.splice(i+1, 0, "e" + i/5)
-			}
-		}
-		console.log(tarray);
-		*/
-		res.send("banana")
+		res.render('teste');
 	});
-	
+
+	// /'SignUp'
+
 	// /'INDEX'
 	router.get('/', function(req, res) {
 		res.render('index', {message: req.flash('message')});
 	});
+
+    router.get('/profile', isAuthenticated, function(req, res) {
+        res.render('profile', {
+			user : req.user,
+			message: req.flash('message')
+        });
+	});
 	
+	router.post('/profile/change', isAuthenticated, function(req, res) {
+		User.findOne({'_id': req.body.id}, function(err, user) {
+			if (err) return handleError(err,req,res);
+			if (user){
+				user.username = req.body.username;
+				user.save(function (err) {
+					if (err) return handleError(err,req,res);
+				});
+				req.flash('message', "Username has been changed");
+				res.redirect('/profile');
+			}
+			else{
+				req.flash('message', "!Username couldn't be changed");
+				res.redirect('/profile');
+			}
+		});
+	});
+
+	router.post('/profile/delete', isAuthenticated, function(req, res) {
+		User.findOne({'_id': req.body["id"]}, function(err, user) {
+			if (err) return handleError(err,req,res);
+			if (user){
+				if (req.body["username"] == user.username){
+					req.logout();
+					user.remove();
+					req.flash('message', "User has been deleted");
+					res.redirect('/logout');
+				}
+				else{
+					req.flash('message', "!Wrong username");
+					res.redirect('/profile');
+				}
+			}
+			else{
+				req.flash('message', "!User couldn't be deleted");
+				res.redirect('/profile');
+			}
+		});
+	});
+
+
+    // LOGOUT ==============================
+    router.get('/logout', function(req, res) {
+        req.logout();
+        res.redirect('/');
+    });
+
+	
+	// locally --------------------------------
+	// LOGIN ===============================
+	// show the login form
+	router.get('/login', function(req, res) {
+		res.render('login', { message: req.flash('message') });
+	});
+
+	// process the login form
+	router.post('/login', passport.authenticate('local-login', {
+		successRedirect : '/profile', // redirect to the secure profile section
+		failureRedirect : '/login', // redirect back to the signup page if there is an error
+		failureFlash : true // allow flash messages
+	}));
+
+	// SIGNUP =================================
+	// show the signup form
+	router.get('/signup', function(req, res) {
+		res.render('signup', { message: req.flash('signupMessage') });
+	});
+
+	// process the signup form
+	router.post('/signup', passport.authenticate('local-signup', {
+		successRedirect : '/profile', // redirect to the secure profile section
+		failureRedirect : '/signup', // redirect back to the signup page if there is an error
+		failureFlash : true // allow flash messages
+	}));
+
+
+	// google ---------------------------------
+
+	// send to google to do the authentication
+	router.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+
+	// the callback after google has authenticated the user
+	router.get('/auth/google/callback',
+		passport.authenticate('google', {
+			successRedirect : '/profile',
+			failureRedirect : '/'
+		}));
+
+
+	/*
+	router.get('/infosys', function(req, res) {
+		var newInfosys = Infosys();
+		newInfosys.users = [];
+		newInfosys.categories = [];
+		newInfosys.save(function (err) {
+			if (err) return handleError(err,req,res);
+			res.send("teste");
+		});
+	});*/
+
+	// OLD STUFF \/
 	router.post('/', function(req, res){
 
 		var newCadastro = new Cadastro();
@@ -669,6 +770,12 @@ var isAuthenticatedAuth = function (req, res, next) {
 	res.redirect('/login/autorizar');
 }
 
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+
+    res.redirect('/');
+}
 
 var createHash = function(password){
 	return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);

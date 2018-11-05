@@ -1,0 +1,14 @@
+extends layout
+
+block content
+    .default-wrapper
+        h1 Sign up
+        form(action='/signup', method='post')
+            div.input-group.form-group
+                span.input-group-addon Email
+                input(type='text', name='email', class = 'form-control', required)
+            div.input-group.form-group
+                span.input-group-addon Password
+                input(type='password', name='password', class = 'form-control', required)
+            button.form-group(type="submit" class="btn btn-primary btn-lg") Sign up
+    

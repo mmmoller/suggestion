@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    .default-wrapper
+        h1 Profile
+        form(action='/profile/change', method='post')
+            div.input-group.form-group
+                span.input-group-addon Username
+                input(type='text', name='username', value=user.username, class = 'form-control', required)
+            input(type='hidden', name='id', value=user._id)
+            button.form-group(type="submit" class="btn btn-primary btn-lg") Change Username
+    .default-wrapper
+        form(action='/profile/delete', method='post')
+            div.input-group.form-group
+                span.input-group-addon Username
+                input(type='text', name='username', placeholder=user.username, class = 'form-control', required)
+            input(type='hidden', name='id', value=user._id)
+            button.form-group(type="submit" class="btn btn-danger btn-lg") Delete Account

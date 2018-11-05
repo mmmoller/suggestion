@@ -5,20 +5,17 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var passport = require('passport');
+var expressSession = require('express-session');
+var flash = require('connect-flash');
+
+//#region Mongo configurations
 mongoose.plugin(schema => { schema.options.usePushEach = true });
 mongoose.Promise = require('bluebird');
 
 var options = {
-	server: {
-		socketOptions: {
-			keepAlive: 300000, connectTimeoutMS: 30000
-		}
-	},
-	replset: {
-		socketOptions: {
-			keepAlive: 300000, connectTimeoutMS : 30000
-		}
-	}
+	socketTimeoutMS: 30000,
+	useNewUrlParser: true
 };
 
 if (process.env.MONGOLAB_URI)
@@ -26,25 +23,27 @@ if (process.env.MONGOLAB_URI)
 else
 	mongoose.connect("mongodb://127.0.0.1/test", options);
 
+//#endregion
+
 var app = express();
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+app.use(favicon(__dirname + '/public/img/favicon.ico'));
 
-app.use(favicon());
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuring Passport
-var passport = require('passport');
-var expressSession = require('express-session');
-// TODO - Why Do we need this key ?
-app.use(expressSession({secret: 'mySecretKey'}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded( {extended:true}));
+
+app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')))
+
+app.use(expressSession({secret: 'mySecretKey', saveUninitialized: true, resave: true}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -53,12 +52,14 @@ app.locals.moment = require('moment');
 
  // Using the flash middleware provided by connect-flash to store messages in session
  // and displaying in templates
-var flash = require('connect-flash');
 app.use(flash());
 
 // Initialize Passport
-var initPassport = require('./passport/init');
-initPassport(passport);
+
+require('./config/passport.js')(passport);
+/*
+var initPassport = require('./config/passport.js')(passport);
+initPassport(passport);*/
 
 var routes = require('./routes/index')(passport);
 app.use('/', routes);
