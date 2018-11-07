@@ -1,6 +1,47 @@
 extends layout
 
 block content
-	div.container
-		h1 TESTE
-		button(class='btn btn-primary', type='submit') Visualizar
+	script.
+		$(document).ready(function () {
+			$('#increment').click(function(){
+				var width = $("#container_width");
+				var input;
+				var input = $("<input>").attr("type","text").attr("name","width[]");
+				var br = $("<br>");
+				width.append(br);
+				width.append(input);
+
+				var height = $("#container_height");
+				var input = $("<input>").attr("type","text").attr("name","height[]");
+				var br = $("<br>");
+				height.append(br);
+				height.append(input);
+			});
+		});
+	<form id="exampleForm">
+	<table class="form-table">
+
+
+
+		<tr valign="top">
+			<td id="container_width">
+				<input type="text" name="width[]" placeholder="" />
+			</td>
+
+			<td id="container_height">
+				<input type="text" name="height[]" placeholder="" />
+			</td>
+
+			<td>
+				<input type="button" name="increment" id="increment" value="+">
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<input type="submit" value="Save settings"/>
+			</td>
+		</tr>
+
+	</table>
+	</form>

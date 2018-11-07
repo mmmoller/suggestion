@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    .default-wrapper
+        h1 Userlist
+            form(action='/userlist', method='get')
+                .input-group(style="margin-top: 10px")
+                    input.form-control(type='text', name='search_name', placehold='Username or Email', required)
+                    .input-group-append
+                        button(type="submit" class="btn btn-outline-primary") Search
+                
+    .default-wrapper
+        - for(var i = 0; i < users.length; i++){
+            form.form-inline(action="/profile/add", method="post")
+                a(href='/profile') #{users[i].username}
+                input(type='hidden', name='id', value=users[i]._id)
+                button.btn.btn-primary(type="submit", style="margin-left: auto") Add
+        -}

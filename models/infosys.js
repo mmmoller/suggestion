@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
 module.exports = mongoose.model('Infosys',{
-	users: [String],
-	categories: [String]
+	usernames: Object, // {_id: name}
+	categories: [String],
 });

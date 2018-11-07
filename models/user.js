@@ -3,10 +3,9 @@ var bcrypt   = require('bcrypt-nodejs');
 
 var userSchema = mongoose.Schema({
 
-	username: String,
-	followers: [String],
-	followers_coefficient: [Number],
-	index: Number,
+    username: String,
+    
+    relation: Object, // {_id: coeficient}
 
     local            : {
         email        : String,

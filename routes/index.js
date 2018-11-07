@@ -6,13 +6,66 @@ var nodemailer = require('nodemailer');
 
 var User = require('../models/user');
 var Infosys = require('../models/infosys');
-var Infodata = require('../models/infodata');
+var Recommendation = require('../models/recommendation');
+var Relation = require('../models/relation'); 
 
 module.exports = function(passport){
 
 	// /TESTE
+	router.get('/a', function(req, res) {
+		if (req.user){
+			req.user.username = "ban"
+			req.user.save(function (err) {
+				if (err) return handleError(err,req,res);
+			});
+		}
+		res.send("done");
+	});
+
 	router.get('/teste', function(req, res) {
-		res.render('teste');
+		var infoData = new Recommendation();
+		infoData.grades = {};
+		infoData.grades["banana"] = "abacate";
+		infoData.grades[3] = 10;
+		infoData.save(function (err) {
+			if (err) return handleError(err,req,res);
+		});
+
+		var infoData2 = new Recommendation();
+		infoData2.grades = {};
+		infoData2.grades["teste"] = "taste";
+		infoData2.grades["tango"] = "tengo";
+		infoData2.save(function (err) {
+			if (err) return handleError(err,req,res);
+		});
+		res.send("done");
+	});
+
+	router.get('/teste2', function(req, res) {
+		var tres = "3"
+		var gradess = "grades.teste"
+		Recommendation.find({ [gradess] : {$exists: true}}, function(err, data){
+			if (data){
+				console.log(data)
+				delete data[0].grades["teste"];
+				data[0].markModified("grades")
+				data[0].save(function (err) {
+					if (err) return handleError(err,req,res);
+					res.send(data)
+				});
+ 				//console.log(data)
+				//res.send(data)
+			}
+			else
+				res.send("error")
+ 		});
+	});
+
+	router.get('/teste3', function(req, res) {
+		Recommendation.findOne({}, function(err, data){
+			console.log(data.users_grade)
+			res.send(data.users_grade);
+ 		});
 	});
 
 	// /'SignUp'
@@ -29,46 +82,200 @@ module.exports = function(passport){
         });
 	});
 	
-	router.post('/profile/change', isAuthenticated, function(req, res) {
-		User.findOne({'_id': req.body.id}, function(err, user) {
+	router.post('/change_username', isAuthenticated, function(req, res) {
+		req.user.username = req.body["username"];
+		req.user.save(function (err) {
 			if (err) return handleError(err,req,res);
-			if (user){
-				user.username = req.body.username;
-				user.save(function (err) {
+		});
+
+		Infosys.findOne({}, function(err, infosys){
+			if (err) return handleError(err,req,res);
+			if (infosys){
+				infosys.usernames[req.user._id] = req.user.username;
+				infosys.markModified("usernames");
+				infosys.save(function (err) {
 					if (err) return handleError(err,req,res);
 				});
-				req.flash('message', "Username has been changed");
-				res.redirect('/profile');
-			}
-			else{
-				req.flash('message', "!Username couldn't be changed");
-				res.redirect('/profile');
 			}
 		});
+
+		req.flash('message', "Username has been changed");
+		res.redirect('/profile');
 	});
 
-	router.post('/profile/delete', isAuthenticated, function(req, res) {
-		User.findOne({'_id': req.body["id"]}, function(err, user) {
+	router.post('/delete_account', isAuthenticated, function(req, res) {
+		if (req.body["username"] == req.user.username){
+
+			var query_user_relation = "relation." + req.user._id
+
+			User.find({[query_user_relation]: {$exists: true}}, function(err, users) {
+				if (err) return handleError(err,req,res);
+				for (var i = 0; i < users.length; i++){
+					delete users[i].relation[req.user._id];
+					users[i].markModified("relation");
+					users[i].save(function (err) {
+						if (err) return handleError(err,req,res);
+					});
+				}
+			});
+			
+			Infosys.findOne({}, function(err, infosys){
+				if (err) return handleError(err,req,res);
+				if (infosys){
+					delete infosys.usernames[req.user._id];
+					infosys.markModified("usernames");
+					infosys.save(function (err) {
+						if (err) return handleError(err,req,res);
+					});
+				}
+			});
+
+			var query_recommendation_grades = "grades." + req.user._id
+			Recommendation.find({[query_recommendation_grades] : {$exists: true} }, function(err, recommendations){
+				if (err) return handleError(err,req,res);
+				for (var i = 0; i < recommendations.length; i++){
+					delete recommendations[i].grades[req.user._id];
+					delete recommendations[i].comments[req.user._id];
+					recommendations[i].markModified("grades");
+					recommendations[i].markModified("comments");
+					recommendations[i].save(function (err) {
+						if (err) return handleError(err,req,res);
+					});
+				}
+			});
+
+			req.logout();
+			req.user.remove();
+			req.flash('message', "User has been deleted");
+			res.redirect('/logout');
+		}
+		else{
+			req.flash('message', "!Wrong username");
+			res.redirect('/profile');
+		}
+		
+	});
+
+	router.get('/userlist', isAuthenticated, function(req, res) {
+		var name = req.body["search_name"];
+		User.find({$or: [
+			{'username': {'$regex': name, "$options": "i"}},
+			{'local.email': {'$regex': name, "$options": "i"}},
+			{'google.email': {'$regex': name, "$options": "i"}}
+		] }, function(err, users) {
 			if (err) return handleError(err,req,res);
-			if (user){
-				if (req.body["username"] == user.username){
-					req.logout();
-					user.remove();
-					req.flash('message', "User has been deleted");
-					res.redirect('/logout');
+			if (users){
+				var user_name = [];
+				var user_relation = [];
+				for (var i = 0; i < users.length; i++){
+					user_name.push(users[i].username);
+					if (req.user.relation[users[i]._id] == undefined){
+						user_relation.push("add");
+					}
+					else{
+						user_relation.push("remove");
+					}
 				}
-				else{
-					req.flash('message', "!Wrong username");
-					res.redirect('/profile');
-				}
+				res.render('userlist', {user_name: user_name, user_relation: user_relation})
 			}
 			else{
-				req.flash('message', "!User couldn't be deleted");
+				req.flash('message', "!No users found.");
 				res.redirect('/profile');
 			}
 		});
 	});
 
+	router.get('/user', isAuthenticated, function(req, res) {
+		var id = req.body["target_id"];
+		var user_relation = "remove";
+		var user_name = "";
+		var recommendations = [];
+		var query = "grades." + "" + id; 
+		if (req.user.relation[id] == undefined){
+			user_relation = "add";
+		}
+		Infosys.findOne({}, function(err, infosys){
+			if (err) return handleError(err,req,res);
+			if (infosys){
+				user_name = infosys.usernames[id];
+				Recommendation.find({[query] : {$exists: true} }, function(err, recommendations){
+					if (err) return handleError(err,req,res);
+					if (recommendations){
+						res.render('user', {id : id, user_relation: user_relation, user_name: user_name, recommendations: recommendations});
+					}
+					else{
+						req.flash('message', "!Recommendations does not exist! Contact Admin");
+						res.redirect("/profile")
+					}
+				});
+			}
+			else {
+				req.flash('message', "!Infosys does not exist! Contact Admin");
+				res.redirect("/profile")
+			}
+		});
+	});
+
+	router.post('/add_relation', isAuthenticated, function(req, res){
+
+		var target_id = req.body["target_id"];
+		if (req.user.relation[target_id] == undefined){
+			req.user.relation[target_id] = 1;
+			req.user.markModified("relation");
+			req.user.save(function (err) {
+				if (err) return handleError(err,req,res);
+			});
+			req.flash('message', "User added sucessfully.");
+			
+		}
+		else{
+			req.flash('message', "!User is aleady added.");
+		}
+		res.redirect("/profile")
+
+	});
+
+	router.post('/remove_relation', isAuthenticated, function(req, res){
+
+		var target_id = req.body["target_id"];
+		if (req.user.relation[target_id] != undefined){
+			req.user.relation[target_id] = undefined;
+			req.user.markModified("relation");
+			req.user.save(function (err) {
+				if (err) return handleError(err,req,res);
+			});
+			req.flash('message', "User removed sucessfully.");
+			
+		}
+		else{
+			req.flash('message', "!User is not related.");
+		}
+		res.redirect("/profile")
+
+	});
+
+	router.get('/relationship', isAuthenticated, function(req, res){
+		var relation_id = [];
+		var relation_username = [];
+		
+		Infosys.findOne({}, function(err, infosys){
+			if (err) return handleError(err,req,res);
+			if (infosys){
+				for (var ids in req.user.relation) {
+					if (req.user_relation.hasOwnProperty(ids)) {
+						relation_id.push(req.user.relation[ids]);
+						relation_username.push(infosys.usernames[req.user.relation[ids]]);
+					}
+				}
+				res.render('relationship', {ids: relation_id, names: relation_usernames})
+			}
+			else {
+				req.flash('message', "!Infosys does not exist! Contact Admin");
+				res.redirect("/profile")
+			}
+		});
+
+	});
 
     // LOGOUT ==============================
     router.get('/logout', function(req, res) {
@@ -117,19 +324,31 @@ module.exports = function(passport){
 			failureRedirect : '/'
 		}));
 
-
-	/*
 	router.get('/infosys', function(req, res) {
 		var newInfosys = Infosys();
-		newInfosys.users = [];
+		newInfosys.usernames = {};
 		newInfosys.categories = [];
 		newInfosys.save(function (err) {
 			if (err) return handleError(err,req,res);
 			res.send("teste");
 		});
-	});*/
+	})
 
-	// OLD STUFF \/
+	// DELETE
+	router.get('/delete', function(req, res){
+		User.remove({}, function(err) { 
+			console.log('Users removed')
+		});
+		Infosys.remove({}, function(err) { 
+			console.log('Infosys removed')
+		});
+		Recommendation.remove({}, function(err) { 
+			console.log('Infodata removed')
+		});
+		res.send("Deletado");
+	});
+
+	//#region OLD STUFF \/
 	router.post('/', function(req, res){
 
 		var newCadastro = new Cadastro();
@@ -591,7 +810,7 @@ module.exports = function(passport){
 		*/
 		res.send("Ajustar")
 	});
-
+	//#endregion
 	
 	return router;
 }
