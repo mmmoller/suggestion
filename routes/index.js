@@ -568,12 +568,12 @@ module.exports = function(passport){
 	// facebook -------------------------------
 
 	// send to facebook to do the authentication
-	router.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+	router.get('/auth/facebook', passport.authenticate('facebook', { scope : ['public_profile', 'email']}));
 
 	// handle the callback after facebook has authenticated the user
 	router.get('/auth/facebook/callback',
 		passport.authenticate('facebook', {
-			successRedirect : '/profile',
+			successRedirect : '/account',
 			failureRedirect : '/'
 		}));
 

@@ -266,16 +266,15 @@ module.exports = function(passport) {
     // =========================================================================
     // FACEBOOK ================================================================
     // =========================================================================
-    passport.use(new FacebookStrategy({
-
-        clientID        : process.env.FACEBOOK_CLIENT_ID,
-        clientSecret    : process.env.FACEBOOK_CLIENT_SECRET,
-        callbackURL     : process.env.FACEBOOK_CALLBACK_URL,
-        profileURL: 'https://graph.facebook.com/v2.5/me?fields=first_name,last_name,email',
-        profileFields   : ['id', 'email', 'name'],
-        passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
-
-    },
+    var fbStrategy = {
+        'clientID'        : process.env.FACEBOOK_CLIENT_ID,
+        'clientSecret'    : process.env.FACEBOOK_CLIENT_SECRET,
+        'callbackURL'     : process.env.FACEBOOK_CALLBACK_URL,
+        'profileURL'      : 'https://graph.facebook.com/v2.5/me?fields=first_name,last_name,email',
+        'profileFields'   : ['id', 'email', 'name'],
+    }
+    fbStrategy.passReqToCallBack = true;
+    passport.use(new FacebookStrategy(fbStrategy,
     function(req, token, refreshToken, profile, done) {
 
         // asynchronous
