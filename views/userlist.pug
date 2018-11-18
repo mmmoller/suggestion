@@ -1,18 +1,14 @@
-extends layout
+extends layout_in
 
 block content
     .default-wrapper
         h1 Userlist
-            form(action='/userlist', method='get')
-                .input-group(style="margin-top: 10px")
-                    input.form-control(type='text', name='search_name', placehold='Username or Email', required)
-                    .input-group-append
-                        button(type="submit" class="btn btn-outline-primary") Search
                 
     .default-wrapper
-        - for(var i = 0; i < users.length; i++){
-            form.form-inline(action="/profile/add", method="post")
-                a(href='/profile') #{users[i].username}
-                input(type='hidden', name='id', value=users[i]._id)
-                button.btn.btn-primary(type="submit", style="margin-left: auto") Add
+        - for(var i = 0; i < user.length; i++){
+            form.form-inline(action="/" + user[i].button + "_friend", method="post")
+                a(href='/user?_id=' + user[i]._id) #{user[i].username}
+                input(type='hidden', name='target_id', value=user[i]._id)
+                input(type='hidden', name='adress', value='/userlist?search_name=' + adress)
+                button.btn.btn-primary(type="submit", style="margin-left: auto") #{user[i].button}
         -}

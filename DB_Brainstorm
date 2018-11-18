@@ -1,0 +1,42 @@
+Suggestion: {
+    userinfo: {
+        _id : {
+            grade: Number,
+            comment: String
+        }
+    }
+}
+
+------------------
+
+User: {
+    correlation:{
+        _id : {
+            isFriend : Boolean,
+            (forEach Category in Infosys){
+                Category: {
+                    gradeSum : Number
+                    gradeCount : Number
+                }
+            }
+        }
+    }
+}
+
+or 
+
+User: {
+    friendlist: [_id]
+}
+
+Correlation : {
+    first_id : _id,
+    second_id: _id,
+    (forEach Category in Infosys){
+        Category: {
+            gradeSum : Number
+            gradeCount : Number
+        }
+    }
+}
+

@@ -1,0 +1,33 @@
+Create Suggestionlist:
+
+Suggestion datatable and ordering based on coeficients:
+    All users using coeficient.
+    Only friends using coeficient.
+
+Suggestion review:
+    Send Review / Change Review (Change review showing actual ratings)
+
+Suggestion "Add to wishlist":
+    Account wishlist
+
+Suggestion "Don't show to me":
+    Accout Don't show me list
+
+Suggestion rating:
+    Show a color instead of a number (From dark green to white to dark red)
+
+User page:
+    Create a nice layout to show coeficient.
+
+Account:
+    My own suggestion list on my page.
+    wishlist
+    Don't show me list
+
+Account:
+    Link Account
+
+Authentication:
+    Facebook
+
+Change word "Grade" to "Rating" on everyplace

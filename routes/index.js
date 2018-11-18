@@ -6,83 +6,36 @@ var nodemailer = require('nodemailer');
 
 var User = require('../models/user');
 var Infosys = require('../models/infosys');
-var Recommendation = require('../models/recommendation');
-var Relation = require('../models/relation'); 
+var Suggestion = require('../models/suggestion');
+var Teste = require('../models/teste');
 
 module.exports = function(passport){
 
+
 	// /TESTE
-	router.get('/a', function(req, res) {
-		if (req.user){
-			req.user.username = "ban"
-			req.user.save(function (err) {
-				if (err) return handleError(err,req,res);
-			});
-		}
-		res.send("done");
-	});
-
 	router.get('/teste', function(req, res) {
-		var infoData = new Recommendation();
-		infoData.grades = {};
-		infoData.grades["banana"] = "abacate";
-		infoData.grades[3] = 10;
-		infoData.save(function (err) {
-			if (err) return handleError(err,req,res);
-		});
-
-		var infoData2 = new Recommendation();
-		infoData2.grades = {};
-		infoData2.grades["teste"] = "taste";
-		infoData2.grades["tango"] = "tengo";
-		infoData2.save(function (err) {
-			if (err) return handleError(err,req,res);
-		});
 		res.send("done");
 	});
 
-	router.get('/teste2', function(req, res) {
-		var tres = "3"
-		var gradess = "grades.teste"
-		Recommendation.find({ [gradess] : {$exists: true}}, function(err, data){
-			if (data){
-				console.log(data)
-				delete data[0].grades["teste"];
-				data[0].markModified("grades")
-				data[0].save(function (err) {
-					if (err) return handleError(err,req,res);
-					res.send(data)
-				});
- 				//console.log(data)
-				//res.send(data)
-			}
-			else
-				res.send("error")
- 		});
-	});
-
-	router.get('/teste3', function(req, res) {
-		Recommendation.findOne({}, function(err, data){
-			console.log(data.users_grade)
-			res.send(data.users_grade);
- 		});
-	});
-
-	// /'SignUp'
-
-	// /'INDEX'
+	//#region INDEX/ACCOUNT
 	router.get('/', function(req, res) {
-		res.render('index', {message: req.flash('message')});
+		if (req.user){
+			res.redirect('/account');
+		}
+		else{
+			res.render('index', {message: req.flash('message')});
+		}
 	});
 
-    router.get('/profile', isAuthenticated, function(req, res) {
-        res.render('profile', {
+    router.get('/account', isAuthenticated, function(req, res) {
+        res.render('account', {
 			user : req.user,
 			message: req.flash('message')
         });
 	});
-	
+
 	router.post('/change_username', isAuthenticated, function(req, res) {
+
 		req.user.username = req.body["username"];
 		req.user.save(function (err) {
 			if (err) return handleError(err,req,res);
@@ -97,67 +50,310 @@ module.exports = function(passport){
 					if (err) return handleError(err,req,res);
 				});
 			}
+			req.flash('message', "Username has been changed");
+			res.redirect('/account');
 		});
 
-		req.flash('message', "Username has been changed");
-		res.redirect('/profile');
+		
 	});
 
 	router.post('/delete_account', isAuthenticated, function(req, res) {
 		if (req.body["username"] == req.user.username){
 
-			var query_user_relation = "relation." + req.user._id
-
-			User.find({[query_user_relation]: {$exists: true}}, function(err, users) {
+			User.find({["correlation." + req.user._id]: {$exists: true}}, function(err, users) {
 				if (err) return handleError(err,req,res);
 				for (var i = 0; i < users.length; i++){
-					delete users[i].relation[req.user._id];
-					users[i].markModified("relation");
+					delete users[i].correlation[req.user._id];
+					users[i].markModified("correlation");
 					users[i].save(function (err) {
 						if (err) return handleError(err,req,res);
 					});
 				}
-			});
-			
-			Infosys.findOne({}, function(err, infosys){
-				if (err) return handleError(err,req,res);
-				if (infosys){
-					delete infosys.usernames[req.user._id];
-					infosys.markModified("usernames");
-					infosys.save(function (err) {
-						if (err) return handleError(err,req,res);
-					});
-				}
-			});
 
-			var query_recommendation_grades = "grades." + req.user._id
-			Recommendation.find({[query_recommendation_grades] : {$exists: true} }, function(err, recommendations){
-				if (err) return handleError(err,req,res);
-				for (var i = 0; i < recommendations.length; i++){
-					delete recommendations[i].grades[req.user._id];
-					delete recommendations[i].comments[req.user._id];
-					recommendations[i].markModified("grades");
-					recommendations[i].markModified("comments");
-					recommendations[i].save(function (err) {
-						if (err) return handleError(err,req,res);
-					});
-				}
-			});
+				Infosys.findOne({}, function(err, infosys){
+					if (err) return handleError(err,req,res);
+					if (infosys){
+						delete infosys.usernames[req.user._id];
+						infosys.markModified("usernames");
+						infosys.save(function (err) {
+							if (err) return handleError(err,req,res);
+						});
+					}
 
-			req.logout();
-			req.user.remove();
-			req.flash('message', "User has been deleted");
-			res.redirect('/logout');
+					Suggestion.find({["grades." + req.user._id] : {$exists: true} }, function(err, suggestions){
+						if (err) return handleError(err,req,res);
+						for (var i = 0; i < suggestions.length; i++){
+							delete suggestions[i].userinfo[req.user._id];
+							suggestions[i].markModified("userinfo");
+							suggestions[i].save(function (err) {
+								if (err) return handleError(err,req,res);
+							});
+						}
+
+						User.findOne({_id: req.user._id}, function(err, user){
+							if (err) return handleError(err,req,res);
+							if (user){
+								user.remove();
+								user.save(function (err) {
+									if (err) return handleError(err,req,res);
+								});
+								req.flash('message', "Account has been deleted");
+								res.redirect('/logout');
+							}
+							else{
+								req.flash('message', "!User not found");
+								res.redirect('/account');
+							}
+						});
+					});
+
+				});
+
+			});
 		}
 		else{
 			req.flash('message', "!Wrong username");
-			res.redirect('/profile');
+			res.redirect('/account');
 		}
 		
 	});
+	//#endregion
 
+	//#region SUGGESTION
+	router.get('/suggestionlist', isAuthenticated, function(req,res){
+
+		var query = {["userinfo." + req.user._id] : {$exists: false}}
+		var adress = "/suggestionlist"
+
+		if (req.query["search_name"]){
+			query = {$or: [
+				{'name': {'$regex': req.query["search_name"], "$options": "i"}},
+				{'tag': {'$regex': req.query["search_name"], "$options": "i"}}
+			]}
+			adress = '/suggestionlist?search_name=' + req.query["search_name"];
+		}
+
+		Suggestion.find(query, function (err, suggestion){
+			if (err) return handleError(err,req,res);
+			if (suggestion){
+				
+				Infosys.findOne({}, function (err, infosys){
+					if (err) return handleError(err,req,res);
+					if (infosys){
+						// Usar grades e coeficientes
+						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
+							 message: req.flash("message"), adress: adress});
+					}
+					else{
+						req.flash('message', "!Infosys don't exist");
+						res.redirect('/account');
+					}
+				});
+			}
+			else{
+				req.flash('message', "!Suggestion don't exist");
+				res.redirect('/account');
+			}
+		});
+
+	
+
+	});
+	
+	router.get('/suggestion', isAuthenticated, function(req, res) {
+
+		var id = req.query["_id"];
+
+		Suggestion.findOne({_id : id}, function(err, suggestion) {
+			if (err) return handleError(err,req,res);
+
+			if (suggestion){
+				Infosys.findOne({}, function (err, infosys){
+					if (err) return handleError(err,req,res);
+					if (infosys){
+						// Usar grades e coeficientes
+
+						res.render('suggestion', {suggestion: suggestion, infosys: infosys,
+							message: req.flash("message"), adress: adress})
+					}
+					else{
+						req.flash('message', "!Infosys don't exist");
+						res.redirect('/account');
+					}
+				});
+			}
+
+			else{
+				req.flash('message', "!Suggestion not found");
+				res.redirect('/account');
+			}
+		});
+	});
+
+	router.post('/create_suggestion', isAuthenticated, function(req, res) {
+
+		Infosys.findOne({}, function (err, infosys){
+			if (err) return handleError(err,req,res);
+			if (infosys){
+
+				var name = req.body["name"];
+				var category = infosys.types[req.body["type"]].category;
+				var adress = '/suggestionlist';
+				if (req.body["adress"])
+					adress = req.body["adress"]
+
+				Suggestion.findOne({$and: [{name: name}, {category: category}]}, function (err, suggestion){
+					if (err) return handleError(err,req,res);
+					if (suggestion){
+						req.flash('message', "!Suggestion already exists");
+						res.redirect('/account');
+					}
+					else{
+						var newSuggestion = new Suggestion();
+						newSuggestion.name = name;
+						newSuggestion.category = category
+						newSuggestion.userinfo[req.user._id] = {"grade": req.body["grade"], "comment": req.body["comment"]}
+						newSuggestion.link[req.body["type"]] = req.body["url"];
+
+						console.log(newSuggestion);
+
+						newSuggestion.save(function (err) {
+							if (err) return handleError(err,req,res);
+						});
+
+						req.flash('message', "Suggestion sucessfully created");
+						res.redirect(adress);
+					}
+				});
+		
+			}	
+			else{
+				req.flash('message', "!Infosys don't exist");
+				res.redirect('/account');
+			}
+		});
+	});
+
+	router.post('/review_suggestion', isAuthenticated, function(req, res) {
+		Suggestion.findOne({_id: req.body["target_id"]}, function (err, suggestion){
+			if (err) return handleError(err,req,res);
+			if (suggestion){
+
+				var id_array = [];
+
+				for (var id in suggestion.userinfo) {
+					if (suggestion.userinfo.hasOwnProperty(id)) {
+						id_array.push(id);
+					}
+				}
+
+				var old_grade = undefined;
+				console.log("my id: " + req.user_id);
+				console.log(id_array)
+				if (suggestion.userinfo[req.user._id]){
+					old_grade = suggestion.userinfo[req.user._id].grade
+					id_array.splice(id_array.indexOf(req.user_id, 1));
+				}
+				console.log(id_array)
+
+				// Tomar cuidado para não puxar eu mesmo (caso eu já tenho dado review antes,
+				// preciso me tirar desse id_array)
+
+				User.find({_id : {$in : id_array}}, function(err, user){
+					if (err) return handleError(err,req,res);
+					for (var i = 0; i < user.length; i++){
+
+						if (!user[i].correlation[req.user._id])
+							user[i].correlation[req.user._id] = {};
+						if (!user[i].correlation[req.user._id][suggestion.category])
+							user[i].correlation[req.user._id][suggestion.category] = {"gradeSum": 0, "gradeCount": 0};
+						if (!req.user.correlation[user[i]._id])
+							req.user.correlation[user[i]._id] = {};
+						if (!req.user.correlation[user[i]._id][suggestion.category])
+							req.user.correlation[user[i]._id][suggestion.category] = {"gradeSum": 0, "gradeCount": 0};
+
+						user[i].correlation[req.user._id][suggestion.category].gradeSum
+							+= Number(10 - Math.abs(req.body["grade"] - suggestion.userinfo[user[i]._id].grade));
+						
+						req.user.correlation[user[i]._id][suggestion.category].gradeSum
+							+= Number(10 - Math.abs(req.body["grade"] - suggestion.userinfo[user[i]._id].grade));
+
+
+						if (old_grade != undefined){
+							user[i].correlation[req.user._id][suggestion.category].gradeSum 
+								-= Number(10 - Math.abs(suggestion.userinfo[req.user._id].grade - suggestion.userinfo[user[i]._id].grade))
+							
+							req.user.correlation[user[i]._id][suggestion.category].gradeSum
+								-= Number(10 - Math.abs(suggestion.userinfo[req.user._id].grade - suggestion.userinfo[user[i]._id].grade))
+						}
+						else {
+							user[i].correlation[req.user._id][suggestion.category].gradeCount += 1;
+
+							req.user.correlation[user[i]._id][suggestion.category].gradeCount += 1;
+						}
+						user[i].markModified("correlation");
+						user[i].save(function (err) {
+							if (err) return handleError(err,req,res);
+						});
+					}
+
+					req.user.markModified("correlation")
+					req.user.save(function (err) {
+						if (err) return handleError(err,req,res);
+					});
+
+					suggestion.userinfo[req.user._id] = {"grade": req.body["grade"], "comment": req.body["comment"]}
+					suggestion.markModified("userinfo");
+					suggestion.save(function (err) {
+						if (err) return handleError(err,req,res);
+					});
+
+					var adress = '/suggestionlist';
+					if (req.body["adress"])
+						adress = req.body["adress"]
+
+					req.flash('message', "Suggestion sucessfully reviewed");
+					res.redirect(adress);
+
+
+				});
+
+				
+				
+			}
+			else{
+				req.flash('message', "!Suggestion doesn't exist");
+				res.redirect('/account');
+			}
+		});
+	});
+
+	// not implemented yet. to edit url
+	router.post('/edit_suggestion', isAuthenticated, function(req, res) {
+		Suggestion.findOne({_id: req.body["target_id"]}, function (err, suggestion){
+			if (err) return handleError(err,req,res);
+			if (suggestion){
+
+				var adress = '/suggestionlist';
+				if (req.body["adress"])
+					adress = req.body["adress"]
+
+				req.flash('message', "Suggestion sucessfully reviewed");
+				res.redirect(adress);
+
+			}
+			else{
+				req.flash('message', "!Suggestion doesn't exist");
+				res.redirect('/account');
+			}
+		});
+	});
+
+	//#endregion
+
+	//#region USER
 	router.get('/userlist', isAuthenticated, function(req, res) {
-		var name = req.body["search_name"];
+		var name = req.query["search_name"];
 		User.find({$or: [
 			{'username': {'$regex': name, "$options": "i"}},
 			{'local.email': {'$regex': name, "$options": "i"}},
@@ -165,63 +361,98 @@ module.exports = function(passport){
 		] }, function(err, users) {
 			if (err) return handleError(err,req,res);
 			if (users){
-				var user_name = [];
-				var user_relation = [];
+				var user = [];
+				var user_name;
+				var user_button;
+				
 				for (var i = 0; i < users.length; i++){
-					user_name.push(users[i].username);
-					if (req.user.relation[users[i]._id] == undefined){
-						user_relation.push("add");
+					if (String(users[i]._id) != String(req.user._id)){
+						user_name = users[i].username;
+						if (req.user.correlation[users[i]._id]){
+							if (req.user.correlation[users[i]._id].isFriend){
+								user_button = "Remove";
+							}
+							else{
+								user_button = "Add";
+							}
+						}
+						else {
+							user_button = "Add";
+						}
+						user.push({"username": user_name, "button": user_button, "_id": users[i].id})
 					}
-					else{
-						user_relation.push("remove");
-					}
+					
 				}
-				res.render('userlist', {user_name: user_name, user_relation: user_relation})
+				res.render('userlist', {user: user, message: req.flash("message"), adress: name})
 			}
 			else{
 				req.flash('message', "!No users found.");
-				res.redirect('/profile');
+				res.redirect('/account');
 			}
 		});
 	});
 
 	router.get('/user', isAuthenticated, function(req, res) {
-		var id = req.body["target_id"];
-		var user_relation = "remove";
-		var user_name = "";
-		var recommendations = [];
-		var query = "grades." + "" + id; 
-		if (req.user.relation[id] == undefined){
-			user_relation = "add";
+
+		
+		var id = req.query["_id"];
+
+		var option = "Remove";
+		if (!req.user.correlation[id] || !req.user.correlation[id].isFriend){
+			option = "Add";
 		}
+
+
+		if (String(id) == String(req.user._id)){
+			option = ""
+		}
+
+		console.log(id)
+
 		Infosys.findOne({}, function(err, infosys){
 			if (err) return handleError(err,req,res);
 			if (infosys){
-				user_name = infosys.usernames[id];
-				Recommendation.find({[query] : {$exists: true} }, function(err, recommendations){
+
+				Suggestion.find({["userinfo." + id] : {$exists: true} }, function(err, suggestion){
 					if (err) return handleError(err,req,res);
-					if (recommendations){
-						res.render('user', {id : id, user_relation: user_relation, user_name: user_name, recommendations: recommendations});
+					if (suggestion){
+
+						var correlation = {}
+						if (req.user.correlation[id])
+							correlation = req.user.correlation[id];
+						var user = {_id : id, name: infosys.usernames[id], correlation: correlation}
+						console.log(user);
+						res.render('user', {user: user, option: option,
+							 suggestion: suggestion, infosys: infosys, message: req.flash("message")});
+
 					}
 					else{
-						req.flash('message', "!Recommendations does not exist! Contact Admin");
-						res.redirect("/profile")
+						req.flash('message', "!Suggestions does not exist! Contact Admin");
+						res.redirect("/account")
 					}
 				});
 			}
 			else {
 				req.flash('message', "!Infosys does not exist! Contact Admin");
-				res.redirect("/profile")
+				res.redirect("/account")
 			}
 		});
 	});
 
-	router.post('/add_relation', isAuthenticated, function(req, res){
+	router.get('/myuser', isAuthenticated, function(req, res) {
+		res.redirect('/user?_id=' + req.user._id);
+	});
+
+	router.post('/add_friend', isAuthenticated, function(req, res){
 
 		var target_id = req.body["target_id"];
-		if (req.user.relation[target_id] == undefined){
-			req.user.relation[target_id] = 1;
-			req.user.markModified("relation");
+		if (!req.user.correlation[target_id]){
+			req.user.correlation[target_id] = {};
+		}
+		
+		if (!req.user.correlation[target_id].isFriend){
+			req.user.correlation[target_id].isFriend = true;
+			req.user.markModified("correlation");
 			req.user.save(function (err) {
 				if (err) return handleError(err,req,res);
 			});
@@ -231,16 +462,21 @@ module.exports = function(passport){
 		else{
 			req.flash('message', "!User is aleady added.");
 		}
-		res.redirect("/profile")
+
+		var adress = '/friendlist';
+		if (req.body["adress"])
+			adress = req.body["adress"]
+
+		res.redirect(adress)
 
 	});
 
-	router.post('/remove_relation', isAuthenticated, function(req, res){
+	router.post('/remove_friend', isAuthenticated, function(req, res){
 
 		var target_id = req.body["target_id"];
-		if (req.user.relation[target_id] != undefined){
-			req.user.relation[target_id] = undefined;
-			req.user.markModified("relation");
+		if (req.user.correlation[target_id] && req.user.correlation[target_id].isFriend){
+			req.user.correlation[target_id].isFriend = false;
+			req.user.markModified("correlation");
 			req.user.save(function (err) {
 				if (err) return handleError(err,req,res);
 			});
@@ -250,40 +486,45 @@ module.exports = function(passport){
 		else{
 			req.flash('message', "!User is not related.");
 		}
-		res.redirect("/profile")
+
+		var adress = '/friendlist';
+		if (req.body["adress"])
+			adress = req.body["adress"]
+
+		res.redirect(adress)
 
 	});
 
-	router.get('/relationship', isAuthenticated, function(req, res){
-		var relation_id = [];
-		var relation_username = [];
-		
+	router.get('/friendlist', isAuthenticated, function(req, res){
+
+		var user = [];
 		Infosys.findOne({}, function(err, infosys){
 			if (err) return handleError(err,req,res);
 			if (infosys){
-				for (var ids in req.user.relation) {
-					if (req.user_relation.hasOwnProperty(ids)) {
-						relation_id.push(req.user.relation[ids]);
-						relation_username.push(infosys.usernames[req.user.relation[ids]]);
+				for (var id in req.user.correlation) {
+					if (req.user.correlation.hasOwnProperty(id)) {
+						if (req.user.correlation[id] && req.user.correlation[id].isFriend)
+							user.push({"username" : infosys.usernames[id], "_id": id})
 					}
 				}
-				res.render('relationship', {ids: relation_id, names: relation_usernames})
+				res.render('friendlist', {user: user, message: req.flash("message")})
 			}
 			else {
 				req.flash('message', "!Infosys does not exist! Contact Admin");
-				res.redirect("/profile")
+				res.redirect("/account")
 			}
 		});
 
 	});
+	//#endregion
 
+	//#region Login/Logout 
     // LOGOUT ==============================
     router.get('/logout', function(req, res) {
         req.logout();
         res.redirect('/');
     });
 
-	
 	// locally --------------------------------
 	// LOGIN ===============================
 	// show the login form
@@ -293,20 +534,20 @@ module.exports = function(passport){
 
 	// process the login form
 	router.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/profile', // redirect to the secure profile section
-		failureRedirect : '/login', // redirect back to the signup page if there is an error
+		successRedirect : '/account', // redirect to the secure account section
+		failureRedirect : '/', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
 
 	// SIGNUP =================================
 	// show the signup form
 	router.get('/signup', function(req, res) {
-		res.render('signup', { message: req.flash('signupMessage') });
+		res.render('signup', { message: req.flash('message') });
 	});
 
 	// process the signup form
 	router.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/profile', // redirect to the secure profile section
+		successRedirect : '/account', // redirect to the secure account section
 		failureRedirect : '/signup', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
@@ -320,14 +561,49 @@ module.exports = function(passport){
 	// the callback after google has authenticated the user
 	router.get('/auth/google/callback',
 		passport.authenticate('google', {
+			successRedirect : '/account',
+			failureRedirect : '/'
+		}));
+
+	// facebook -------------------------------
+
+	// send to facebook to do the authentication
+	router.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+
+	// handle the callback after facebook has authenticated the user
+	router.get('/auth/facebook/callback',
+		passport.authenticate('facebook', {
 			successRedirect : '/profile',
 			failureRedirect : '/'
 		}));
 
+	//#endregion
+	
 	router.get('/infosys', function(req, res) {
-		var newInfosys = Infosys();
+		var newInfosys = new Infosys();
 		newInfosys.usernames = {};
-		newInfosys.categories = [];
+		newInfosys.categories = ["Film", "Music"];
+		newInfosys.types = {
+			"IMDb" : {
+				fontAwesome: "fab fa-imdb",
+				color: {color: "goldenrod"},
+				size: {"font-size": "35px"},
+				category: "Film"
+			},
+			"YouTube" : {
+				fontAwesome: "fab fa-youtube",
+				color: {color: "red"},
+				size: {"font-size": "35px"},
+				category: "Music"
+			},
+			"Spotify" : {
+				fontAwesome: "fab fa-spotify",
+				color: {color: "green"},
+				size: {"font-size": "35px"},
+				category: "Music"
+			},
+		}
+
 		newInfosys.save(function (err) {
 			if (err) return handleError(err,req,res);
 			res.send("teste");
@@ -342,651 +618,21 @@ module.exports = function(passport){
 		Infosys.remove({}, function(err) { 
 			console.log('Infosys removed')
 		});
-		Recommendation.remove({}, function(err) { 
-			console.log('Infodata removed')
+		Suggestion.remove({}, function(err) { 
+			console.log('Suggestions removed')
 		});
 		res.send("Deletado");
 	});
 
-	//#region OLD STUFF \/
-	router.post('/', function(req, res){
-
-		var newCadastro = new Cadastro();
-		newCadastro.nome = req.param('nome');
-		newCadastro.identidade = req.param('identidade'); 
-		newCadastro.cracha = req.param('cracha'); 
-		newCadastro.divisao = req.param('divisao'); 
-		newCadastro.trecho = req.param('trecho'); 
-		newCadastro.data = req.param('data');
-		newCadastro.relacao = req.param('relacao');
-		newCadastro.estado = "solicitação de reserva";
-		newCadastro.email = req.param('email');
-		newCadastro.observacao = req.param('observacao');
-		console.log(req.param('data'));
-		
-		// Se a data for valida
-		if (moment(newCadastro.data).isValid()){
-			var data = moment(newCadastro.data).format("YYYY-MM-DD");
-			//data.hour(0);
-			newCadastro.data = data;
-
-			for (var i = 0; i < newCadastro.relacao.length; i++){
-				if (i%5 == 3){
-					newCadastro.relacao.splice(i+1, 0, "Em análise");
-				}
-			}
-
-			newCadastro.save(function (err) {
-				if (err) return handleError(err,req,res);
-			});
-			req.flash('message', "Solicitação realizada com sucesso, aguarde aprovação por e-mail");
-			
-			var text = 'A solicitação de embarque do(a) ' + newCadastro.nome +
-				" foi realizada com sucesso para o dia " + moment(newCadastro.data).format("DD/MM/YYYY") + ", no trecho " + newCadastro.trecho +
-				", aguarde aprovação por-email. Segue a lista dos passageiros solicitada: \n\n";
-				
-			for (var i = 0; i < newCadastro.relacao.length/5; i++){
-				text+= newCadastro.relacao[i*5] + ". \n"
-			}
-
-			
-			
-			var subject = "Solicitação de embarque realizada - Aguarde aprovação"
-			
-			acceptMail(newCadastro, text, subject)
-		
-			res.redirect('/');
-		}
-		else {
-			req.flash('message', "!Data invalida");
-			res.redirect('/');
-		}
-		
-	});
-			
-	// /LOGIN
-	router.get('/login/autorizar', function(req,res){
-		res.render('login', {endereco: "autorizar", message: req.flash('message') });
-	});
-	
-	router.get('/login/visualizar', function(req,res){
-		res.render('login', {endereco: "visualizar", message: req.flash('message') });
-	});
-	
-	router.get('/logout', function(req, res) {
-		req.logout();
-		res.redirect('/');
-	});
-	
-	router.post('/login/autorizar', passport.authenticate('login', {
-		// Autenticação pelo passport.
-		successRedirect: '/autorizar',
-		failureRedirect: '/login/autorizar',
-		failureFlash : true
-	}));
-	
-	router.post('/login/visualizar', passport.authenticate('login', {
-		// Autenticação pelo passport.
-		successRedirect: '/visualizar',
-		failureRedirect: '/login/visualizar',
-		failureFlash : true
-	}));
-
-	// /AUTORIZAR
-	router.get('/autorizar', isAuthenticatedAuth, function(req, res){
-		Cadastro.find({'estado': "solicitação de reserva"}, function(err, cadastros) {
-			if (err) return handleError(err,req,res);
-			if (cadastros){
-				res.render('autorizar', {cadastros: cadastros, user: req.user.username, message: req.flash('message')});
-			}
-			else {
-				req.flash('message', "Não existem solicitações");
-				res.redirect('/autorizar');
-			}
-		});
-	});
-	
-	router.post('/autorizar', isAuthenticatedAuth, function(req, res){
-		
-		Cadastro.findOne({_id: req.param('_id')},function(err, cadastro){
-			if (err) return handleError(err,req,res);
-			if (cadastro){
-				
-				var autorizacao = {};
-				
-				if (Array.isArray(req.param("autorizacao"))){
-					autorizacao = req.param("autorizacao");
-				}
-				else {
-					autorizacao = [req.param("autorizacao")];
-				}
-				
-				motivo = req.param("observacao");
-				
-				var text = 'A solicitação de embarque do(a) ' + cadastro.nome + 
-				" no dia " + moment(cadastro.data).format("DD/MM/YYYY") + ", no trecho " + cadastro.trecho +
-				" foi avaliada.\n\n Relação dos passageiros APROVADOS: \n\n";
-				
-				for (var i = 0, j = 0; i < cadastro.relacao.length/5; i++, j++){
-					
-					if (autorizacao[j] == "sim"){
-						text+= cadastro.relacao[i*5]
-						text+= " foi APROVADO(A). \n";
-						cadastro.relacao.splice((i*5)+4, 1, "Aprovado")
-					}
-				}
-				
-				text+= "\n Relação dos passageiros REPROVADOS: \n\n"
-				
-				for (var i = 0, j = 0; i < cadastro.relacao.length/5; i++, j++){
-					if (autorizacao[j] == "nao"){
-						text+= cadastro.relacao[i*5]
-						text+= " foi REPROVADO(a). \n"
-						cadastro.relacao.splice((i*5)+4, 1, "Reprovado")
-					}
-				}
-				
-				if (motivo){
-					text+="\n\nObservação: " + motivo;
-				}
-				
-				var subject = "Solicitação de embarque avaliada";
-				
-				Cadastro.find({"data": req.param("data"), "estado": "analisada", "trecho": req.param("trecho")}, function(err, cadastros) {
-		
-					if (err) return handleError(err,req,res);
-					if (cadastros){
-						var total = 0;
-
-						for (var i = 0; i < cadastros.length; i++){
-							for (var j = 4; j < cadastros[i].relacao.length; j+=5){
-								if (cadastros[i].relacao[j] == "Aprovado"){
-									total++;
-								}
-							}
-						}
-
-						for (var j = 4; j < cadastro.relacao.length; j+=5){
-							if (cadastro.relacao[j] == "Aprovado"){
-								total++;
-							}
-						}
-						
-						if (total > 30){
-							var msg = "!Solicitação avaliada com sucesso. Existem " + Number(total) + " solitações autorizadas para esse trecho nessa data!"
-							req.flash('message', msg)
-						}
-						else{
-							var msg = "Solicitação avaliada com sucesso. Existem " + Number(total) + " solitações autorizadas para esse trecho nessa data."
-							req.flash('message', msg);
-						}
-						
-						acceptMail(cadastro, text, subject);
-						cadastro.estado = "analisada";
-						cadastro.save(function (err) {
-							if (err) return handleError(err,req,res);
-						});
-						if (cadastro.relacao.length == 0)
-							cadastro.remove();
-						
-						res.redirect('/autorizar');
-					}
-					else {
-						req.flash('message', "!Não há cadastros no sistema!");
-					}
-					
-				});
-			}
-			else {
-				req.flash('message', "!Solicitação não existente");
-				res.redirect('/autorizar');
-			}
-		
-		});
-	});
-
-	// /ALTERAR
-	router.get('/alterar', isAuthenticatedAuth, function(req, res){
-
-		var data = moment().format("YYYY-MM-DD");
-		if (req.param('data') != undefined && req.param('data')){
-			data = moment(req.param('data')).format("YYYY-MM-DD");
-		}
-		
-		Cadastro.find({"data": data, 'estado': "analisada"}, function(err, cadastros) {
-			if (err) return handleError(err,req,res);
-			if (cadastros){
-				res.render('alterar', {cadastros: cadastros, user: req.user.username, message: req.flash('message')});
-			}
-			else {
-				req.flash('message', "Não existem solicitações");
-				res.redirect('/alterar');
-			}
-		});
-	});
-
-	router.post('/alterar', isAuthenticatedAuth, function(req, res){
-		
-		Cadastro.findOne({_id: req.param('_id')},function(err, cadastro){
-			if (err) return handleError(err,req,res);
-			if (cadastro){
-				
-				var autorizacao = {};
-				
-				if (Array.isArray(req.param("autorizacao"))){
-					autorizacao = req.param("autorizacao");
-				}
-				else {
-					autorizacao = [req.param("autorizacao")];
-				}
-				
-				motivo = req.param("observacao");
-				
-				var text = 'A solicitação de embarque do(a) ' + cadastro.nome + 
-				" no dia " + moment(cadastro.data).format("DD/MM/YYYY") + ", no trecho " + cadastro.trecho +
-				" foi REavaliada.\n\n Relação dos passageiros APROVADOS: \n\n";
-				
-				for (var i = 0, j = 0; i < cadastro.relacao.length/5; i++, j++){
-					
-					if (autorizacao[j] == "sim"){
-						text+= cadastro.relacao[i*5]
-						text+= " foi APROVADO(A). \n";
-						cadastro.relacao.splice((i*5)+4, 1, "Aprovado")
-					}
-				}
-				
-				text+= "\n Relação dos passageiros REPROVADOS: \n\n"
-				
-				for (var i = 0, j = 0; i < cadastro.relacao.length/5; i++, j++){
-					if (autorizacao[j] == "nao"){
-						text+= cadastro.relacao[i*5]
-						text+= " foi REPROVADO(a). \n"
-						cadastro.relacao.splice((i*5)+4, 1, "Reprovado")
-					}
-				}
-				
-				if (motivo){
-					text+="\n\nObservação: " + motivo;
-				}
-				
-				var subject = "Solicitação de embarque REavaliada";
-				
-				Cadastro.find({"data": req.param("data"), "estado": "analisada", "trecho": req.param("trecho")}, function(err, cadastros) {
-		
-					if (err) return handleError(err,req,res);
-					if (cadastros){
-						var total = 0;
-
-						for (var i = 0; i < cadastros.length; i++){
-							for (var j = 4; j < cadastros[i].relacao.length; j+=5){
-								if (cadastros[i].relacao[j] == "Aprovado"){
-									total++;
-								}
-							}
-						}
-
-						for (var j = 4; j < cadastro.relacao.length; j+=5){
-							if (cadastro.relacao[j] == "Aprovado"){
-								total++;
-							}
-						}
-						
-						if (total > 30){
-							var msg = "!Solicitação REavaliada com sucesso. Existem " + Number(total) + " solitações autorizadas para esse trecho nessa data!"
-							req.flash('message', msg)
-						}
-						else{
-							var msg = "Solicitação REavaliada com sucesso. Existem " + Number(total) + " solitações autorizadas para esse trecho nessa data."
-							req.flash('message', msg);
-						}
-						
-						acceptMail(cadastro, text, subject);
-						cadastro.estado = "analisada";
-						cadastro.save(function (err) {
-							if (err) return handleError(err,req,res);
-						});
-						if (cadastro.relacao.length == 0)
-							cadastro.remove();
-						
-						res.redirect('/alterar');
-					}
-					else {
-						req.flash('message', "!Não há cadastros no sistema!");
-					}
-					
-				});
-			}
-			else {
-				req.flash('message', "!Solicitação não existente");
-				res.redirect('/autorizar');
-			}
-		
-		});
-	});
-
-	router.get('/relatorio', isAuthenticatedAuth, function(req, res){
-		
-
-		var data = moment().format("YYYY-MM");
-		if (req.param('data') != undefined && req.param('data')){
-			data = req.param('data');
-		}
-		
-		Cadastro.find({"data": {$regex : data}}, function(err, cadastros) {
-			
-			if (err) return handleError(err,req,res);
-			if (cadastros){
-				
-				res.render("relatorio", {cadastros: cadastros, data: data, user: req.user.username});
-			}
-			else {
-				req.flash('message', "!Não há");
-				res.send('Não há');
-			}
-			
-		});
-	});
-	
-	// apenas os autorizados
-	// /VISUALIZAR
-	router.get('/visualizar', isAuthenticatedView, function(req, res){
-		
-		var data = moment().format("YYYY-MM-DD");
-		if (req.param('data') != undefined && req.param('data')){
-			data = moment(req.param('data')).format("YYYY-MM-DD");
-		}
-		
-		var trecho = "SLZ-AK"
-		if (req.param('trecho') != undefined && req.param('trecho')){
-			trecho = req.param("trecho");
-		}
-		
-		Cadastro.find({"data": data, "estado": "analisada", "trecho": trecho}, function(err, cadastros) {
-			
-			if (err) return handleError(err,req,res);
-			if (cadastros){
-				
-				res.render("visualizar", {trecho: trecho, cadastros: cadastros, user: req.user.username});
-			}
-			else {
-				req.flash('message', "!Não há");
-				res.send('Não há');
-			}
-			
-		});
-	});
-
-	
-	// /CONSULTAR
-	router.get('/consultar', function(req, res){
-		
-		var saram = req.param("saram");
-		//console.log(saram)
-		
-		
-		Cadastro.find({"identidade": saram}, function(err, cadastros) {
-			//console.log(cadastros)
-			if (err) return handleError(err,req,res);
-			if (cadastros){
-				res.render("consultar", {cadastros: cadastros});
-			}
-			else {
-				req.flash('message', "!Error");
-				res.send('Não existe nenhum cadastro no sistema');
-			}
-			
-		});
-	});
-	
-	
-	// DELETE
-	router.get('/delete', function(req, res){
-		/*
-		User.remove({}, function(err) { 
-			console.log('Users removed')
-		});
-		Cadastro.remove({}, function(err) { 
-			console.log('Cadastros removed')
-		});
-		*/
-		res.send("Deletado");
-	});
-	
-	// CRIAR
-	router.get('/criar', function(req,res){
-		//BDAdmin();
-		//BDPopulate();
-		res.send("Criado");
-	});
-	
-	// REPOPULATE
-	
-	router.get('/repopulate', function(req,res){
-		/*
-		Cadastro.remove({}, function(err) { 
-			console.log('Cadastros removed')
-		});
-		BDPopulate();
-		res.redirect('/autorizar');*/
-		res.send("Repopulate");
-	});
-	
-	// Ajustar de 4 para 5
-	router.get('/ajustar', function(req,res){
-		/*
-		Cadastro.find({}, function(err, cadastros) {
-			
-			if (err) return handleError(err,req,res);
-			if (cadastros){
-				
-				//console.log(cadastros)
-				for (var x = 0; x < cadastros.length; x++){
-					for (var i = 0; i < cadastros[x].relacao.length; i++){
-						if (i%5 == 3){
-							if (cadastros[x].estado == "solicitação de reserva"){
-								cadastros[x].relacao.splice(i+1, 0, "Em análise");
-							}
-							else if (cadastros[x].estado == "autorizada" || cadastros[x].estado == "analisada"){
-								cadastros[x].relacao.splice(i+1, 0, "Aprovado");
-								cadastros[x].estado = "analisada";
-							}
-						}
-					}
-					console.log(cadastros[x].relacao);
-					cadastros[x].save(function (err) {
-						if (err) return handleError(err,req,res);
-					});
-				}
-				res.send("Ajustar");
-
-
-			}
-			else {
-				req.flash('message', "!Não há");
-				res.send('Não há');
-			}
-			
-		});
-		*/
-		res.send("Ajustar")
-	});
-	//#endregion
-	
 	return router;
 }
 
 { // Functions
 
-function BDAdmin(req, res){
-	User.findOne({ 'username' :  'admin' }, function(err, user) {
-		if (err){
-			return handleError(err,req,res);
-		}
-		if (user){
-			if (process.env.ADMIN_PASS)
-				user.password = createHash(process.env.ADMIN_PASS);
-			else
-				user.password = createHash("admin");
-			user.save(function(err){
-				if (err) return handleError(err,req,res);
-			});
-			return;
-		}
-		var newUser = new User();
-		
-		newUser.username = 'admin';
-		if (process.env.ADMIN_PASS)
-			newUser.password = createHash(process.env.ADMIN_PASS);
-		else
-			newUser.password = createHash("admin");
-		newUser.save(function (err) {
-			if (err) return handleError(err,req,res);
-		});
-	});
-	
-	User.findOne({ 'username' :  'fiscal' }, function(err, user) {
-		if (err){
-			return handleError(err,req,res);
-		}
-		if (user){
-			if (process.env.FISCAL_PASS)
-				user.password = createHash(process.env.FISCAL_PASS);
-			else
-				user.password = createHash('fenix2018');
-			user.save(function(err){
-				if (err) return handleError(err,req,res);
-			});
-			return;
-		}
-		var newUser = new User();
-		
-		newUser.username = 'fiscal';
-		if (process.env.FISCAL_PASS)
-			newUser.password = createHash(process.env.FISCAL_PASS);
-		else
-			newUser.password = createHash('fenix2018');
-		newUser.save(function (err) {
-			if (err) return handleError(err,req,res);
-		});
-	});
-	
-	return
-}
-
-function BDPopulate(req, res){
-	
-	for (var i = 1; i < 5; i++){
-		var rel = [];
-		var trecho = "SLZ-AK";
-		if (i%2 == 0){
-			trecho = "AK-SLZ";
-		}
-		for (var j = 0; j < i*4; j++){
-			if (j%4 == 0){
-				rel[j] = "dependente" + i + "" + j
-			}
-			if (j%4 == 1){
-				rel[j] = "identidade" + i + "" + j
-			}
-			if (j%4 == 2){
-				rel[j] = "grau" + i + "" + j
-			}
-			if (j%4 == 3){
-				rel[j] = "motivo" + i + "" + j
-			}
-			/*
-			if (j%5 == 4){
-				rel[j] = "solicitação"
-			}*/
-		}
-		createCadastro( "responsavel teste"+i, "identidade"+i, "cracha"+i, "divisao"+i,
-		trecho, moment().format("YYYY-MM-DD"), rel, i+"email@email.com", "observacao"+i, req, res);
-	}
-	return
-}
-
-
-function createCadastro(nome, identidade, cracha, divisao, 
-trecho, data, relacao, email, observacao, req, res){
-	var newCadastro = new Cadastro();
-	newCadastro.nome = nome;
-	newCadastro.identidade = identidade;
-	newCadastro.cracha = cracha;
-	newCadastro.divisao = divisao;
-	newCadastro.trecho = trecho;
-	var _data = moment(data).format("YYYY-MM-DD")
-	newCadastro.data = _data;
-	newCadastro.relacao = relacao;
-	newCadastro.estado = "solicitação de reserva";
-	newCadastro.email = email;
-	newCadastro.observacao = observacao;
-	newCadastro.save(function (err) {
-		if (err) return handleError(err,req,res);
-	});
-}
-
-function acceptMail(cadastro, text, subject){
-	
-	var texto = text +
-	"\n\nA ficha de embarque é avaliada pelo Chefe da Seção de Transporte Marítimo, para eventuais dúvidas, entrar em contato através do funcional (98)99126-0456." +
-	"\n\nEssa mensagem é gerada automaticamente pelo sistema, favor não responder.";
-	
-	
-	var mailOptions = {
-		from: 'fichaembarque@gmail.com',
-		to: cadastro.email,
-		subject: subject,
-		text: texto
-	};
-
-	//console.log(process.env.EMAIL_PASS)
-
-	var transporter = nodemailer.createTransport({
-		service: 'gmail',
-		auth: {
-			user: 'fichaembarque@gmail.com',
-			pass: process.env.EMAIL_PASS
-		}
-	});
-
-	transporter.sendMail(mailOptions, function(error, info){
-		if (error) {
-			console.log(error);
-		} else {
-			console.log('Email sent: ' + info.response);
-		}
-	});
-}
 
 function handleError(err,req,res){
 	console.log(err);
 	res.send(err);
-}
-
-var isAuthenticatedView = function (req, res, next) {
-	// if user is authenticated in the session, call the next() to call the next request handler 
-	// Passport adds this method to request object. A middleware is allowed to add properties to
-	// request and response objects
-	
-	if (req.isAuthenticated() && (req.user.username == "fiscal" || req.user.username == "admin"))
-		return next();
-	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/login/visualizar');
-}
-
-var isAuthenticatedAuth = function (req, res, next) {
-	// if user is authenticated in the session, call the next() to call the next request handler 
-	// Passport adds this method to request object. A middleware is allowed to add properties to
-	// request and response objects
-	
-	if (req.isAuthenticated() && req.user.username == "admin")
-		return next();
-	if (req.isAuthenticated() && req.user.username == "fiscal"){
-		req.logout();
-		req.flash('message', "!Fiscal não pode autorizar fichas de embarque");
-	}
-	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/login/autorizar');
 }
 
 function isAuthenticated(req, res, next) {
@@ -996,8 +642,5 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-var createHash = function(password){
-	return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
-}
 
 }

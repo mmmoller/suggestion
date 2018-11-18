@@ -1,31 +1,8 @@
-extends layout
+extends layout_out
 
 block content
-    script.
-        var ll = false;
-        function localLogin(){
-            if (ll == false){
-                /*
-                var button = document.getElementById("aaa")
-                input = document.createElement("input");
-                input.setAttribute("type", "text")
-                input.setAttribute("name", "relacao")
-                input.setAttribute("class", "form-control")
-                input.setAttribute("size", "100")
-                input.setAttribute("required", "")
-                button.appendChild(input);*/
-                //var text = document.getElementById("emailText")
-                var text = document.createElement("div");
-                text.setAttribute("class", "input-group-prepend");
-                text.textContent = "Email"
-                ll = true;
-            }
-        }
     .default-wrapper
         h1 Log in
-        div#aaa
-            | Blablabla
-            input.btn.btn-primary(type='button', value='+', onclick='localLogin()')
         form(action='/login', method='post')
             .input-group.form-group
                 .input-group-prepend
@@ -36,9 +13,6 @@ block content
                     .input-group-text Password
                 input(type='password', name='password', class = 'form-control', required)
             button.form-group(type="submit" class="btn btn-primary btn-lg") Log in
-        form(action='/teste', method='get')
-            .input-group.form-group#emailInput
-                .input-group-prepend#emailTextFather
-                    .input-group-text#emailText
-                input(type='text', name='email', class = 'form-control', required)
-    
+        a(href="/signup") Don't have an account? Create an account!
+        br
+        a(href="/signup") Or log in using your Google account!

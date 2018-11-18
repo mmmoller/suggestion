@@ -5,7 +5,21 @@ var userSchema = mongoose.Schema({
 
     username: String,
     
-    relation: Object, // {_id: coeficient}
+    correlation: {type: Object, default: {}},
+
+    /*
+    correlation:{
+        _id : {
+            isFriend : Boolean,
+            (forEach Category in Infosys){
+                Category: {
+                    gradeSum : Number
+                    gradeCount : Number
+                }
+            }
+        }
+    }
+    */
 
     local            : {
         email        : String,
@@ -16,9 +30,15 @@ var userSchema = mongoose.Schema({
         token        : String,
         email        : String,
         name         : String
-    }
+    },
+    facebook         : {
+        id           : String,
+        token        : String,
+        email        : String,
+        name         : String
+    },
 
-});
+}, {minimize: false});
 
 // generating a hash
 userSchema.methods.generateHash = function(password) {

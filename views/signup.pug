@@ -1,4 +1,4 @@
-extends layout
+extends layout_out
 
 block content
     .default-wrapper
@@ -12,5 +12,6 @@ block content
                 .input-group-prepend
                     .input-group-text Password
                 input(type='password', name='password', class = 'form-control', required)
-            button.form-group(type="submit" class="btn btn-primary btn-lg") Sign up
+            button.form-group(type="submit" class="btn btn-primary") Sign up
+        a(href="/") Already have an account? Log in!
     

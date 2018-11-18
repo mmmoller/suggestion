@@ -1,0 +1,27 @@
+extends layout_in
+
+block content
+    .default-wrapper(style="width:80%")
+        h1 #{user.username}
+        .container(style="margin-top:40px")
+            .row
+                .col.vertical-bar
+                    | Link account
+                .col.vertical-bar
+                    form(action='/change_username', method='post')
+                        .input-group.form-group
+                            .input-group-prepend
+                                .input-group-text Username
+                            input(type='text', name='username', value=user.username, class = 'form-control', required)
+                        input(type='hidden', name='id', value=user._id)
+                        button.form-group(type="submit" class="btn btn-primary") Change Username
+                .col
+                    form(action='/delete_account', method='post')
+                        .input-group.form-group
+                            .input-group-prepend
+                                .input-group-text Username
+                            input(type='text', name='username', placeholder=user.username, class = 'form-control', required)
+                        input(type='hidden', name='id', value=user._id)
+                        button.form-group(type="submit" class="btn btn-danger") Delete Account
+    
+            

@@ -1,0 +1,62 @@
+extends layout_in
+
+block content
+    .default-wrapper
+        h1 Suggestion
+        
+    .default-table-wrapper
+        table.default-table
+            thead
+                tr
+                    th Name
+                    th Link
+                    th UserX Grade
+                    th UserX Comment
+                    th Your Grade
+                    th Your Comment
+                    th Review
+            tbody
+                - for(var i = 0; i < suggestion.length; i++){
+                    tr
+                        form.form-inline(action="/review_suggestion", method="post")
+                            td
+                                | #{suggestion[i].name}
+                            td
+                                -for (var key in suggestion[i].link) {
+                                    if (suggestion[i].link.hasOwnProperty(key))
+                                        a(href=suggestion[i].link[key], target="_blank", style=infosys.types[key].color).margin
+                                            span(class=infosys.types[key].fontAwesome, style=infosys.types[key].size)
+                                            | #{""}
+                                -}
+                            -for (var key in suggestion[i].userinfo) {
+                                if (suggestion[i].userinfo.hasOwnProperty(key))
+                                    td
+                                        | #{suggestion[i].userinfo[key].grade}
+                                    td
+                                        | #{suggestion[i].userinfo[key].comment}
+                            -}
+                            input(type='hidden', name='target_id', value=suggestion[i]._id)
+                            input(type='hidden', name='adress', value=adress)
+                            td
+                                input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", placeholder="Rating", required)
+                            td
+                                input.form-control.margin(type='text', name='comment', placeholder= "Your commentary about this stuff")
+                            td
+                                button.btn.btn-primary.margin(type="submit", style="margin-left: auto") Send review
+                -}
+    .default-table-wrapper
+        form.form-inline(action="/create_suggestion", method="post")
+            input.form-control.margin(type='text', name='name', placeholder= "Name", required)
+            .form-group
+                select.form-control(name="type").margin
+                    -for (var key in infosys.types) {
+                        if (infosys.types.hasOwnProperty(key))
+                            option(value=key) #{key}
+                    -}
+            input.form-control.margin(type='text', name='url', placeholder= "Url", required)
+            input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", placeholder="Rating", required)
+            input.form-control.margin(type='text', name='comment', placeholder= "Your commentary about this stuff")
+            input(type='hidden', name='adress', value=adress)
+            button.btn.btn-primary.margin(type="submit", style="margin-left: auto") Create new suggestion
+
+
