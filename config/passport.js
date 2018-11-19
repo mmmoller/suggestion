@@ -148,6 +148,7 @@ module.exports = function(passport) {
         // asynchronous
         process.nextTick(function() {
 
+            console.log(req)
             // check if the user is already logged in
             if (!req.user) {
 
@@ -249,19 +250,20 @@ module.exports = function(passport) {
     // FACEBOOK ================================================================
     // =========================================================================
     var fbStrategy = {
-        'clientID'        : process.env.FACEBOOK_CLIENT_ID,
-        'clientSecret'    : process.env.FACEBOOK_CLIENT_SECRET,
-        'callbackURL'     : process.env.FACEBOOK_CALLBACK_URL,
-        'profileURL'      : 'https://graph.facebook.com/v2.5/me?fields=first_name,last_name,email',
-        'profileFields'   : ['id', 'email', 'name'],
+        clientID        : process.env.FACEBOOK_CLIENT_ID,
+        clientSecret    : process.env.FACEBOOK_CLIENT_SECRET,
+        callbackURL     : process.env.FACEBOOK_CALLBACK_URL,
+        profileURL      : 'https://graph.facebook.com/v2.5/me?fields=first_name,last_name,email',
+        profileFields   : ['id', 'email', 'name'],
+        passReqToCallback : true
     }
-    fbStrategy.passReqToCallBack = true;
     passport.use(new FacebookStrategy(fbStrategy,
     function(req, token, refreshToken, profile, done) {
 
         // asynchronous
         process.nextTick(function() {
 
+            console.log(req)
             // check if the user is already logged in
             if (!req.user) {
 
