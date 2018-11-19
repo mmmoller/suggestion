@@ -35,41 +35,6 @@ module.exports = function(passport) {
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     },
     function(req, email, password, done) {
-        if (email)
-            email = email.toLowerCase(); // Use lower-case e-mails to avoid case-sensitive e-mail matching
-
-        // asynchronous
-        process.nextTick(function() {
-            User.findOne({ 'local.email' :  email }, function(err, user) {
-                // if there are any errors, return the error
-                if (err)
-                    return done(err);
-
-                // if no user is found, return the message
-                if (!user)
-                    return done(null, false, req.flash('message', '!User not found.'));
-
-                if (!user.validPassword(password))
-                    return done(null, false, req.flash('message', 'Oops! Wrong password.'));
-
-                // all is well, return user
-                else
-                    return done(null, user);
-            });
-        });
-
-    }));
-
-  // =========================================================================
-    // LOCAL LOGIN =============================================================
-    // =========================================================================
-    passport.use('local-login', new LocalStrategy({
-        // by default, local strategy uses username and password, we will override with email
-        usernameField : 'email',
-        passwordField : 'password',
-        passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
-    },
-    function(req, email, password, done) {
 
         // asynchronous
         process.nextTick(function() {
@@ -205,8 +170,11 @@ module.exports = function(passport) {
                                 return done(null, user);
                             });
                         }
+                        else {
+                            return done(null, user);
+                        }
 
-                        return done(null, user);
+                        
                     } else {
                         var newUser          = new User();
 
@@ -242,19 +210,33 @@ module.exports = function(passport) {
                 });
 
             } else {
-                // user already exists and is logged in, we have to link accounts
-                var user               = req.user; // pull the user out of the session
 
-                user.google.id    = profile.id;
-                user.google.token = user.generateHash(token);
-                user.google.name  = profile.displayName;
-                user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
-
-                user.save(function(err) {
+                User.findOne({ 'google.id' : profile.id }, function(err, user) {
                     if (err)
                         return done(err);
-                        
-                    return done(null, user);
+
+                    if (user) {
+                        req.flash("message", "!You already have a google account in use.")
+                        return done(null, req.user);
+                    }
+                    else {
+
+
+                        // user already exists and is logged in, we have to link accounts
+                        var user_               = req.user; // pull the user out of the session
+
+                        user_.google.id    = profile.id;
+                        user_.google.token = user_.generateHash(token);
+                        user_.google.name  = profile.displayName;
+                        user_.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+
+                        user_.save(function(err) {
+                            if (err)
+                                return done(err);
+                                
+                            return done(null, user_);
+                        });
+                    }
                 });
 
             }
@@ -301,8 +283,11 @@ module.exports = function(passport) {
                                 return done(null, user);
                             });
                         }
+                        else {
+                            return done(null, user);
+                        }
 
-                        return done(null, user); // user found, return that user
+
                     } else {
                         // if there is no user, create them
                         var newUser            = new User();
@@ -340,18 +325,31 @@ module.exports = function(passport) {
                 });
 
             } else {
-                // user already exists and is logged in, we have to link accounts
-                var user            = req.user; // pull the user out of the session
 
-                user.facebook.id    = profile.id;
-                user.facebook.token = user.generateHash(token);
-                user.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
-                user.facebook.email = profile.emails[0].value;
-
-                user.save(function(err) {
+                User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                     if (err)
-                        throw err;
-                    return done(null, user);
+                        return done(err);
+
+                    if (user) {
+                        req.flash("message", "!Your facebook account is already in use.")
+                        return done(null, req.user);
+                    }
+                    else {
+
+                        // user already exists and is logged in, we have to link accounts
+                        var user_            = req.user; // pull the user out of the session
+
+                        user_.facebook.id    = profile.id;
+                        user_.facebook.token = user_.generateHash(token);
+                        user_.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
+                        user_.facebook.email = profile.emails[0].value;
+
+                        user_.save(function(err) {
+                            if (err)
+                                throw err;
+                            return done(null, user_);
+                        });
+                    }
                 });
 
             }

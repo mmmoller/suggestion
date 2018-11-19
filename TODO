@@ -10,7 +10,7 @@ Suggestion review:
 Suggestion "Add to wishlist":
     Account wishlist
 
-Suggestion "Don't show to me":
+Suggestion "Don't show again":
     Accout Don't show me list
 
 Suggestion rating:
@@ -29,5 +29,8 @@ Account:
 
 Authentication:
     Facebook
+
+Account:
+    Change password.
 
 Change word "Grade" to "Rating" on everyplace

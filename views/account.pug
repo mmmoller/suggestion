@@ -1,12 +1,26 @@
 extends layout_in
 
 block content
-    .default-wrapper(style="width:80%")
+    .default-wrapper(style="width:90%")
         h1 #{user.username}
         .container(style="margin-top:40px")
             .row
                 .col.vertical-bar
-                    | Link account
+                    form(action='/change_password', method='post')
+                        .input-group.form-group
+                            .input-group-prepend
+                                .input-group-text Old Password
+                            input(type='text', name='old_pass', class = 'form-control', required)
+                        .input-group.form-group
+                            .input-group-prepend
+                                .input-group-text New Password
+                            input(type='text', name='new_pass', class = 'form-control', required)
+                        .input-group.form-group
+                            .input-group-prepend
+                                .input-group-text Confirm Password
+                            input(type='text', name='confirm_pass', class = 'form-control', required)
+                        input(type='hidden', name='id', value=user._id)
+                        button.form-group(type="submit" class="btn btn-primary") Change Password
                 .col.vertical-bar
                     form(action='/change_username', method='post')
                         .input-group.form-group
@@ -14,14 +28,51 @@ block content
                                 .input-group-text Username
                             input(type='text', name='username', value=user.username, class = 'form-control', required)
                         input(type='hidden', name='id', value=user._id)
-                        button.form-group(type="submit" class="btn btn-primary") Change Username
+                        button.form-group(type="submit" class="btn btn-primary", style="margin-bottom: auto") Change Username
                 .col
                     form(action='/delete_account', method='post')
                         .input-group.form-group
-                            .input-group-prepend
-                                .input-group-text Username
-                            input(type='text', name='username', placeholder=user.username, class = 'form-control', required)
+                            input(type='text', name='username', placeholder="Write username to delete", class = 'form-control', required)
                         input(type='hidden', name='id', value=user._id)
                         button.form-group(type="submit" class="btn btn-danger") Delete Account
+        .container(style="margin-top:40px")    
+            .row
+                .col.vertical-bar
+                    span.fa.fa-user(style="font-size: 35px; margin-bottom:10px").margin
+                    if (user.local.email)
+                        p Email: #{user.local.email}
+                        a.btn.btn-outline-secondary(href="/unlink/local") Unlink Local Account
+                    else
+                        form(action='/signup', method='post')
+                            .input-group.form-group
+                                .input-group-prepend
+                                    .input-group-text Email
+                                input(type='text', name='email', class = 'form-control', required)
+                            .input-group.form-group
+                                .input-group-prepend
+                                    .input-group-text Password
+                                input(type='password', name='password', class = 'form-control', required)
+                            button.form-group(type="submit" class="btn btn-outline-secondary") Link Local Account
+                .col.vertical-bar
+                    span.fab.fa-google-plus-g(style="font-size: 35px; margin-bottom:10px; color: crimson").margin
+                    if (user.google.token)
+                        p ID: #{user.google.id}
+                        p Email: #{user.google.email}
+                        p Name: #{user.google.name}
+                        a.btn.btn-outline-danger(href="/unlink/google") Unlink Google Account
+                    else
+                        br
+                        a.btn.btn-outline-danger(href="/connect/google") Link Google Account
+                .col
+                    span.fab.fa-facebook(style="font-size: 35px; margin-bottom:10px; color: darkblue").margin
+                    if (user.facebook.token)
+                        p ID: #{user.facebook.id}
+                        p Email: #{user.facebook.email}
+                        p Name: #{user.facebook.name}
+                        a.btn.btn-outline-primary(href="/unlink/facebook") Unlink Facebook Account
+                    else
+                        br
+                        a.btn.btn-outline-primary(href="/connect/facebook") Link Facebook Account
+                    
     
             
