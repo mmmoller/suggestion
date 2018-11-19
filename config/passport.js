@@ -216,7 +216,7 @@ module.exports = function(passport) {
                         return done(err);
 
                     if (user) {
-                        req.flash("message", "!You already have a google account in use.")
+                        req.flash("message", "!Your google account is already in use.")
                         return done(null, req.user);
                     }
                     else {
@@ -329,6 +329,10 @@ module.exports = function(passport) {
                 User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                     if (err)
                         return done(err);
+
+
+                    console.log(user)
+                    console.log(req.user)
 
                     if (user) {
                         req.flash("message", "!Your facebook account is already in use.")
