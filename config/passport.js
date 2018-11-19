@@ -265,6 +265,8 @@ module.exports = function(passport) {
             // check if the user is already logged in
             if (!req.user) {
 
+                console.log("batata")
+
                 User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                     if (err)
                         return done(err);
@@ -325,6 +327,8 @@ module.exports = function(passport) {
                 });
 
             } else {
+
+                console.log("Atatata")
 
                 User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                     if (err)
