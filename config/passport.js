@@ -148,7 +148,6 @@ module.exports = function(passport) {
         // asynchronous
         process.nextTick(function() {
 
-            console.log(req)
             // check if the user is already logged in
             if (!req.user) {
 
@@ -158,23 +157,7 @@ module.exports = function(passport) {
 
                     if (user) {
 
-                        // if there is a user id already but no token (user was linked at one point and then removed)
-                        if (!user.google.token) {
-                            user.google.token = user.generateHash(token);
-                            user.google.name  = profile.displayName;
-                            user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
-
-                            user.save(function(err) {
-                                if (err)
-                                    return done(err);
-                                    
-                                return done(null, user);
-                            });
-                        }
-                        else {
-                            return done(null, user);
-                        }
-
+                        return done(null, user);
                         
                     } else {
                         var newUser          = new User();
@@ -204,7 +187,8 @@ module.exports = function(passport) {
 
                             }
                             else {
-                                console.log("bugou");
+                                req.flash("message", "!Infosys not created. Contact admin");
+                                return done(null, false);
                             }
                         });
                     }
@@ -263,11 +247,8 @@ module.exports = function(passport) {
         // asynchronous
         process.nextTick(function() {
 
-            console.log(req)
             // check if the user is already logged in
             if (!req.user) {
-
-                console.log("batata")
 
                 User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                     if (err)
@@ -275,22 +256,7 @@ module.exports = function(passport) {
 
                     if (user) {
 
-                        // if there is a user id already but no token (user was linked at one point and then removed)
-                        if (!user.facebook.token) {
-                            user.facebook.token = user.generateHash(token);
-                            user.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
-                            user.facebook.email = profile.emails[0].value;
-
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
-                            });
-                        }
-                        else {
-                            return done(null, user);
-                        }
-
+                         return done(null, user);
 
                     } else {
                         // if there is no user, create them
@@ -322,7 +288,8 @@ module.exports = function(passport) {
 
                             }
                             else {
-                                console.log("bugou");
+                                req.flash("message", "!Infosys not created. Contact admin");
+                                return done(null, false);
                             }
                         });
                     }
@@ -330,15 +297,10 @@ module.exports = function(passport) {
 
             } else {
 
-                console.log("Atatata")
-
                 User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                     if (err)
                         return done(err);
 
-
-                    console.log(user)
-                    console.log(req.user)
 
                     if (user) {
                         req.flash("message", "!Your facebook account is already in use.")
