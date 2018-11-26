@@ -1,17 +1,16 @@
-Create Suggestionlist:
+--------- CHECK --------
+Forget Password (on Heroku),
+Suggestionlist,
+Send Review / Change Review,
+Change User and Suggestion to be Params instead of Query.
+
+--------- TODO ---------
 
 Suggestion datatable and ordering based on coeficients:
     All users using coeficient.
     Only friends using coeficient.
 
-Suggestion review:
-    Send Review / Change Review (Change review showing actual ratings)
 
-Suggestion "Add to wishlist":
-    Account wishlist
-
-Suggestion "Don't show again":
-    Accout Don't show me list
 
 Suggestion rating:
     Show a color instead of a number (From dark green to white to dark red)
@@ -19,18 +18,29 @@ Suggestion rating:
 User page:
     Create a nice layout to show coeficient.
 
+Suggestion "Add to wishlist":
+    Account wishlist
+
+Suggestion "Don't show again":
+    Accout Don't show me list
+
 Account:
     My own suggestion list on my page.
     wishlist
     Don't show me list
 
-Account:
-    Link Account
-
-Authentication:
-    Facebook
-
-Account:
-    Change password.
-
 Change word "Grade" to "Rating" on everyplace
+
+
+FriendOnly = true
+    if (friend)
+        if (correlation)
+            grade With correlation coeficient
+        else
+            grade with default coeficient.
+
+FriendOnly = false;
+    if (correlation)
+        grade with correlation coeficient
+    else
+        grade with default coeficient

@@ -1,13 +1,73 @@
 extends layout_in
 
 block content
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+ 
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+
+    script.
+        $(document).ready(function() {
+            $('#datatable').DataTable( {
+                "language": {
+                "emptyTable": "No users"
+                },
+                "ordering": true,
+                "paging": false,
+            });
+        });
+
     .default-wrapper
         h1 Userlist
-                
-    .default-wrapper
+    .default-table-wrapper
+        table#datatable.default-table
+            thead
+                tr
+                    th Name
+                    th Alias
+                    - for (var i = 0; i < infosys.categories.length; i++)
+                        th #{infosys.categories[i]} Coeficient
+                    
+                    th Action
+            tbody
+                if (user.length > 0)
+                    - for (var i = 0; i < user.length; i++) {
+                        tr
+                            td
+                                a(href='/user/'+ user[i]._id, id="username"+i) #{user[i].username}
+                            td
+                                | Alias
+                            - for (var j = 0; j < infosys.categories.length; j++)
+                                td
+                                    if ((correlation[user[i]._id]) && (correlation[user[i]._id][infosys.categories[j]]))
+                                        | #{Number((correlation[user[i]._id][infosys.categories[j]].gradeSum)/(correlation[user[i]._id][infosys.categories[j]].gradeCount))}
+                                    else
+                                        | #
+                            td
+                                button.btn.btn-primary(id='action', onclick="Friend(this)") #{user[i].action}
+                    - }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //.default-wrapper
         - for(var i = 0; i < user.length; i++){
             form.form-inline(action="/" + user[i].button + "_friend", method="post")
-                a(href='/user?_id=' + user[i]._id) #{user[i].username}
+                a(href='/user/' + user[i]._id) #{user[i].username}
                 input(type='hidden', name='target_id', value=user[i]._id)
                 input(type='hidden', name='adress', value='/userlist?search_name=' + adress)
                 button.btn.btn-primary(type="submit", style="margin-left: auto") #{user[i].button}

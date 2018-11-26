@@ -23,7 +23,9 @@ var userSchema = mongoose.Schema({
 
     local            : {
         email        : String,
-        password     : String
+        password     : String,
+        resetPasswordToken       : String,
+        resetPasswordExpires : Date
     },
     google           : {
         id           : String,

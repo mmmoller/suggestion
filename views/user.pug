@@ -13,7 +13,7 @@ block content
             -}
             form.form-inline(action="/" + option + "_friend", method="post")
                 input(type='hidden', name='target_id', value=user._id)
-                input(type='hidden', name='adress', value='/user?_id=' + user._id)
+                input(type='hidden', name='adress', value='/user/' + user._id)
                 button.btn.btn-primary(type="submit", style="margin: auto") #{option} friend
     .default-table-wrapper
         table.default-table
@@ -45,7 +45,7 @@ block content
                                 | #{suggestion[i].userinfo[user._id].comment}
 
                             input(type='hidden', name='target_id', value=suggestion[i]._id)
-                            input(type='hidden', name='adress', value='/user?_id=' + user._id)
+                            input(type='hidden', name='adress', value='/user/' + user._id)
                             td
                                 input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", placeholder="Rating", required)
                             td

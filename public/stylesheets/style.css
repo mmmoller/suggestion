@@ -10,6 +10,10 @@ input {
     text-align:center;
 }
 
+h1 {
+	margin-bottom: 20px;
+}
+
 .btn-group+.btn-group{
     margin-left: -5px;
 }

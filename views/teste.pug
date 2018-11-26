@@ -1,47 +1,72 @@
 extends layout_out
 
 block content
-	script.
-		$(document).ready(function () {
-			$('#increment').click(function(){
-				var width = $("#container_width");
-				var input;
-				var input = $("<input>").attr("type","text").attr("name","width[]");
-				var br = $("<br>");
-				width.append(br);
-				width.append(input);
+	//<script  src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="crossorigin="anonymous"></script>
+	//script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+	<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
 
-				var height = $("#container_height");
-				var input = $("<input>").attr("type","text").attr("name","height[]");
-				var br = $("<br>");
-				height.append(br);
-				height.append(input);
+	script.
+		$(document).ready(function() {
+			$('#datatable').DataTable( {
+				"language": {
+					"emptyTable": "No suggestions"
+				},
+				"ordering": true,
+				"paging": false,
 			});
 		});
-	<form id="exampleForm">
-	<table class="form-table">
 
 
+	h1 Banana
+	p#a Teste
+	p#b TRASA
 
-		<tr valign="top">
-			<td id="container_width">
-				<input type="text" name="width[]" placeholder="" />
-			</td>
 
-			<td id="container_height">
-				<input type="text" name="height[]" placeholder="" />
-			</td>
+	.default-table-wrapper
+		table#datatable.default-table
+			thead
+				tr
+					th Name
+					th Action
+			tbody
+				tr#row1
+					td "Banana" 1
+					td
+						button#btn.btn.btn-primary(onclick="Func(this)") Haha
+				tr#row2
+					td "Banana" 2
+					td
+						button#btn.btn.btn-primary Haha
+				tr#row3
+					td "Banana" 3
+					td
+						input(type='hidden', id="3", value="teste3213123")
+						button#btn.btn.btn-primary(onclick="Func(this)") Haha
 
-			<td>
-				<input type="button" name="increment" id="increment" value="+">
-			</td>
-		</tr>
+	script.
+		$("#a").click (function(){
+			var batata =10;
+			//console.log(data)
+			console.log("teste")
+			Banana()
+			$.post( '/teste2/abacate?tata=tata', {t1: batata, t2: "teste"}, function(data) {
+				$('#b').html(data.user.name);
+			});
+		})
 
-		<tr>
-			<td>
-				<input type="submit" value="Save settings"/>
-			</td>
-		</tr>
+		function Func(r){
+			var i = r.parentNode.parentNode.rowIndex;
+			var banana = document.getElementById(i).value
+			console.log(banana)
+			$.post('/teste2/abacate', {t1: banana}, function(data){
+				
+				console.log(i)
+				document.getElementById("datatable").deleteRow(i);
+				console.log(data)
+			});
+		}
 
-	</table>
-	</form>
+		var Banana = function(){
+			console.log("abacate");
+		}

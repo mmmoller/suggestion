@@ -1,6 +1,19 @@
 extends layout_in
 
 block content
+    script.
+        function CheckPassword(){
+            if (document.getElementById('new_password').value ==
+             document.getElementById('confirm_password').value &&
+             document.getElementById('new_password').value != ""){
+                document.getElementById('submit').disabled = false;
+                document.getElementById('submit').setAttribute("class", "btn btn-primary form-group")
+            }
+            else{
+                document.getElementById('submit').disabled = true;
+                document.getElementById('submit').setAttribute("class", "btn btn-secondary form-group")
+            }
+        }
     .default-wrapper(style="width:90%")
         h1 #{user.username}
         .container(style="margin-top:40px")
@@ -10,17 +23,17 @@ block content
                         .input-group.form-group
                             .input-group-prepend
                                 .input-group-text Old Password
-                            input(type='text', name='old_pass', class = 'form-control', required)
+                            input(type='password', name='old_password', class = 'form-control', required)
                         .input-group.form-group
                             .input-group-prepend
                                 .input-group-text New Password
-                            input(type='text', name='new_pass', class = 'form-control', required)
+                            input.form-group(type='password', name='new_password', id='new_password', class = 'form-control', onkeyup="CheckPassword();", required)
                         .input-group.form-group
                             .input-group-prepend
                                 .input-group-text Confirm Password
-                            input(type='text', name='confirm_pass', class = 'form-control', required)
+                            input.form-group(type='password', name='confirm_password', id='confirm_password', class = 'form-control', onkeyup="CheckPassword();", required)
                         input(type='hidden', name='id', value=user._id)
-                        button.form-group(type="submit" class="btn btn-primary") Change Password
+                        button.form-group(type="submit", id="submit" class="btn btn-secondary", disabled) Change Password
                 .col.vertical-bar
                     form(action='/change_username', method='post')
                         .input-group.form-group

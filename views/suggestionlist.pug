@@ -1,48 +1,116 @@
 extends layout_in
 
 block content
+
+    //<script  src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
+ 
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+
+    script.
+        $(document).ready(function() {
+            $('#datatable').DataTable( {
+                "language": {
+                "emptyTable": "No suggestions"
+                },
+                "ordering": true,
+                "paging": false,
+            });
+        });
+
     .default-wrapper
         h1 Suggestion
         
     .default-table-wrapper
-        table.default-table
+        table#datatable.default-table
             thead
                 tr
                     th Name
                     th Link
-                    th UserX Grade
-                    th UserX Comment
-                    th Your Grade
+                    th Friends Rating
+                    th All Users Rating
+                    th Your Rating
                     th Your Comment
                     th Review
+                    th Action
             tbody
                 - for(var i = 0; i < suggestion.length; i++){
                     tr
-                        form.form-inline(action="/review_suggestion", method="post")
-                            td
-                                | #{suggestion[i].name}
-                            td
-                                -for (var key in suggestion[i].link) {
-                                    if (suggestion[i].link.hasOwnProperty(key))
-                                        a(href=suggestion[i].link[key], target="_blank", style=infosys.types[key].color).margin
-                                            span(class=infosys.types[key].fontAwesome, style=infosys.types[key].size)
-                                            | #{""}
-                                -}
-                            -for (var key in suggestion[i].userinfo) {
-                                if (suggestion[i].userinfo.hasOwnProperty(key))
-                                    td
-                                        | #{suggestion[i].userinfo[key].grade}
-                                    td
-                                        | #{suggestion[i].userinfo[key].comment}
+                        td
+                            | #{suggestion[i].name}
+                        td
+                            -for (var key in suggestion[i].link) {
+                                if (suggestion[i].link.hasOwnProperty(key))
+                                    a(href=suggestion[i].link[key], target="_blank", style=infosys.types[key].color).margin
+                                        span(class=infosys.types[key].fontAwesome, style=infosys.types[key].size)
+                                        | #{""}
                             -}
+                        mixin rating(friendsOnly)
+                            - var grade = 0;
+                            - var sum = 0;
+                            - var coeficient = 0;
+                            - var defaultCoeficient = 1;
+                            - for (var id in suggestion[i].userinfo){
+                                if (suggestion[i].userinfo.hasOwnProperty(id))
+                                    //| Name: #{infosys.usernames[id]} , Grade: #{suggestion[i].userinfo[id].grade} , Coeficient:
+                                    - coeficient = 0;
+                                    if ( user.correlation[id] && (friendsOnly && user.correlation[id].isFriend || !friendsOnly) ) 
+                                        if ( user.correlation[id][suggestion[i].category] && user.correlation[id][suggestion[i].category].gradeSum )
+                                            - coeficient = Number((user.correlation[id][suggestion[i].category].gradeSum)/(user.correlation[id][suggestion[i].category].gradeCount))
+                                            //| #{coeficient}
+                                        else
+                                            - coeficient = defaultCoeficient;
+                                            //| #{coeficient}
+                                    else if (!friendsOnly && user._id != id)
+                                        - coeficient = defaultCoeficient;
+                                        //| #{coeficient}
+                                    else
+                                        //| #{coeficient}
+                                    - grade += coeficient*suggestion[i].userinfo[id].grade
+                                    - sum += coeficient;
+                                    p
+                            -}
+                            if (sum != 0)
+                                p #{Number((grade)/(sum)).toFixed(2)}
+                            else
+                                p #
+                            //p Grade: #{grade}
+                            //p Sum: #{sum}
+                        // FRIENDS
+                        td
+                            +rating(true)
+                        // ALL USER
+                        td 
+                            +rating(false)
+                        form#form.form-inline(action="/review_suggestion", method="post")
                             input(type='hidden', name='target_id', value=suggestion[i]._id)
                             input(type='hidden', name='adress', value=adress)
+                            if (suggestion[i].userinfo[user._id])
+                                td
+                                    input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", value=suggestion[i].userinfo[user._id].grade, placeholder="Rating", required)
+                                td
+                                    input.form-control.margin(type='text', name='comment',value=suggestion[i].userinfo[user._id].comment, placeholder= "Your commentary")
+                                td
+                                    button.btn.btn-primary.btn-block.margin(type="submit", style="margin-left: auto") Change
+                            else
+                                td
+                                    input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", placeholder="Rating", required)
+                                td
+                                    input.form-control.margin(type='text', name='comment', placeholder= "Your commentary")
+                                td
+                                    button.btn.btn-primary.btn-block.margin(type="submit", style="margin-left: auto") Rate
                             td
-                                input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", placeholder="Rating", required)
-                            td
-                                input.form-control.margin(type='text', name='comment', placeholder= "Your commentary about this stuff")
-                            td
-                                button.btn.btn-primary.margin(type="submit", style="margin-left: auto") Send review
+                                span.btn.fas.fa-star(style="color:goldenrod;font-size:30px", onclick="Func(1)")
+                                span.btn.fa.fa-times(style="color:crimson;font-size:30px", onclick="Func(2)")
+                        script.
+                            function Func(n) {
+                                var adress ="tantofaz";
+                                if (n == 1)
+                                    adress = "xuxa_xuxa"
+                                document.getElementById("form").setAttribute("action", adress)
+                                document.getElementById("form").submit()
+                            }
                 -}
     .default-table-wrapper
         form.form-inline(action="/create_suggestion", method="post")

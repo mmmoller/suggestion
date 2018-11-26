@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var bCrypt = require('bcrypt-nodejs');
-var moment = require('moment');
 var nodemailer = require('nodemailer');
+var async = require('async');
+var crypto = require('crypto')
 
 var User = require('../models/user');
 var Infosys = require('../models/infosys');
@@ -14,13 +14,23 @@ module.exports = function(passport){
 
 	// /TESTE
 	router.get('/teste', function(req, res) {
-		if(req.user.google.token){
-			res.send("banana")
-		}
-		else{
-		console.log(req.user)
-		res.send("done");
-		}
+		res.render("teste", {data : "dataassa"})
+	});
+
+	router.get('/teste2/:token', function(req, res) {
+
+		var user = {id:"10", name:req.params.token, teste: req.body.bbody}
+		res.send(user);
+	});
+
+	router.post('/teste2/:token', function(req, res) {
+		console.log(req.params.token)
+		console.log(req.query.tata)
+		console.log(req.body.t1)
+		console.log(req.params.t1)
+		console.log(req.query.t1)
+		var user = {id:"10", name:"treco", body: req.body.t1, params: req.params.token}
+		res.send({user, message: "batata"});
 	});
 
 	//#region INDEX/ACCOUNT
@@ -31,6 +41,121 @@ module.exports = function(passport){
 		else{
 			res.render('index', {message: req.flash('message')});
 		}
+	});
+
+	router.get('/forgot_password', function(req, res){
+		res.render('forgotpassword', {message: req.flash('message')});
+	});
+
+	router.post('/forgot_password', function(req, res, next) {
+		async.waterfall([
+			function(done) {
+				crypto.randomBytes(20, function(err, buf) {
+					var token = buf.toString('hex');
+			  		done(err, token);
+				});
+		  	},
+		  	function(token, done) {
+				User.findOne({ "local.email" : req.body.email }, function(err, user) {
+					if (!user) {
+						req.flash('message', '!There is no local account with this email adress.');
+						return res.redirect('/forgot_password');
+					}
+	  
+					user.local.resetPasswordToken = token;
+					user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+					user.markModified("local");
+			
+					user.save(function(err) {
+						done(err, token, user);
+					});
+				});
+		  	},
+			function(token, user, done) {
+				var transporter = nodemailer.createTransport({
+					service: 'gmail',
+					auth: {
+						user: process.env.EMAIL,
+						pass: process.env.EMAIL_PASS
+					}
+				});
+				var mailOptions = {
+					to: user.local.email,
+					from: '"GetSuggestion Reset Password Bot" <getsuggestion_forgotpass@gmail.com>',
+					subject: 'GetSuggestion Password Reset',
+					text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+						'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+						'http://' + req.headers.host + '/reset/' + token + '\n\n' +
+						'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+				};
+				transporter.sendMail(mailOptions, function(err) {
+					req.flash('message', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
+					done(err, 'done');
+				});
+			}
+		], function(err) {
+			if (err) return next(err);
+			res.redirect('/forgot_password');
+		});
+	});
+
+	router.get('/reset/:token', function(req, res) {
+		User.findOne({ "local.resetPasswordToken": req.params.token, "local.resetPasswordExpires": { $gt: Date.now() } }, function(err, user) {
+			if (err) return next(err);
+			if (!user) {
+				
+				req.flash('message', '!Password reset token is invalid or has expired.');
+				return res.redirect('/forgot_password');
+
+			}
+			res.render('resetpassword', { user: req.user });
+		});
+	});
+
+	router.post('/reset/:token', function(req, res) {
+		async.waterfall([ 
+			function(done){
+				User.findOne({ "local.resetPasswordToken": req.params.token, "local.resetPasswordExpires": { $gt: Date.now() } }, function(err, user) {
+					if (!user) {
+						console.log(req.params.token)
+						req.flash('message', '!Password reset token is invalid or has expired.');
+						return res.redirect('back');
+					}
+
+					user.local.password = user.generateHash(req.body.new_password);
+					user.local.resetPasswordToken = undefined;
+					user.local.resetPasswordExpires = undefined;
+			
+					user.save(function(err) {
+						req.logIn(user, function(err) {
+							done(err, user);
+						});
+					});
+				});
+			}, 
+			function(user, done) {
+				var smtpTransport = nodemailer.createTransport({
+					service: 'gmail',
+					auth: {
+						user: process.env.EMAIL,
+						pass: process.env.EMAIL_PASS
+					}
+				});
+				var mailOptions = {
+					to: user.local.email,
+					from: '"GetSuggestion Reset Password Bot" <getsuggestion_forgotpass@gmail.com>',
+					subject: 'Your password has been changed',
+					text: 'Hello,\n\n' +
+					'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed.\n'
+				};
+				smtpTransport.sendMail(mailOptions, function(err) {
+					req.flash('message', 'Success! Your password has been changed.');
+					done(err);
+				});
+		}], function(err) {
+			if (err) return next(err);
+			res.redirect('/');
+		});
 	});
 
     router.get('/account', isAuthenticated, function(req, res) {
@@ -61,6 +186,21 @@ module.exports = function(passport){
 		});
 
 		
+	});
+
+	router.post('/change_password', isAuthenticated, function(req, res) {
+
+		if (req.user.validPassword(req.body["old_password"])){
+			req.user.local.password = req.user.generateHash(req.body["new_password"])
+			req.user.save(function (err) {
+				if (err) return handleError(err,req,res);
+			});
+			req.flash('message', "User password has been changed");
+		}
+		else{
+			req.flash('message', "!Wrong old password!");
+		}
+		res.redirect('/account');
 	});
 
 	router.post('/delete_account', isAuthenticated, function(req, res) {
@@ -123,6 +263,7 @@ module.exports = function(passport){
 		}
 		
 	});
+
 	//#endregion
 
 	//#region SUGGESTION
@@ -138,6 +279,9 @@ module.exports = function(passport){
 			]}
 			adress = '/suggestionlist?search_name=' + req.query["search_name"];
 		}
+		if (req.query["search_name"] == ""){
+			query = {}
+		}
 
 		Suggestion.find(query, function (err, suggestion){
 			if (err) return handleError(err,req,res);
@@ -147,8 +291,15 @@ module.exports = function(passport){
 					if (err) return handleError(err,req,res);
 					if (infosys){
 						// Usar grades e coeficientes
+
+						//console.log(req.user.correlation);
+						//console.log(suggestion)
+
+						console.log(infosys)
+
+						var user = {"_id": req.user._id, "correlation": req.user.correlation}
 						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
-							 message: req.flash("message"), adress: adress});
+							 message: req.flash("message"), adress: adress, user: user});
 					}
 					else{
 						req.flash('message', "!Infosys don't exist");
@@ -166,9 +317,9 @@ module.exports = function(passport){
 
 	});
 	
-	router.get('/suggestion', isAuthenticated, function(req, res) {
+	router.get('/suggestion/:_id', isAuthenticated, function(req, res) {
 
-		var id = req.query["_id"];
+		var id = req.params["_id"];
 
 		Suggestion.findOne({_id : id}, function(err, suggestion) {
 			if (err) return handleError(err,req,res);
@@ -398,10 +549,10 @@ module.exports = function(passport){
 		});
 	});
 
-	router.get('/user', isAuthenticated, function(req, res) {
+	router.get('/user/:_id', isAuthenticated, function(req, res) {
 
 		
-		var id = req.query["_id"];
+		var id = req.params["_id"];
 
 		var option = "Remove";
 		if (!req.user.correlation[id] || !req.user.correlation[id].isFriend){
@@ -446,7 +597,8 @@ module.exports = function(passport){
 	});
 
 	router.get('/myuser', isAuthenticated, function(req, res) {
-		res.redirect('/user?_id=' + req.user._id);
+		console.log(req.user.correlation)
+		res.redirect('/user/' + req.user._id);
 	});
 
 	router.post('/add_friend', isAuthenticated, function(req, res){
@@ -510,10 +662,10 @@ module.exports = function(passport){
 				for (var id in req.user.correlation) {
 					if (req.user.correlation.hasOwnProperty(id)) {
 						if (req.user.correlation[id] && req.user.correlation[id].isFriend)
-							user.push({"username" : infosys.usernames[id], "_id": id})
+							user.push({"username" : infosys.usernames[id], "_id": id, action:"Remove"})
 					}
 				}
-				res.render('friendlist', {user: user, message: req.flash("message")})
+				res.render('userlist', {user: user, infosys:infosys, correlation:req.user.correlation, message: req.flash("message")})
 			}
 			else {
 				req.flash('message', "!Infosys does not exist! Contact Admin");
@@ -699,6 +851,46 @@ module.exports = function(passport){
 			console.log('Suggestions removed')
 		});
 		res.send("Deletado");
+	});
+
+	router.get('/r', function(req, res){
+		User.remove({}, function(err) { 
+			console.log('Users removed')
+		});
+		Suggestion.remove({}, function(err) { 
+			console.log('Suggestions removed')
+		});
+		Infosys.remove({}, function(err) { 
+			console.log('Infosys removed')
+			var newInfosys = new Infosys();
+			newInfosys.usernames = {};
+			newInfosys.categories = ["Film", "Music"];
+			newInfosys.types = {
+				"IMDb" : {
+					fontAwesome: "fab fa-imdb",
+					color: {color: "goldenrod"},
+					size: {"font-size": "35px"},
+					category: "Film"
+				},
+				"YouTube" : {
+					fontAwesome: "fab fa-youtube",
+					color: {color: "red"},
+					size: {"font-size": "35px"},
+					category: "Music"
+				},
+				"Spotify" : {
+					fontAwesome: "fab fa-spotify",
+					color: {color: "green"},
+					size: {"font-size": "35px"},
+					category: "Music"
+				},
+			}
+
+			newInfosys.save(function (err) {
+				if (err) return handleError(err,req,res);
+				res.redirect("/");
+			});
+		});
 	});
 
 	return router;
