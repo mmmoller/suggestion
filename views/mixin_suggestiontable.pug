@@ -1,0 +1,69 @@
+mixin Suggestiontable(isUser, suggestion, infosys, user, ownId, bookmark)
+    
+    include include_datatable.pug
+
+    include mixin_ratingtocolor.pug
+
+    include mixin_rating.pug
+
+    include mixin_reviewsuggestionform.pug
+
+    script.
+        $(document).ready(function() {
+            $('#suggestiontable').DataTable( {
+                "language": {
+                "emptyTable": "No suggestions"
+                },
+                "ordering": true,
+                "order": [[2, "desc"]],
+                "paging": false,
+                "info": false,
+            });
+        });
+    
+    .default-table-wrapper(style="max-height:60vh")
+        table#suggestiontable.default-table.compact.row-border
+            thead
+                tr
+                    th Name
+                    th Link
+                    if (isUser)
+                        th #{user.name} Rating
+                        th #{user.name} Comment
+                    else
+                        th Friends
+                        th All Users
+                    th Your Rating
+                    //th Your Comment
+                    th Review
+                    th Action
+            tbody
+                - for(var i = 0; i < suggestion.length; i++){
+                    tr
+                        td
+                            a(href='/suggestion/'+ suggestion[i]._id, id="name"+i) #{suggestion[i].name}
+                        td
+                            -for (var key in suggestion[i].link) {
+                                if (suggestion[i].link.hasOwnProperty(key))
+                                    a(href=suggestion[i].link[key], target="_blank", style=infosys.types[key].color).margin
+                                        span(class=infosys.types[key].fontAwesome, style=infosys.types[key].size)
+                                        | #{""}
+                            -}
+                        if (isUser)
+                            if (suggestion[i].userRating[user._id])
+                                td(data-sort=suggestion[i].userRating[user._id])
+                                    +RatingToColor(suggestion[i].userRating[user._id])
+                            else
+                                td(data-sort="#")
+                                    | #
+                            td
+                                | #{suggestion[i].userComment[user._id]}
+                        else
+                            
+                            
+                            +Rating(true, suggestion[i], user)
+                             
+                            +Rating(false, suggestion[i], user)
+                        
+                        +ReviewSuggestion(suggestion[i], i, ownId, bookmark)
+                -}

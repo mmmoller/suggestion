@@ -1,0 +1,14 @@
+mixin Dontshow(suggestionId, i)
+    
+    button.btn.fas.fa-times(value=i, onclick="ActionDontshow(this)")
+
+script.
+    function ActionDontshow(index){
+        var target_id = document.getElementById("suggestionid"+index.value);        
+        $.post("/action_dontshow",{target_id:target_id.value}, function(data){
+
+            if (data.option != ""){
+                $(index).parents("tr").fadeOut(200);
+            }
+        });
+    }

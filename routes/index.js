@@ -11,8 +11,19 @@ var Teste = require('../models/teste');
 
 module.exports = function(passport){
 
-
 	// /TESTE
+	router.get('/a', function(req, res) {
+
+		var a = {"banana" : {}, "teste": {"arara": 10}}
+		console.log(a.banana)
+		console.log(a)
+		if (!Object.keys(a.banana).length)
+			delete a.banana
+		console.log(a)
+
+		res.send(a)
+	});
+
 	router.get('/teste', function(req, res) {
 		res.render("teste", {data : "dataassa"})
 	});
@@ -23,14 +34,10 @@ module.exports = function(passport){
 		res.send(user);
 	});
 
-	router.post('/teste2/:token', function(req, res) {
-		console.log(req.params.token)
-		console.log(req.query.tata)
+	router.post('/teste_post', function(req, res) {
 		console.log(req.body.t1)
-		console.log(req.params.t1)
-		console.log(req.query.t1)
-		var user = {id:"10", name:"treco", body: req.body.t1, params: req.params.token}
-		res.send({user, message: "batata"});
+		//var user = {id:"10", name:"treco", body: req.body.t1, params: req.params.token}
+		res.send({t1: req.body.t1, message: "batata"});
 	});
 
 	//#region INDEX/ACCOUNT
@@ -210,7 +217,11 @@ module.exports = function(passport){
 				if (err) return handleError(err,req,res);
 				for (var i = 0; i < users.length; i++){
 					delete users[i].correlation[req.user._id];
+					var indexOf = users[i].friendlist.indexOf(String(req.user._id));
+					if (indexOf > -1) users[i].friendlist.splice(indexOf, 1)
+					// TODO Test deleting friend from friendlist
 					users[i].markModified("correlation");
+					users[i].markModified("friendlist");
 					users[i].save(function (err) {
 						if (err) return handleError(err,req,res);
 					});
@@ -226,11 +237,18 @@ module.exports = function(passport){
 						});
 					}
 
-					Suggestion.find({["grades." + req.user._id] : {$exists: true} }, function(err, suggestions){
+					var query = {$or : [
+						{["userRating."+ req.user._id] : {$exists: true}},
+						{["userComment."+ req.user._id] : {$exists: true}},
+					]}
+
+					Suggestion.find(query, function(err, suggestions){
 						if (err) return handleError(err,req,res);
 						for (var i = 0; i < suggestions.length; i++){
-							delete suggestions[i].userinfo[req.user._id];
-							suggestions[i].markModified("userinfo");
+							delete suggestions[i].userRating[req.user._id];
+							delete suggestions[i].userComment[req.user._id];
+							suggestions[i].markModified("userRating");
+							suggestions[i].markModified("userComment");
 							suggestions[i].save(function (err) {
 								if (err) return handleError(err,req,res);
 							});
@@ -269,15 +287,16 @@ module.exports = function(passport){
 	//#region SUGGESTION
 	router.get('/suggestionlist', isAuthenticated, function(req,res){
 
-		var query = {["userinfo." + req.user._id] : {$exists: false}}
-		var adress = "/suggestionlist"
+		var query = {$and: [
+			{ ["userRating." + req.user._id] : {$exists: false} },
+			{"_id" : {$nin: req.user.dontshow}}
+		]}
 
 		if (req.query["search_name"]){
 			query = {$or: [
 				{'name': {'$regex': req.query["search_name"], "$options": "i"}},
 				{'tag': {'$regex': req.query["search_name"], "$options": "i"}}
 			]}
-			adress = '/suggestionlist?search_name=' + req.query["search_name"];
 		}
 		if (req.query["search_name"] == ""){
 			query = {}
@@ -290,16 +309,16 @@ module.exports = function(passport){
 				Infosys.findOne({}, function (err, infosys){
 					if (err) return handleError(err,req,res);
 					if (infosys){
-						// Usar grades e coeficientes
+						// Usar ratings e coeficientes
 
 						//console.log(req.user.correlation);
 						//console.log(suggestion)
 
-						console.log(infosys)
+						//console.log(infosys)
 
-						var user = {"_id": req.user._id, "correlation": req.user.correlation}
+						var user = {"_id": req.user._id, "correlation": req.user.correlation, "friendlist": req.user.friendlist}
 						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
-							 message: req.flash("message"), adress: adress, user: user});
+							 message: req.flash("message"), bookmark: req.user.bookmark, user: user});
 					}
 					else{
 						req.flash('message', "!Infosys don't exist");
@@ -328,10 +347,11 @@ module.exports = function(passport){
 				Infosys.findOne({}, function (err, infosys){
 					if (err) return handleError(err,req,res);
 					if (infosys){
-						// Usar grades e coeficientes
+
+						var user = {"_id": req.user._id, "correlation": req.user.correlation, "friendlist": req.user.friendlist}
 
 						res.render('suggestion', {suggestion: suggestion, infosys: infosys,
-							message: req.flash("message"), adress: adress})
+							message: req.flash("message"), user: user})
 					}
 					else{
 						req.flash('message', "!Infosys don't exist");
@@ -355,21 +375,19 @@ module.exports = function(passport){
 
 				var name = req.body["name"];
 				var category = infosys.types[req.body["type"]].category;
-				var adress = '/suggestionlist';
-				if (req.body["adress"])
-					adress = req.body["adress"]
 
 				Suggestion.findOne({$and: [{name: name}, {category: category}]}, function (err, suggestion){
 					if (err) return handleError(err,req,res);
 					if (suggestion){
 						req.flash('message', "!Suggestion already exists");
-						res.redirect('/account');
+						res.send({success:false, message:req.flash("message")});
 					}
 					else{
 						var newSuggestion = new Suggestion();
 						newSuggestion.name = name;
-						newSuggestion.category = category
-						newSuggestion.userinfo[req.user._id] = {"grade": req.body["grade"], "comment": req.body["comment"]}
+						newSuggestion.category = category;
+						newSuggestion.userRating[req.user._id] = req.body["rating"];
+						//newSuggestion.userComment[req.user._id] = req.body["comment"]
 						newSuggestion.link[req.body["type"]] = req.body["url"];
 
 						console.log(newSuggestion);
@@ -378,76 +396,129 @@ module.exports = function(passport){
 							if (err) return handleError(err,req,res);
 						});
 
-						req.flash('message', "Suggestion sucessfully created");
-						res.redirect(adress);
+						req.flash('message', "Suggestion successfully created");
+						res.send({success:true, message:req.flash("message")});
 					}
 				});
 		
 			}	
 			else{
 				req.flash('message', "!Infosys don't exist");
-				res.redirect('/account');
+				res.send({success:false, message:req.flash("message")});
 			}
 		});
 	});
 
 	router.post('/review_suggestion', isAuthenticated, function(req, res) {
+
+		console.log("Suggestion ID: " + req.body.target_id)
+		console.log("Rating: " + req.body.rating)
+
 		Suggestion.findOne({_id: req.body["target_id"]}, function (err, suggestion){
 			if (err) return handleError(err,req,res);
 			if (suggestion){
 
-				var id_array = [];
+				var usersRatedIds = [];
 
-				for (var id in suggestion.userinfo) {
-					if (suggestion.userinfo.hasOwnProperty(id)) {
-						id_array.push(id);
+				for (var id in suggestion.userRating) {
+					if (suggestion.userRating.hasOwnProperty(id)) {
+						usersRatedIds.push(id);
 					}
 				}
 
-				var old_grade = undefined;
-				console.log("my id: " + req.user_id);
-				console.log(id_array)
-				if (suggestion.userinfo[req.user._id]){
-					old_grade = suggestion.userinfo[req.user._id].grade
-					id_array.splice(id_array.indexOf(req.user_id, 1));
+				var oldRating = "";
+				console.log("my id: " + req.user._id);
+				console.log(usersRatedIds)
+
+				if (suggestion.userRating[req.user._id]){
+					oldRating = suggestion.userRating[req.user._id]
+					usersRatedIds.splice(usersRatedIds.indexOf(String(req.user._id)), 1);
 				}
-				console.log(id_array)
 
-				// Tomar cuidado para não puxar eu mesmo (caso eu já tenho dado review antes,
-				// preciso me tirar desse id_array)
+				console.log(usersRatedIds)
 
-				User.find({_id : {$in : id_array}}, function(err, user){
+				User.find({_id : {$in : usersRatedIds}}, function(err, user){
 					if (err) return handleError(err,req,res);
+					console.log(user)
 					for (var i = 0; i < user.length; i++){
 
-						if (!user[i].correlation[req.user._id])
-							user[i].correlation[req.user._id] = {};
-						if (!user[i].correlation[req.user._id][suggestion.category])
-							user[i].correlation[req.user._id][suggestion.category] = {"gradeSum": 0, "gradeCount": 0};
-						if (!req.user.correlation[user[i]._id])
-							req.user.correlation[user[i]._id] = {};
-						if (!req.user.correlation[user[i]._id][suggestion.category])
-							req.user.correlation[user[i]._id][suggestion.category] = {"gradeSum": 0, "gradeCount": 0};
+						if (req.body.rating == ""){
 
-						user[i].correlation[req.user._id][suggestion.category].gradeSum
-							+= Number(10 - Math.abs(req.body["grade"] - suggestion.userinfo[user[i]._id].grade));
-						
-						req.user.correlation[user[i]._id][suggestion.category].gradeSum
-							+= Number(10 - Math.abs(req.body["grade"] - suggestion.userinfo[user[i]._id].grade));
+							if (oldRating != ""){
+								req.user.correlation[user[i]._id][suggestion.category].ratingSum
+									-= Number(10 - Math.abs(suggestion.userRating[req.user._id] - suggestion.userRating[user[i]._id]))
+							}
 
+							req.user.correlation[user[i]._id][suggestion.category].ratingCount -= 1;
 
-						if (old_grade != undefined){
-							user[i].correlation[req.user._id][suggestion.category].gradeSum 
-								-= Number(10 - Math.abs(suggestion.userinfo[req.user._id].grade - suggestion.userinfo[user[i]._id].grade))
-							
-							req.user.correlation[user[i]._id][suggestion.category].gradeSum
-								-= Number(10 - Math.abs(suggestion.userinfo[req.user._id].grade - suggestion.userinfo[user[i]._id].grade))
 						}
 						else {
-							user[i].correlation[req.user._id][suggestion.category].gradeCount += 1;
+							if (!req.user.correlation[user[i]._id]){
+								req.user.correlation[user[i]._id] = {};
+							}
 
-							req.user.correlation[user[i]._id][suggestion.category].gradeCount += 1;
+							if (!req.user.correlation[user[i]._id][suggestion.category]){
+								req.user.correlation[user[i]._id][suggestion.category] = {"ratingSum": 0, "ratingCount": 0};
+							}
+
+							req.user.correlation[user[i]._id][suggestion.category].ratingSum
+								+= Number(10 - Math.abs(req.body["rating"] - suggestion.userRating[user[i]._id]));
+
+							if (oldRating != ""){
+								req.user.correlation[user[i]._id][suggestion.category].ratingSum
+									-= Number(10 - Math.abs(suggestion.userRating[req.user._id] - suggestion.userRating[user[i]._id]))
+							} else {
+								req.user.correlation[user[i]._id][suggestion.category].ratingCount += 1;
+							}
+
+							/*
+							if (!user[i].correlation[req.user._id])
+								user[i].correlation[req.user._id] = {};
+
+							if (!user[i].correlation[req.user._id][suggestion.category])
+								user[i].correlation[req.user._id][suggestion.category] = {"ratingSum": 0, "ratingCount": 0};
+
+							if (!req.user.correlation[user[i]._id])
+								req.user.correlation[user[i]._id] = {};
+
+							if (!req.user.correlation[user[i]._id][suggestion.category])
+								req.user.correlation[user[i]._id][suggestion.category] = {"ratingSum": 0, "ratingCount": 0};
+
+							user[i].correlation[req.user._id][suggestion.category].ratingSum
+								+= Number(10 - Math.abs(req.body["rating"] - suggestion.userRating[user[i]._id]));
+							
+							req.user.correlation[user[i]._id][suggestion.category].ratingSum
+								+= Number(10 - Math.abs(req.body["rating"] - suggestion.userRating[user[i]._id]));
+
+
+							if (oldRating != ""){
+
+								user[i].correlation[req.user._id][suggestion.category].ratingSum 
+									-= Number(10 - Math.abs(suggestion.userRating[req.user._id] - suggestion.userRating[user[i]._id]))
+								
+								req.user.correlation[user[i]._id][suggestion.category].ratingSum
+									-= Number(10 - Math.abs(suggestion.userRating[req.user._id] - suggestion.userRating[user[i]._id]))
+							}
+
+							else {
+								user[i].correlation[req.user._id][suggestion.category].ratingCount += 1;
+
+								req.user.correlation[user[i]._id][suggestion.category].ratingCount += 1;
+							}*/
 						}
+
+						if (req.user.correlation[user[i]._id][suggestion.category].ratingCount == 0){
+							delete req.user.correlation[user[i]._id][suggestion.category];
+							delete user[i].correlation[req.user._id][suggestion.category];
+							if (!Object.keys(req.user.correlation[user[i]._id]).length){
+								delete req.user.correlation[user[i]._id]
+								delete user[i].correlation[req.user._id]
+							}
+							
+						} else {
+							user[i].correlation[req.user._id] = req.user.correlation[user[i]._id];
+						}
+
 						user[i].markModified("correlation");
 						user[i].save(function (err) {
 							if (err) return handleError(err,req,res);
@@ -459,30 +530,130 @@ module.exports = function(passport){
 						if (err) return handleError(err,req,res);
 					});
 
-					suggestion.userinfo[req.user._id] = {"grade": req.body["grade"], "comment": req.body["comment"]}
-					suggestion.markModified("userinfo");
+					if (req.body["rating"] == "")
+						delete suggestion.userRating[req.user._id]
+					else
+						suggestion.userRating[req.user._id] = req.body["rating"]
+
+					suggestion.markModified("userRating");
 					suggestion.save(function (err) {
 						if (err) return handleError(err,req,res);
 					});
 
-					var adress = '/suggestionlist';
-					if (req.body["adress"])
-						adress = req.body["adress"]
-
-					req.flash('message', "Suggestion sucessfully reviewed");
-					res.redirect(adress);
-
-
+					
 				});
 
-				
+				req.flash('message', "Suggestion sucessfully reviewed");
+				res.send({success: true, message:req.flash("message")})
 				
 			}
 			else{
 				req.flash('message', "!Suggestion doesn't exist");
+				res.send({success: false, message:req.flash("message")})
+				//res.redirect('/account');
+			}
+		});
+	});
+
+	router.get('/bookmarklist', isAuthenticated, function(req,res){
+		Suggestion.find({_id : {$in : req.user.bookmark}}, function (err, suggestion){
+			if (err) return handleError(err,req,res);
+			if (suggestion){
+				
+				Infosys.findOne({}, function (err, infosys){
+					if (err) return handleError(err,req,res);
+					if (infosys){
+
+						var user = {"_id": req.user._id, "correlation": req.user.correlation, "friendlist": req.user.friendlist}
+						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
+								message: req.flash("message"), bookmark: req.user.bookmark, user: user});
+					}
+					else{
+						req.flash('message', "!Infosys don't exist");
+						res.redirect('/account');
+					}
+				});
+			}
+			else{
+				req.flash('message', "!Suggestion don't exist");
 				res.redirect('/account');
 			}
 		});
+	});
+
+	router.post('/action_bookmark', isAuthenticated, function(req, res) {
+
+		var target_id = req.body["target_id"];
+
+		var option;
+
+		if (req.user.bookmark.indexOf(String(target_id)) == -1){
+			req.user.bookmark.push(target_id);
+			option = "fas"
+		}
+		else{
+			req.user.bookmark.splice(req.user.bookmark.indexOf(String(target_id)), 1)
+			option = "far"
+		}
+
+		req.user.markModified("bookmark")
+		req.user.save(function (err) {
+			if (err) return handleError(err,req,res);
+			res.send({option: option})
+		});
+
+	});
+
+	router.get('/dontshowlist', isAuthenticated, function(req,res){
+		console.log(req.user)
+		Suggestion.find({_id : {$in : req.user.dontshow}}, function (err, suggestion){
+			if (err) return handleError(err,req,res);
+			if (suggestion){
+				
+				Infosys.findOne({}, function (err, infosys){
+					if (err) return handleError(err,req,res);
+					if (infosys){
+
+						var user = {"_id": req.user._id, "correlation": req.user.correlation, "friendlist": req.user.friendlist}
+						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
+								message: req.flash("message"), bookmark: req.user.bookmark, user: user});
+					}
+					else{
+						req.flash('message', "!Infosys don't exist");
+						res.redirect('/account');
+					}
+				});
+			}
+			else{
+				req.flash('message', "!Suggestion don't exist");
+				res.redirect('/account');
+			}
+		});
+	});
+
+	router.post('/action_dontshow', isAuthenticated, function(req, res) {
+
+		var target_id = req.body["target_id"];
+
+		var option;
+
+		if (req.user.dontshow.indexOf(String(target_id)) == -1){
+			req.user.dontshow.push(target_id);
+			option = "fas fa-times"
+		}
+		else if (req.user.dontshow.indexOf(String(target_id)) > -1){
+			req.user.dontshow.splice(req.user.dontshow.indexOf(String(target_id)), 1)
+			option = "fas fa-plus"
+		}
+		else
+			option = ""
+
+		req.user.markModified("dontshow")
+		req.user.save(function (err) {
+			if (err) return handleError(err,req,res);
+			res.send({option: option})
+		});
+
 	});
 
 	// not implemented yet. to edit url
@@ -491,9 +662,6 @@ module.exports = function(passport){
 			if (err) return handleError(err,req,res);
 			if (suggestion){
 
-				var adress = '/suggestionlist';
-				if (req.body["adress"])
-					adress = req.body["adress"]
 
 				req.flash('message', "Suggestion sucessfully reviewed");
 				res.redirect(adress);
@@ -509,54 +677,15 @@ module.exports = function(passport){
 	//#endregion
 
 	//#region USER
-	router.get('/userlist', isAuthenticated, function(req, res) {
-		var name = req.query["search_name"];
-		User.find({$or: [
-			{'username': {'$regex': name, "$options": "i"}},
-			{'local.email': {'$regex': name, "$options": "i"}},
-			{'google.email': {'$regex': name, "$options": "i"}}
-		] }, function(err, users) {
-			if (err) return handleError(err,req,res);
-			if (users){
-				var user = [];
-				var user_name;
-				var user_button;
-				
-				for (var i = 0; i < users.length; i++){
-					if (String(users[i]._id) != String(req.user._id)){
-						user_name = users[i].username;
-						if (req.user.correlation[users[i]._id]){
-							if (req.user.correlation[users[i]._id].isFriend){
-								user_button = "Remove";
-							}
-							else{
-								user_button = "Add";
-							}
-						}
-						else {
-							user_button = "Add";
-						}
-						user.push({"username": user_name, "button": user_button, "_id": users[i].id})
-					}
-					
-				}
-				res.render('userlist', {user: user, message: req.flash("message"), adress: name})
-			}
-			else{
-				req.flash('message', "!No users found.");
-				res.redirect('/account');
-			}
-		});
-	});
-
+	
 	router.get('/user/:_id', isAuthenticated, function(req, res) {
 
 		
 		var id = req.params["_id"];
 
-		var option = "Remove";
-		if (!req.user.correlation[id] || !req.user.correlation[id].isFriend){
-			option = "Add";
+		var option = "Add";
+		if (req.user.friendlist.indexOf(id) > -1){
+			option = "Remove";
 		}
 
 
@@ -570,7 +699,7 @@ module.exports = function(passport){
 			if (err) return handleError(err,req,res);
 			if (infosys){
 
-				Suggestion.find({["userinfo." + id] : {$exists: true} }, function(err, suggestion){
+				Suggestion.find({["userRating." + id] : {$exists: true} }, function(err, suggestion){
 					if (err) return handleError(err,req,res);
 					if (suggestion){
 
@@ -579,7 +708,7 @@ module.exports = function(passport){
 							correlation = req.user.correlation[id];
 						var user = {_id : id, name: infosys.usernames[id], correlation: correlation}
 						console.log(user);
-						res.render('user', {user: user, option: option,
+						res.render('user', {user: user, option: option, ownId: req.user._id, bookmark: req.user.bookmark,
 							 suggestion: suggestion, infosys: infosys, message: req.flash("message")});
 
 					}
@@ -601,56 +730,51 @@ module.exports = function(passport){
 		res.redirect('/user/' + req.user._id);
 	});
 
-	router.post('/add_friend', isAuthenticated, function(req, res){
+	router.get('/userlist', isAuthenticated, function(req, res) {
+		var name = req.query["search_name"];
+		User.find({$or: [
+			{'username': {'$regex': name, "$options": "i"}},
+			{'local.email': {'$regex': name, "$options": "i"}},
+			{'google.email': {'$regex': name, "$options": "i"}}
+		] }, function(err, users) {
+			if (err) return handleError(err,req,res);
+			if (users){
+				var user = [];
+				var user_name;
+				var user_button;
+				
+				for (var i = 0; i < users.length; i++){
+					if (String(users[i]._id) != String(req.user._id)){
+						user_name = users[i].username;
+						if (req.user.friendlist.indexOf(users[i]._id) > -1){
+							user_button = "Remove";
+						}
+						else {
+							user_button = "Add";
+						}
+						user.push({"username": user_name, "action": user_button, "_id": users[i].id})
+					}
+					
+				}
 
-		var target_id = req.body["target_id"];
-		if (!req.user.correlation[target_id]){
-			req.user.correlation[target_id] = {};
-		}
-		
-		if (!req.user.correlation[target_id].isFriend){
-			req.user.correlation[target_id].isFriend = true;
-			req.user.markModified("correlation");
-			req.user.save(function (err) {
-				if (err) return handleError(err,req,res);
-			});
-			req.flash('message', "User added sucessfully.");
-			
-		}
-		else{
-			req.flash('message', "!User is aleady added.");
-		}
+				Infosys.findOne({}, function(err, infosys){
+					if (err) return handleError(err,req,res);
+					if (infosys){
 
-		var adress = '/friendlist';
-		if (req.body["adress"])
-			adress = req.body["adress"]
+						res.render('userlist', {user: user, infosys:infosys, correlation:req.user.correlation, message: req.flash("message")})
+					}
+					else {
+						req.flash('message', "!Infosys does not exist! Contact Admin");
+						res.redirect("/account")
+					}
+				});
 
-		res.redirect(adress)
-
-	});
-
-	router.post('/remove_friend', isAuthenticated, function(req, res){
-
-		var target_id = req.body["target_id"];
-		if (req.user.correlation[target_id] && req.user.correlation[target_id].isFriend){
-			req.user.correlation[target_id].isFriend = false;
-			req.user.markModified("correlation");
-			req.user.save(function (err) {
-				if (err) return handleError(err,req,res);
-			});
-			req.flash('message', "User removed sucessfully.");
-			
-		}
-		else{
-			req.flash('message', "!User is not related.");
-		}
-
-		var adress = '/friendlist';
-		if (req.body["adress"])
-			adress = req.body["adress"]
-
-		res.redirect(adress)
-
+			}
+			else{
+				req.flash('message', "!No users found.");
+				res.redirect('/account');
+			}
+		});
 	});
 
 	router.get('/friendlist', isAuthenticated, function(req, res){
@@ -659,11 +783,9 @@ module.exports = function(passport){
 		Infosys.findOne({}, function(err, infosys){
 			if (err) return handleError(err,req,res);
 			if (infosys){
-				for (var id in req.user.correlation) {
-					if (req.user.correlation.hasOwnProperty(id)) {
-						if (req.user.correlation[id] && req.user.correlation[id].isFriend)
-							user.push({"username" : infosys.usernames[id], "_id": id, action:"Remove"})
-					}
+				for (var i = 0; i < req.user.friendlist.length; i++) {
+					var id = req.user.friendlist[i]
+					user.push({"username" : infosys.usernames[id], "_id": id, action:"Remove"})
 				}
 				res.render('userlist', {user: user, infosys:infosys, correlation:req.user.correlation, message: req.flash("message")})
 			}
@@ -672,6 +794,31 @@ module.exports = function(passport){
 				res.redirect("/account")
 			}
 		});
+
+	});
+
+	router.post('/action_friend', isAuthenticated, function(req, res){
+
+		var target_id = req.body["target_id"];
+		var option;
+
+		if (req.user.friendlist.indexOf(target_id) == -1){
+			req.user.friendlist.push(target_id)
+			option = "fa-user-minus"
+			req.flash('message', "User added sucessfully.");
+		}
+		else{
+			req.user.friendlist.splice(req.user.friendlist.indexOf(target_id), 1)
+			option = "fa-user-plus"
+			req.flash('message', "User removed sucessfully.");
+		}
+
+		req.user.markModified("friendlist");
+		req.user.save(function (err) {
+			if (err) return handleError(err,req,res);
+		});
+
+		res.send({message: req.flash("message"), option: option})
 
 	});
 	//#endregion
@@ -909,6 +1056,10 @@ function isAuthenticated(req, res, next) {
         return next();
 
     res.redirect('/');
+}
+
+function Title(title){
+	return title + " - GetSuggestion";
 }
 
 

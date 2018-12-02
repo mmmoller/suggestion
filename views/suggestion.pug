@@ -1,0 +1,66 @@
+extends layout_in
+
+block content
+
+    include mixin_rating.pug
+    include include_datatable.pug
+    include mixin_actionfriend.pug
+
+    include function_calcCoeficient.pug
+
+    .default-wrapper
+        h1 #{suggestion.name}
+
+        
+        | Friends: 
+        +Rating(true, suggestion, user)
+        br
+        | All users: 
+        +Rating(false, suggestion, user)
+
+    
+    script.
+        $(document).ready(function() {
+            $('#usertable').DataTable( {
+                "language": {
+                "emptyTable": "No users"
+                },
+                "ordering": true,
+                "paging": false,
+            });
+        });
+
+    .default-table-wrapper(style="max-height:100vh")
+        table#usertable.default-table.compact.row-border
+            thead
+                tr
+                    th Name
+                    th Alias
+                    th Rating
+                    - for (var i = 0; i < infosys.categories.length; i++)
+                        th #{infosys.categories[i]} Coeficient
+                    th Action
+            tbody
+                - for (var id in suggestion.userRating){
+                    if (suggestion.userRating.hasOwnProperty(id))
+                        tr
+                            td
+                                a(href='/user/'+ id, id="username"+i) #{infosys.usernames[id]}
+                            td
+                                | Alias
+                            td
+                                | #{suggestion.userRating[id]}
+                            - for (var j = 0; j < infosys.categories.length; j++)
+                                td
+                                    if ((user.correlation[id]) && (user.correlation[id][infosys.categories[j]]))
+                                        //| #{Number((user.correlation[id][infosys.categories[j]].ratingSum)/(user.correlation[id][infosys.categories[j]].ratingCount))}
+                                        //+Coeficient(user.correlation[id], infosys.categories[j], undefined, undefined)
+                                        | #{CalcCoeficient(user.correlation[id][infosys.categories[j]])}
+                                    else
+                                        | #
+                            td
+                                - var action = (user.friendlist.indexOf(id) > -1) ? "Remove" : "Add"
+                                
+                                if (String(id) != String(user._id))
+                                    +ActionFriend(i, id, action)
+                -}

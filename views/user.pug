@@ -1,55 +1,22 @@
 extends layout_in
 
 block content
+    
     .default-wrapper
         h1 #{user.name}
         if (option != "")
             -for (var key in user.correlation) {
-                if (user.correlation.hasOwnProperty(key) && key != 'isFriend')
+                if (user.correlation.hasOwnProperty(key))
                     .form-inline
                         span #{key}
-                        span(style="margin-left: auto") Sum: #{user.correlation[key].gradeSum}
-                        span(style="margin-left: auto") Count: #{user.correlation[key].gradeCount}
+                        span(style="margin-left: auto") Sum: #{user.correlation[key].ratingSum}
+                        span(style="margin-left: auto") Count: #{user.correlation[key].ratingCount}
             -}
-            form.form-inline(action="/" + option + "_friend", method="post")
-                input(type='hidden', name='target_id', value=user._id)
-                input(type='hidden', name='adress', value='/user/' + user._id)
-                button.btn.btn-primary(type="submit", style="margin: auto") #{option} friend
-    .default-table-wrapper
-        table.default-table
-            thead
-                tr
-                    th Name
-                    th Link
-                    th #{user.name} Grade
-                    th #{user.name} Comment
-                    th Rating
-                    th Comment
-                    th Review
-            tbody
-                - for(var i = 0; i < suggestion.length; i++){
-                    tr
-                        form.form-inline(action="/review_suggestion", method="post")
-                            td
-                                | #{suggestion[i].name}
-                            td
-                                -for (var key in suggestion[i].link) {
-                                    if (suggestion[i].link.hasOwnProperty(key))
-                                        a(href=suggestion[i].link[key], target="_blank", style=infosys.types[key].color).margin
-                                            span(class=infosys.types[key].fontAwesome, style=infosys.types[key].size)
-                                            | #{""}
-                                -}
-                            td
-                                | #{suggestion[i].userinfo[user._id].grade}
-                            td
-                                | #{suggestion[i].userinfo[user._id].comment}
+            br
 
-                            input(type='hidden', name='target_id', value=suggestion[i]._id)
-                            input(type='hidden', name='adress', value='/user/' + user._id)
-                            td
-                                input.form-control.margin(type='number', name='grade', min="0", max = "10", step="0.1", placeholder="Rating", required)
-                            td
-                                input.form-control.margin(type='text', name='comment', placeholder= "Your commentary about this stuff")
-                            td
-                                button.btn.btn-primary.margin(type="submit", style="margin-left: auto") Send review
-                -}
+            include mixin_actionfriend.pug
+            +ActionFriend(0, user._id, option)
+
+    include mixin_suggestiontable.pug
+    +Suggestiontable(true, suggestion, infosys, user, ownId, bookmark)
+    

@@ -3,57 +3,55 @@ html
 	head
 		title= title
 
-		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
-		//<script  src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="crossorigin="anonymous"></script>
-		
-		script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js")
-		link(rel='stylesheet', href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css")
-		
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+		include include_import.pug
 
-		link(rel='stylesheet', href='/stylesheets/style.css')
-	.menu-bar.form-inline(style="overflow: visible")
-		a(href="/friendlist", class="btn btn-outline-primary").margin
-			| #{""} Friends
-		a(href="/suggestionlist", class="btn btn-outline-primary", style="margin-left: 20px").margin
-			| #{""} Suggestions
-		form(action='/suggestionlist', method='get', style="margin-left: auto").margin
-			.input-group
-				input.form-control(type='text', name='search_name', placeholder='Search Suggestion')
-				.input-group-append
-					button(type="submit" class="btn btn-outline-primary")
-						span.fas.fa-search
-						| #{""}
-		form(action='/userlist', method='get', style="margin-left: auto").margin
-			.input-group
-				input.form-control(type='text', name='search_name', placeholder='Search User')
-				.input-group-append
-					button(type="submit" class="btn btn-outline-primary")
-						span.fas.fa-search
-						| #{""}
-		.dropdown.margin(style="margin-left: auto")
-			button(type="button", class="btn btn-primary dropdown-toggle", id="dropdownAccount", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") Lists
-			div.dropdown-menu(aria-labelledby="dropdownAccount")
-				a(href="/wishlist", class="dropdown-item")
-					| #{""} Wishlist
-				a(href="/dontshowlist", class="dropdown-item")
-					| #{""} Don't show me again list
-				a(href="/myuser", class="dropdown-item")
-					| #{""} Own suggestion list
-		a(href="/account", class="btn btn-outline-secondary", style="margin-left: auto").margin
-			span.fas.fa-cog
-			| #{""}
-		a(href="/logout", class="btn btn-danger", style="margin-left: auto").margin
-			span.fas.fa-sign-out-alt
-			| #{""}
+		.menu-bar.form-inline(style="overflow: visible")
+			a(href="/friendlist", class="btn btn-outline-primary").margin
+				| #{""} Friends
+			a(href="/suggestionlist", class="btn btn-outline-primary", style="margin-left: 20px").margin
+				| #{""} Suggestions
+			form(action='/suggestionlist', method='get', style="margin-left: auto").margin
+				.input-group
+					input.form-control(type='text', name='search_name', placeholder='Suggestion')
+					.input-group-append
+						button(type="submit" class="btn btn-outline-primary")
+							span.fas.fa-search
+							| #{""}
+			form(action='/userlist', method='get', style="margin-left: auto").margin
+				.input-group
+					input.form-control(type='text', name='search_name', placeholder='User')
+					.input-group-append
+						button(type="submit" class="btn btn-outline-primary")
+							span.fas.fa-search
+							| #{""}
+			//.dropdown.margin(style="margin-left: auto")
+				button(type="button", class="btn btn-primary dropdown-toggle", id="dropdownAccount", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") Lists
+				div.dropdown-menu(aria-labelledby="dropdownAccount")
+					a(href="/wishlist", class="dropdown-item")
+						| #{""} Wishlist
+					a(href="/dontshowlist", class="dropdown-item")
+						| #{""} Don't show me again list
+					a(href="/myuser", class="dropdown-item")
+						| #{""} Own suggestion list
+			a(href="/account", class="btn btn-outline-secondary", style="margin-left: auto").margin
+				span.fas.fa-cog
+				| #{""}
+			a(href="/bookmarklist", style="margin-left: auto").margin
+				span.fas.fa-bookmark
+			a(href="/dontshowlist", style="margin-left: auto").margin
+				span.fas.fa-times
+			a(href="/logout", class="btn btn-danger", style="margin-left: auto").margin
+				span.fas.fa-sign-out-alt
+				| #{""}
 
-	-if ( message != undefined && message.length){
-		.center
+		if (message != undefined && message.length)
 			if ( message.toString().charAt(0) == '!')
-				div.alert.alert-danger #{message.toString().slice(1)}
+				div#message.alert.alert-danger #{message.toString().slice(1)}
 			else
-				div.alert.alert-success #{message}
-	-}
-	block content
+				div#message.alert.alert-success #{message}
+		else
+			div#message
+
+		block content
 
 

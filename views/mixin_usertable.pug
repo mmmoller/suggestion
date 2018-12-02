@@ -1,0 +1,46 @@
+include include_datatable.pug
+include mixin_actionfriend.pug
+
+include function_calcCoeficient.pug
+
+
+mixin Usertable(infosys, user, correlation)
+
+    script.
+        $(document).ready(function() {
+            $('#usertable').DataTable( {
+                "language": {
+                "emptyTable": "No users"
+                },
+                "ordering": true,
+                "paging": false,
+            });
+        });
+
+    .default-table-wrapper
+        table#usertable.default-table
+            thead
+                tr
+                    th Name
+                    th Alias
+                    - for (var i = 0; i < infosys.categories.length; i++)
+                        th #{infosys.categories[i]} Coeficient
+                    th Action
+            tbody
+                - for (var i = 0; i < user.length; i++) 
+                    tr
+                        td
+                            a(href='/user/'+ user[i]._id, id="username"+i) #{user[i].username}
+                        td
+                            | Alias
+                        - for (var j = 0; j < infosys.categories.length; j++)
+                            td
+                                if ((correlation[user[i]._id]) && (correlation[user[i]._id][infosys.categories[j]]))
+                                    //| #{Number((correlation[user[i]._id][infosys.categories[j]].ratingSum)/(correlation[user[i]._id][infosys.categories[j]].ratingCount)).toFixed(2)}
+                                    | #{CalcCoeficient(correlation[user[i]._id][infosys.categories[j]])}
+                                else
+                                    | #
+                        td
+                            
+                            +ActionFriend(i, user[i]._id, user[i].action)
+                

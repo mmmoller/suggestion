@@ -6,11 +6,11 @@ Change User and Suggestion to be Params instead of Query.
 
 --------- TODO ---------
 
-Suggestion datatable and ordering based on coeficients:
-    All users using coeficient.
-    Only friends using coeficient.
+Change all POSTS to AJAX.
 
+Add Restrictions to post.
 
+Start re-use code. (Include, Scripts, etc)
 
 Suggestion rating:
     Show a color instead of a number (From dark green to white to dark red)

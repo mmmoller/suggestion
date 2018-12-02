@@ -7,19 +7,22 @@ var userSchema = mongoose.Schema({
     
     correlation: {type: Object, default: {}},
 
-    /*
-    correlation:{
+    /*correlation:{
         _id : {
-            isFriend : Boolean,
+            //isFriend: Boolean, (OLD, NOT WORKING ANYMORE)
             (forEach Category in Infosys){
                 Category: {
-                    gradeSum : Number
-                    gradeCount : Number
+                    ratingSum : Number
+                    ratingCount : Number
                 }
             }
         }
-    }
-    */
+    }*/
+
+    friendlist: [String],
+
+    bookmark: [String],
+    dontshow: [String],
 
     local            : {
         email        : String,

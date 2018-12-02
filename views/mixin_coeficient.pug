@@ -1,0 +1,8 @@
+mixin Coeficient(correlation, category, defaultCoeficient, coeficient)
+    if (defaultCoeficient == undefined)
+        - defaultCoeficient = 2;
+
+    if (coeficient != undefined)
+        - coeficient = Number( (correlation[category].ratingSum + defaultCoeficient*5) / (correlation[category].ratingCount + 1) )
+    else
+        | #{Number( (correlation[category].ratingSum + defaultCoeficient*5) / (correlation[category].ratingCount + 1) ).toFixed(2)}

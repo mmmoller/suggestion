@@ -1,0 +1,26 @@
+script(src="/scripts/message.js")
+//script(src="/scripts/actionfriend.js")
+
+mixin ActionFriend(index, id, action)
+    input(type='hidden', id="userid"+index, value=id)
+    input(type='hidden', id="adress"+index, value=action)
+    - var option = (action == "Add") ? "fas fa-user-plus" : "fas fa-user-minus";
+    button.btn(class=option, value=index, onclick="ActionFriend(this)")
+    //button.btn.btn-primary(id="btn"+index, value=index, onclick="ActionFriend(this)") #{action}
+
+script.
+    function ActionFriend(index){
+        //var rowIndex = index.parentNode.parentNode.rowIndex;
+        var target_id = document.getElementById("userid"+index.value);
+        //var adress = document.getElementById("adress"+index.value);
+        $.post("/action_friend",{target_id:target_id.value}, function(data){
+            //document.getElementById("datatable").deleteRow(rowIndex);
+            if (data.option == "fa-user-minus")
+                $(index).removeClass("fa-user-plus").addClass("fa-user-minus")
+            else
+                $(index).removeClass("fa-user-minus").addClass("fa-user-plus")
+            //adress.value = (adress.value=="Add") ? "Remove" : "Add"
+            //index.innerHTML = adress.value
+            //Message(data.message)
+        });
+    }   

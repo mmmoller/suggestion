@@ -3,7 +3,7 @@ body {
 	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 	text-align: center;
 	padding-top:0px;
-	background-color:#99CCFF
+	background-color:#99CCFF;
 }
 
 input {
@@ -16,6 +16,24 @@ h1 {
 
 .btn-group+.btn-group{
     margin-left: -5px;
+}
+
+.fa-bookmark{
+	background-color: transparent;
+	color: goldenrod;
+	font-size: 25px
+}
+
+.fa-user-plus, .fa-plus{
+	background-color: transparent;
+	color: blue;
+	font-size: 25px;
+}
+
+.fa-user-minus, .fa-times{
+	background-color: transparent;
+	color:crimson;
+	font-size: 25px;
 }
 
 .body-background {
@@ -62,25 +80,11 @@ h1 {
 	margin-left: auto;
 	border-radius: 5px;
 	width: 95%;
-	height: 100%;
+	height: 10%;
 	padding: 20px 20px 20px 20px;
-	background-color: #f7f7f7;
+	background-color: #e7e9ff;
 	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3); 
 	overflow: auto;
-}
-
-#default-table{
-	width: 100%;
-}
-
-#default-table th, #default-table td{
-	text-align: center;
-	font-size: 12px;
-}
-
-#default-table2 th, #default-table2 td{
-	text-align: center;
-	font-size: 12px;
 }
 
 .default-table{
@@ -91,12 +95,7 @@ h1 {
 	text-align: center;
 	padding: 5px 5px 5px 5px;
 	font-size: 15px;
-}
-
-.default-table2 th, .default-table2 td{
-	text-align: right;
-	padding: 5px 5px 5px 5px;
-	font-size: 15px;
+	background-color: #e7e9ff;
 }
 
 .margin{

@@ -1,72 +1,22 @@
-extends layout_out
+extends layout_in
+
 
 block content
-	//<script  src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="crossorigin="anonymous"></script>
-	//script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css"/>
-	<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
-
-	script.
-		$(document).ready(function() {
-			$('#datatable').DataTable( {
-				"language": {
-					"emptyTable": "No suggestions"
-				},
-				"ordering": true,
-				"paging": false,
-			});
-		});
+	//script(src="/scripts/function.js")
+	include function.pug
+	//- var banana = "10"
+	//- function foo(banana) {
+	//-	if(banana==10){
+	//-	return 5
+	//-}
+	//- else return 11
+	//-}
+	//- banana = foo(banana)
+	- var teste = 10;
+	- teste = foo(teste);
+	p #{teste.toFixed(2)}
 
 
-	h1 Banana
-	p#a Teste
-	p#b TRASA
 
 
-	.default-table-wrapper
-		table#datatable.default-table
-			thead
-				tr
-					th Name
-					th Action
-			tbody
-				tr#row1
-					td "Banana" 1
-					td
-						button#btn.btn.btn-primary(onclick="Func(this)") Haha
-				tr#row2
-					td "Banana" 2
-					td
-						button#btn.btn.btn-primary Haha
-				tr#row3
-					td "Banana" 3
-					td
-						input(type='hidden', id="3", value="teste3213123")
-						button#btn.btn.btn-primary(onclick="Func(this)") Haha
 
-	script.
-		$("#a").click (function(){
-			var batata =10;
-			//console.log(data)
-			console.log("teste")
-			Banana()
-			$.post( '/teste2/abacate?tata=tata', {t1: batata, t2: "teste"}, function(data) {
-				$('#b').html(data.user.name);
-			});
-		})
-
-		function Func(r){
-			var i = r.parentNode.parentNode.rowIndex;
-			var banana = document.getElementById(i).value
-			console.log(banana)
-			$.post('/teste2/abacate', {t1: banana}, function(data){
-				
-				console.log(i)
-				document.getElementById("datatable").deleteRow(i);
-				console.log(data)
-			});
-		}
-
-		var Banana = function(){
-			console.log("abacate");
-		}
