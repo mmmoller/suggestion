@@ -41,6 +41,7 @@ block content
                         th #{infosys.categories[i]} Coeficient
                     th Action
             tbody
+                - var i = 0;
                 - for (var id in suggestion.userRating){
                     if (suggestion.userRating.hasOwnProperty(id))
                         tr
@@ -63,4 +64,5 @@ block content
                                 
                                 if (String(id) != String(user._id))
                                     +ActionFriend(i, id, action)
+                    - i++;
                 -}
