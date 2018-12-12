@@ -20,9 +20,10 @@ var userSchema = mongoose.Schema({
     }*/
 
     friendlist: [String],
-
     bookmark: [String],
     dontshow: [String],
+
+    permission: {type: Number, default: 0}, // 0: normal, 1 moderator, 2 admin
 
     local            : {
         email        : String,

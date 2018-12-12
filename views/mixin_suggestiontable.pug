@@ -1,4 +1,4 @@
-mixin Suggestiontable(isUser, suggestion, infosys, user, ownId, bookmark)
+mixin Suggestiontable(targetUserId, suggestion, infosys, ownUser)
     
     include include_datatable.pug
 
@@ -27,9 +27,9 @@ mixin Suggestiontable(isUser, suggestion, infosys, user, ownId, bookmark)
                 tr
                     th Name
                     th Link
-                    if (isUser)
-                        th #{user.name} Rating
-                        th #{user.name} Comment
+                    if (targetUserId)
+                        th #{infosys.usernames[targetUserId]} Rating
+                        th #{infosys.usernames[targetUserId]} Comment
                     else
                         th Friends
                         th All Users
@@ -41,7 +41,7 @@ mixin Suggestiontable(isUser, suggestion, infosys, user, ownId, bookmark)
                 - for(var i = 0; i < suggestion.length; i++){
                     tr
                         td
-                            a(href='/suggestion/'+ suggestion[i]._id, id="name"+i) #{suggestion[i].name}
+                            a(href='/suggestion/'+ suggestion[i]._id, id="suggestionhref"+i) #{suggestion[i].name}
                         td
                             -for (var key in suggestion[i].link) {
                                 if (suggestion[i].link.hasOwnProperty(key))
@@ -49,21 +49,21 @@ mixin Suggestiontable(isUser, suggestion, infosys, user, ownId, bookmark)
                                         span(class=infosys.types[key].fontAwesome, style=infosys.types[key].size)
                                         | #{""}
                             -}
-                        if (isUser)
-                            if (suggestion[i].userRating[user._id])
-                                td(data-sort=suggestion[i].userRating[user._id])
-                                    +RatingToColor(suggestion[i].userRating[user._id])
+                        if (targetUserId)
+                            if (suggestion[i].userRating[targetUserId])
+                                td(data-sort=suggestion[i].userRating[targetUserId])
+                                    +RatingToColor(suggestion[i].userRating[targetUserId])
                             else
                                 td(data-sort="#")
                                     | #
                             td
-                                | #{suggestion[i].userComment[user._id]}
+                                | #{suggestion[i].userComment[targetUserId]}
                         else
                             
                             
-                            +Rating(true, suggestion[i], user)
+                            +Rating(true, suggestion[i], ownUser)
                              
-                            +Rating(false, suggestion[i], user)
+                            +Rating(false, suggestion[i], ownUser)
                         
-                        +ReviewSuggestion(suggestion[i], i, ownId, bookmark)
+                        +ReviewSuggestion(suggestion[i], i, ownUser._id, ownUser.bookmark)
                 -}

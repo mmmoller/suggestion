@@ -4,7 +4,7 @@ include mixin_actionfriend.pug
 include function_calcCoeficient.pug
 
 
-mixin Usertable(infosys, user, correlation)
+mixin Usertable(suggestion, infosys, usersId, ownUser)
 
     script.
         $(document).ready(function() {
@@ -23,24 +23,27 @@ mixin Usertable(infosys, user, correlation)
                 tr
                     th Name
                     th Alias
+                    if (suggestion)
+                        th Rating
                     - for (var i = 0; i < infosys.categories.length; i++)
                         th #{infosys.categories[i]} Coeficient
                     th Action
             tbody
-                - for (var i = 0; i < user.length; i++) 
+                - for (var i = 0; i < usersId.length; i++)
                     tr
                         td
-                            a(href='/user/'+ user[i]._id, id="username"+i) #{user[i].username}
+                            a(href='/user/'+ usersId[i], id="userhref"+i) #{infosys.usernames[usersId[i]]}
                         td
                             | Alias
+                        if (suggestion)
+                            td
+                                | #{suggestion.userRating[usersId[i]]}
                         - for (var j = 0; j < infosys.categories.length; j++)
                             td
-                                if ((correlation[user[i]._id]) && (correlation[user[i]._id][infosys.categories[j]]))
-                                    //| #{Number((correlation[user[i]._id][infosys.categories[j]].ratingSum)/(correlation[user[i]._id][infosys.categories[j]].ratingCount)).toFixed(2)}
-                                    | #{CalcCoeficient(correlation[user[i]._id][infosys.categories[j]])}
+                                if ((ownUser.correlation[usersId[i]]) && (ownUser.correlation[usersId[i]][infosys.categories[j]]))
+                                    | #{CalcCoeficient(ownUser.correlation[usersId[i]][infosys.categories[j]])}
                                 else
                                     | #
                         td
-                            
-                            +ActionFriend(i, user[i]._id, user[i].action)
+                            +ActionFriend(i, usersId[i], ownUser)
                 

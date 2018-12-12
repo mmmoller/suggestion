@@ -61,9 +61,7 @@ require('./config/passport.js')(passport);
 var initPassport = require('./config/passport.js')(passport);
 initPassport(passport);*/
 
-var functions = require('./config/functions.js');
-
-var routes = require('./routes/index')(passport, functions);
+var routes = require('./routes/index')(passport);
 app.use('/', routes);
 
 /// catch 404 and forward to error handler

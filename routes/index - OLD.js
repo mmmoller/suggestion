@@ -9,16 +9,11 @@ var Infosys = require('../models/infosys');
 var Suggestion = require('../models/suggestion');
 var Teste = require('../models/teste');
 
-
-
-module.exports = function(passport, functions){
-
-	var teste = require('./teste')(passport,functions);
-	router.use('/', teste);
+module.exports = function(passport){
 
 	//#region /TESTE
 	router.get('/a', function(req, res) {
-		res.send(functions.banana())
+		res.render("teste")
 	});
 
 	router.get('/teste', function(req, res) {

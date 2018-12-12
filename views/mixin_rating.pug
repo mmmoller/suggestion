@@ -2,7 +2,7 @@ include mixin_ratingtocolor.pug
 
 include function_calcCoeficient.pug
 
-mixin Rating(friendsOnly, suggestion, user)
+mixin Rating(friendsOnly, suggestion, ownUser)
     - var coeficient = 0;
     - var defaultCoeficient = 2.5;
     - var sum = defaultCoeficient;
@@ -11,19 +11,19 @@ mixin Rating(friendsOnly, suggestion, user)
         if (suggestion.userRating.hasOwnProperty(id))
             //p 
             //p
-            //p OwnID: #{user._id} , ID: #{id}
+            //p OwnID: #{ownUser._id} , ID: #{id}
             //| Name: #{infosys.usernames[id]} , rating: #{suggestion.userRating[id]} , Coeficient:
             - coeficient = 0;
-            if (user.correlation[id] && (friendsOnly && user.friendlist.indexOf(id) > -1 || !friendsOnly) ) 
-                if ( user.correlation[id][suggestion.category] && user.correlation[id][suggestion.category].ratingSum )
-                    //- coeficient = Number((user.correlation[id][suggestion.category].ratingSum + 5) /(user.correlation[id][suggestion.category].ratingCount + 1))
+            if (ownUser.correlation[id] && (friendsOnly && ownUser.friendlist.indexOf(id) > -1 || !friendsOnly) ) 
+                if ( ownUser.correlation[id][suggestion.category] && ownUser.correlation[id][suggestion.category].ratingSum )
+                    //- coeficient = Number((ownUser.correlation[id][suggestion.category].ratingSum + 5) /(ownUser.correlation[id][suggestion.category].ratingCount + 1))
                     //| Normal Coeficient: #{coeficient}
-                    - coeficient = CalcCoeficient(user.correlation[id][suggestion.category])
+                    - coeficient = CalcCoeficient(ownUser.correlation[id][suggestion.category])
                     //| Mixin Coeficient: #{coeficient}
                 else
                     - coeficient = defaultCoeficient;
                     //| #{coeficient}
-            else if (!friendsOnly /*&& user._id != id*/)
+            else if (!friendsOnly /*&& ownUser._id != id*/)
                 - coeficient = defaultCoeficient;
                 //| #{coeficient}
             else

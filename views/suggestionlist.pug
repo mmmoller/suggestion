@@ -5,7 +5,7 @@ block content
     //   h1 Suggestionlist
 
     include mixin_suggestiontable.pug
-    +Suggestiontable(false, suggestion, infosys, user, user._id, bookmark)
+    +Suggestiontable(undefined, suggestion, infosys, ownUser)
 
     include mixin_createsuggestion.pug
     +CreateSuggestion(infosys)
