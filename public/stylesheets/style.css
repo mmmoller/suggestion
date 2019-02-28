@@ -106,6 +106,10 @@ h1 {
 	margin: 3px;
 }
 
+.left{
+	margin-left: auto;
+}
+
 .vertical-bar{
 	border-right: 1px solid rgb(148, 148, 148);
 }
@@ -113,3 +117,5 @@ h1 {
 .horizontal-bar{
 	border-bottom: 1px solid rgb(148, 148, 148);
 }
+
+.selectBox{border-radius:4px;border:1px solid #AAAAAA;}

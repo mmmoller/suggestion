@@ -1,0 +1,122 @@
+include ratingToRGB
+include calcRating
+include calcCoeficient
+
+script.
+    function FillRatingIcon(){
+
+        console.log(window.location)
+
+        // /user -- suggestionTable && menu
+        if (window.location.pathname.includes('/user/')){
+
+            RatingIconUserOnSuggestion()
+
+        }
+
+        // /suggestionList -- suggestionTable
+        else if (window.location.pathname == '/suggestionlist' ||
+        window.location.pathname == '/bookmarklist' ||
+        window.location.pathname == '/dontshowlist'){
+
+            RatingIconFriendsOnly();
+            RatingIconAllUsers();
+
+        }
+
+        // /suggestion -- userTable && menu
+        
+        else if (window.location.pathname.includes('/suggestion/')){
+
+            RatingIconUserOnSuggestion()
+
+            RatingIconSharp();
+            RatingIconUserCorrelation();
+
+            RatingIconFriendsOnly();
+            RatingIconAllUsers();
+        }
+
+        // /userlist -- userTable
+        else if (window.location.pathname == '/userlist' || window.location.pathname == '/friendlist'){
+            
+            RatingIconSharp();
+            RatingIconUserCorrelation();
+
+        }
+    }
+
+    function RatingIconFriendsOnly(){
+        $('[name=ratingIconFriendOnly]').each(function(){
+            var index = this.value
+
+            var ownUser = $(this).parents("table").data("own-user")
+            var suggestion = $(this).parents("tr").data("suggestion")
+
+            var rating = CalcRating(true, suggestion, ownUser)
+
+            $(this).parents("td").data("sort", rating)
+            $(this).css("background-color", RatingToRGB(rating))
+
+            $('#ratingTextFriendOnly'+index).html(rating)
+        });
+    }
+
+    function RatingIconAllUsers(){
+        $('[name=ratingIconAllUsers]').each(function(){
+
+            var index = this.value
+
+            var ownUser = $(this).parents("table").data("own-user")
+            var suggestion = $(this).parents("tr").data("suggestion")
+
+            var rating = CalcRating(false, suggestion, ownUser)
+
+
+            $(this).parents("td").data("sort", rating)
+            $(this).css("background-color", RatingToRGB(rating))
+
+            $('#ratingTextAllUsers'+index).html(rating)
+        });
+    }
+
+    function RatingIconSharp(){
+        $('[name=ratingIconSharp]').each(function(){
+
+            var index = this.value
+
+            var rating = "#"
+
+            $(this).parents("td").data("sort", rating)
+            $(this).css("background-color", RatingToRGB(rating))
+
+            $('#ratingTextSharp'+index).html(rating)
+        });
+    }
+
+    function RatingIconUserCorrelation(){
+        $('[name=ratingIconUserCorrelation]').each(function(){
+            var index = this.value
+
+            var correlation = $(this).parents("td").data("correlation")
+            console.log(correlation)
+            var rating = CalcCoeficient(correlation).toFixed(2);
+            console.log(rating)
+            console.log(Math.pow(Number((25+5)/(2+1)), 2)/10)
+
+            $(this).css("background-color", RatingToRGB(rating))
+            $('#ratingTextUserCorrelation'+index).html(rating)
+        })
+    }
+
+    function RatingIconUserOnSuggestion(){
+        $('[name=ratingIconUserOnSuggestion]').each(function(){
+            var index = this.value
+
+            //SHOULD BE ATTRIBUTE
+            var rating = $(this).parents("td").data("sort")
+            $(this).css("background-color", RatingToRGB(rating))
+
+            $('#ratingTextUserOnSuggestion'+index).html(rating)
+        })
+    }

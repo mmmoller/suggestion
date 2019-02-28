@@ -1,0 +1,22 @@
+extends layout_in
+
+block content
+    
+    .default-wrapper
+        h1 #{infosys.usernames[usersId[0]]}
+        if (ownUser._id != usersId[0])
+            -for (var key in ownUser.correlation[usersId[0]]) {
+                if (ownUser.correlation[usersId[0]].hasOwnProperty(key))
+                    .form-inline
+                        span #{key}
+                        span(style="margin-left: auto") Sum: #{ownUser.correlation[usersId[0]][key].ratingSum}
+                        span(style="margin-left: auto") Count: #{ownUser.correlation[usersId[0]][key].ratingCount}
+            -}
+            br
+
+            include mixin_actionfriend.pug
+            +ActionFriend(0, usersId[0], ownUser)
+
+    include mixin_suggestiontable.pug
+    +Suggestiontable(usersId[0], suggestion, infosys, ownUser)
+    

@@ -1,0 +1,106 @@
+include ../functionScript/message
+include ../functionScript/checkRating
+include ../functionScript/createSuggestion
+
+mixin CreateSuggestion(infosys)
+
+    .default-wrapper#storedData(data-categories=infosys.categories)
+
+        .form-inline.form-group
+            .input-group.form-group
+                .input-group-prepend
+                    .input-group-text Name
+                input.form-control(type='text', id='suggestionName', placeholder= "Suggestion's name", required)
+            input.form-group.form-control.left(type='number', id='rating', min="0",
+             max = "10", step="0.1", placeholder="Rating", onkeyup="CheckRating(this)")
+
+        .form-inline.form-group
+            select.form-control(id="selectCategory", onChange="SelectCategory(this)")
+                option(value="" selected disabled hidden) Category
+                -for(var category in infosys.categories){
+                    option(value=category) #{category}
+                -}
+
+            include ../mixin/addLinkBtn
+            +AddLinkBtn()
+
+        div#LinkDiv
+
+        div#SpecificInfoDiv
+
+        
+
+        button.form-group.btn.btn-primary.btn-block(id="btn", value="", onclick="CreateSuggestion(this)", style="margin-left: auto") Create Suggestion
+
+    // To complete name with the search option
+    script.
+        $(document).ready(function() {
+            if (!window.location.search)
+                $('#storedData').hide()
+            else{
+                $('#suggestionName').val($.urlParam("search_name"))
+            }
+        });
+        $.urlParam = function(name){
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
+            if (results==null) {
+                return null;
+            }
+            return decodeURI(results[1].replace(/[+]/g, " ")) || "";
+        }
+
+    // To add URL link field
+    script.
+        $(document).ready(function() {
+            AddLink();
+        });
+
+
+    // To POST (Create Suggestion)
+    script.
+        function CreateSuggestion(index){
+
+            var name = document.getElementById("suggestionName")
+            if (name.value == ""){
+                alert("Please, insert a Suggestion's Name")
+                return
+            }
+
+            var rating = document.getElementById("rating");
+
+            
+            var category = document.getElementById("selectCategory")
+            if (category.value == ""){
+                alert("Please, insert a Category")
+                return
+            }
+
+            var extraInfo = CreateJSONExtraInfo(category.value)
+
+            var link = urlToLinkJSON("url")
+            
+            $.post("/create_suggestion",{name:name.value, rating:rating.value,
+            category:category.value, link:link, extraInfo:extraInfo}, function(data){
+                
+                if (data.success){
+
+                    name.value = "";
+
+                    category.value = "";
+                    category.text = "Category"
+                    
+                    var addLinkDiv = document.getElementById("LinkDiv")
+                    while (addLinkDiv.firstChild) {
+                        addLinkDiv.removeChild(addLinkDiv.firstChild);
+                    }
+
+                    rating.value = "";
+                }
+
+                alert(data.message)
+
+                //Message(data.message)
+            });
+        }
+
+    

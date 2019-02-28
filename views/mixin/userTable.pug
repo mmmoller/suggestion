@@ -1,0 +1,60 @@
+include ../mixin/actionFriend
+include ../mixin/ratingIcon
+include ../dependency/datatable
+include ../functionScript/fillRatingIcon
+
+
+mixin Usertable(suggestion, infosys, usersId, ownUser)
+
+    .default-table-wrapper
+        table#usertable.default-table.compact.row-border
+            thead
+                tr
+                    th Name
+                    th Alias
+                    if (suggestion)
+                        th Rating
+                    -for(var category in infosys.categories){
+                        th #{category} Coeficient
+                    -}
+                    th Action
+            tbody
+                - for (var i = 0; i < usersId.length; i++)
+                    tr
+                        td
+                            a(href='/user/'+ usersId[i], id="userhref"+i) #{infosys.usernames[usersId[i]]}
+                        td
+                            | Alias
+
+                        if (suggestion)
+                            td(data-sort= suggestion.userRating[usersId[i]] )
+                                +RatingIcon(i, "UserOnSuggestion")
+                        
+                        // era j e eu coloquei category
+                        -for(var category in infosys.categories){
+                            if ((ownUser.correlation[usersId[i]]) && (ownUser.correlation[usersId[i]][category]))
+                                td(data-correlation= ownUser.correlation[usersId[i]][category])
+                                    +RatingIcon(i + "-" + category, "UserCorrelation")
+                            else
+                                td
+                                    +RatingIcon(i + "-" + category, "Sharp")
+                        -}
+
+                        td
+                            +ActionFriend(i, usersId[i], ownUser)
+
+    script.
+        $(document).ready(function(){
+            FillRatingIcon();
+        });
+
+        $(document).ready(function() {
+            $('#usertable').DataTable( {
+                "language": {
+                "emptyTable": "No users"
+                },
+                "ordering": true,
+                "paging": false,
+            });
+        });
+                

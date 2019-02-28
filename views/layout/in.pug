@@ -1,0 +1,52 @@
+doctype html
+html
+	head
+		title= title
+
+		include ../dependency/all
+
+		.menu-bar.form-inline(style="overflow: visible")
+			a(href="/friendlist", class="btn btn-outline-primary").margin
+				| #{""} Friends
+			a(href="/suggestionlist", class="btn btn-outline-primary", style="margin-left: 20px").margin
+				| #{""} Suggestions
+			form(action='/suggestionlist', method='get', style="margin-left: auto").margin
+				.input-group
+					input.form-control(type='text', name='search_name', placeholder='Suggestion')
+					.input-group-append
+						button(type="submit" class="btn btn-outline-primary")
+							span.fas.fa-search
+							| #{""}
+			form(action='/userlist', method='get', style="margin-left: auto").margin
+				.input-group
+					input.form-control(type='text', name='search_name', placeholder='User')
+					.input-group-append
+						button(type="submit" class="btn btn-outline-primary")
+							span.fas.fa-search
+							| #{""}
+			//.dropdown.margin(style="margin-left: auto")
+				button(type="button", class="btn btn-primary dropdown-toggle", id="dropdownAccount", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") Lists
+				div.dropdown-menu(aria-labelledby="dropdownAccount")
+					a(href="/wishlist", class="dropdown-item")
+						| #{""} Wishlist
+					a(href="/dontshowlist", class="dropdown-item")
+						| #{""} Don't show me again list
+					a(href="/myuser", class="dropdown-item")
+						| #{""} Own suggestion list
+			a(href="/account", class="btn btn-outline-secondary", style="margin-left: auto").margin
+				span.fas.fa-cog
+				| #{""}
+			a(href="/bookmarklist", style="margin-left: auto").margin
+				span.fas.fa-bookmark
+			a(href="/dontshowlist", style="margin-left: auto").margin
+				span.fas.fa-times
+			a(href="/logout", class="btn btn-danger", style="margin-left: auto").margin
+				span.fas.fa-sign-out-alt
+				| #{""}
+
+		include ../mixin/message
+		+Message(message)
+
+		block content
+
+

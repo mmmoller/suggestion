@@ -1,0 +1,22 @@
+
+include ../functionScript/checkRating
+include ../functionScript/reviewSuggestion
+
+include ../mixin/bookmark
+include ../mixin/dontShow
+
+mixin ReviewSuggestion(suggestion, i, ownId, bookmark)
+
+    input(type='hidden', id='suggestionid'+i, value=suggestion._id)
+    -var ratingValue = ""
+    -var btnInnerHTML = "Rate"
+    if (suggestion.userRating[ownId])
+        - ratingValue = suggestion.userRating[ownId]
+        - btnInnerHTML = "Change"
+    td(data-sort=ratingValue)
+        input.form-control.margin(type='number', id='reviewRating'+i, min="0", max = "10", step="0.1", value = ratingValue, placeholder="Rating", onkeyup="CheckRating(this)", style="max-width:100px; margin:auto")
+    td
+        button.btn.btn-primary.btn-block.margin(id="btn"+i, value=i, onclick="ReviewSuggestion(this)", style="max-width:100px;margin: auto") #{btnInnerHTML}
+    td
+        +Bookmark(suggestion._id, i, bookmark)
+        +Dontshow(suggestion._id, i)

@@ -1,46 +1,19 @@
 --------- CHECK --------
 Forget Password (on Heroku),
-Suggestionlist,
-Send Review / Change Review,
-Change User and Suggestion to be Params instead of Query.
 
 --------- TODO ---------
 
-Change all POSTS to AJAX.
-
-Add Restrictions to post.
-
-Start re-use code. (Include, Scripts, etc)
-
-Suggestion rating:
-    Show a color instead of a number (From dark green to white to dark red)
+TEM QUE SER ICON:URL
 
 User page:
     Create a nice layout to show coeficient.
 
-Suggestion "Add to wishlist":
-    Account wishlist
-
-Suggestion "Don't show again":
-    Accout Don't show me list
-
-Account:
-    My own suggestion list on my page.
-    wishlist
-    Don't show me list
-
-Change word "Grade" to "Rating" on everyplace
+OPTIONAL{
+    APENAS VISUAL:
+        em suggestion, ao dar review: update correlation da userTable.
+        em user/:id, ao dar review: update correlation entre usuários.
+            SUGESTÃO Para resolver:
+                MIXIN bolado com um div que tem todos os data-* (ownUser, suggestion, infosys, etc)
+}
 
 
-FriendOnly = true
-    if (friend)
-        if (correlation)
-            grade With correlation coeficient
-        else
-            grade with default coeficient.
-
-FriendOnly = false;
-    if (correlation)
-        grade with correlation coeficient
-    else
-        grade with default coeficient

@@ -1,0 +1,17 @@
+extends layout_out
+
+block content
+    .default-wrapper
+        h1 Sign up
+        form(action='/signup', method='post')
+            .input-group.form-group
+                .input-group-prepend
+                    .input-group-text Email
+                input(type='text', name='email', class = 'form-control', required)
+            .input-group.form-group
+                .input-group-prepend
+                    .input-group-text Password
+                input(type='password', name='password', class = 'form-control', required)
+            button.form-group(type="submit" class="btn btn-primary") Sign up
+        a(href="/") Already have an account? Log in!
+    

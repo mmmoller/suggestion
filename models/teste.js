@@ -2,8 +2,10 @@ var mongoose = require('mongoose');
 
 var testeSchema = mongoose.Schema({
 
-	t1: String, // Nome da Informação
-    t2: String, // Categoria
+	t1: String,
+    t2: String,
+    t3: {type: Object},
+    t5: String,
 
 }, {minimize: false});
 

@@ -1,0 +1,27 @@
+include ../functionScript/message
+
+mixin ActionFriend(index, targetUserId, ownUser)
+
+    if (targetUserId != ownUser._id)
+        - var option = (ownUser.friendlist.indexOf(targetUserId) > -1) ? "fas fa-user-minus" : "fas fa-user-plus"
+        input(type='hidden', id="targetUserid"+index, value=targetUserId)
+        button.btn(class=option, value=index, onclick="ActionFriend(this)")
+    else
+        | #
+
+    
+script.
+    function ActionFriend(index){
+
+        var target_id = document.getElementById("targetUserid"+index.value);
+
+        $.post("/action_friend",{target_id:target_id.value}, function(data){
+
+            if (data.option == "fa-user-minus")
+                $(index).removeClass("fa-user-plus").addClass("fa-user-minus")
+            else
+                $(index).removeClass("fa-user-minus").addClass("fa-user-plus")
+
+            //Message(data.message)
+        });
+    }   

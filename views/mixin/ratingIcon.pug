@@ -1,0 +1,24 @@
+link(rel='stylesheet', href='/stylesheets/hover.css')
+
+script.
+    $(function() {
+        var mobileScreenTreshold = 1024;
+        $(".hvrbox").click(function(e) {
+            if($(window).width() <= mobileScreenTreshold) {
+                if($(this).hasClass("active")) {
+                    $(this).removeClass("active");
+                } else {
+                    e.preventDefault();
+                    $(this).addClass("active");
+                }
+            } else {
+                $(this).removeClass("active");
+            }
+        });
+    });
+
+mixin RatingIcon(index, iconType)
+    .hvrbox
+        button.btn(name="ratingIcon"+iconType, style="background-color:"+rgb+"; padding: 25px; border-radius:8px", value=index)
+        .hvrbox-layer_top
+            .hvrbox-text(id="ratingText"+iconType+index)

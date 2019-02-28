@@ -37,6 +37,7 @@ mixin Rating(friendsOnly, suggestion, ownUser)
         td(data-order= result )
             //p #{sum}
             //p #{rating}
+            input(type="hidden", value=suggestion)
             +RatingToColor(result)
         //| #{}
     else

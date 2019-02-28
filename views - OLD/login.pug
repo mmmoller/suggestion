@@ -1,0 +1,18 @@
+extends layout_out
+
+block content
+    .default-wrapper
+        h1 Log in
+        form(action='/login', method='post')
+            .input-group.form-group
+                .input-group-prepend
+                    .input-group-text Email
+                input(type='text', name='email', class = 'form-control', required)
+            .input-group.form-group
+                .input-group-prepend
+                    .input-group-text Password
+                input(type='password', name='password', class = 'form-control', required)
+            button.form-group(type="submit" class="btn btn-primary btn-lg") Log in
+        a(href="/signup") Don't have an account? Create an account!
+        br
+        a(href="/signup") Or log in using your Google account!

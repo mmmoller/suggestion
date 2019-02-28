@@ -38,7 +38,7 @@ mixin Suggestiontable(targetUserId, suggestion, infosys, ownUser)
                     th Review
                     th Action
             tbody
-                - for(var i = 0; i < suggestion.length; i++){
+                - for(var i = 0; i < Object.keys(suggestion).length; i++){
                     tr
                         td
                             a(href='/suggestion/'+ suggestion[i]._id, id="suggestionhref"+i) #{suggestion[i].name}

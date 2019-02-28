@@ -1,0 +1,66 @@
+
+include ../mixin/ratingIcon
+include ../mixin/reviewSuggestion
+include ../mixin/iconUrl
+include ../functionScript/fillRatingIcon
+include ../dependency/datatable
+
+mixin Suggestiontable(targetUserId, suggestion, infosys, ownUser)
+    
+    .default-table-wrapper(style="max-height:60vh")
+        table#suggestionTable.default-table.compact.row-border(
+            data-own-user = ownUser)
+
+            thead
+                tr
+                    th Name
+                    th Link
+                    if (targetUserId)
+                        th #{infosys.usernames[targetUserId]} Rating
+                        th #{infosys.usernames[targetUserId]} Comment
+                    else
+                        th Friends
+                        th All Users
+                    th Your Rating
+                    th Review
+                    th Action
+            tbody
+                - for(var i = 0; i < Object.keys(suggestion).length; i++){
+                    tr(data-suggestion = suggestion[i])
+                        td
+                            a(href='/suggestion/'+ suggestion[i]._id, id="suggestionhref"+i) #{suggestion[i].name}
+                        td
+                            -for (var key in suggestion[i].link) {
+                                if (suggestion[i].link.hasOwnProperty(key))
+                                    +IconUrl(infosys, key, suggestion[i].link[key])
+                            -}
+                        if (targetUserId)
+                            td(data-sort=suggestion[i].userRating[targetUserId])
+                                +RatingIcon(i, "UserOnSuggestion")
+                            td
+                                | #{suggestion[i].userComment[targetUserId]}
+                        else
+                            td
+                                +RatingIcon(i, "FriendOnly")
+                            td
+                                +RatingIcon(i, "AllUsers")
+                        
+                        +ReviewSuggestion(suggestion[i], i, ownUser._id, ownUser.bookmark)
+                -}
+
+    script.
+        $(document).ready(function(){
+            FillRatingIcon();
+        });
+
+        $(document).ready(function() {
+            $('#suggestionTable').DataTable( {
+                "language": {
+                "emptyTable": "No suggestions"
+                },
+                "ordering": true,
+                "order": [[2, "desc"]],
+                "paging": false,
+                "info": false,
+            });
+        });

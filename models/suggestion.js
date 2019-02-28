@@ -4,9 +4,10 @@ var suggestionSchema = mongoose.Schema({
 
 	name: String, // Nome da Informação
     category: String, // Categoria
-    link: {type: Object, default: {}}, // {type: url}
+    link: {type: Object, default: {}}, // {icon: url}
     userRating: {type: Object, default: {}}, // {_id : rating}
-    userComment: {type: Object, default: {}}, //{_id : comment}
+    userComment: {type: Object, default: {}}, //{_id : comment},
+    extraInfo: {type: Object, default:{}}, //{description: blablabla, autor, blablabla, etc}
     tag: String,
 
 }, {minimize: false});

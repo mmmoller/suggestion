@@ -1,0 +1,52 @@
+include ../functionScript/message
+include ../functionScript/fillRatingIcon
+
+script.
+    function ReviewSuggestion(index){
+        
+        var target_id = document.getElementById("suggestionid"+index.value);
+        var rating = document.getElementById("reviewRating"+index.value);
+        index.disabled = true;
+
+        $.post("/review_suggestion",{target_id:target_id.value, rating:rating.value}, function(data){
+            
+            if (data.success){
+
+                index.disabled = false;
+
+                if (rating.value != ""){
+                    document.getElementById("btn"+index.value).innerHTML = "Change"
+                }else{
+                    document.getElementById("btn"+index.value).innerHTML = "Rate"
+                }
+
+                if (window.location.pathname == '/suggestionlist' && !window.location.search){
+                    $(index).parents("tr").fadeOut(300)
+                }else{
+                    $(index).parents("tr").fadeOut(300).fadeIn(300)
+                }
+
+                // Atualizando o Sort da coluna Own Rating
+                $(rating).parents("td").attr("data-sort", rating.value)
+
+                // Updating data-*
+                //var updatedOwnUser = $('#suggestionTable').data("own-user");
+                //updatedOwnUser.correlation = data.ownUserCorrelation
+                //$('#suggestionTable').data("own-user", updatedOwnUser)
+
+                var updatedOwnUser = $(index).parents('table').data("own-user");
+                updatedOwnUser.correlation = data.ownUserCorrelation
+                $(index).parents('table').data("own-user", updatedOwnUser)
+
+
+                var updatedSuggestion = $(index).parents('tr').data("suggestion");
+                updatedSuggestion.userRating = data.suggestionUserRating
+                $(index).parents('tr').data("suggestion", updatedSuggestion)
+                
+                // Redrawing datatable with updated values.
+                FillRatingIcon();
+                $("#suggestionTable").DataTable().row( $(index).parents("tr") ).invalidate().draw();
+            }
+
+        });
+    }

@@ -1,0 +1,14 @@
+extends layout/out
+
+block content
+
+    input.form-control(id="name")
+    button.btn(onClick="Send(this)") Send
+    
+    script.
+        function Send(index){
+            var name = document.getElementById("name")
+            $.get("http://www.omdbapi.com/?t="+name.value+"&apikey=d9916e3d", {}, function(data){
+                console.log(data)
+            });
+        }

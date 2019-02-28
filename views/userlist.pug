@@ -1,8 +1,8 @@
-extends layout_in
+extends layout/in
 
 block content
     .default-wrapper
         h1 Userlist
 
-    include mixin_usertable.pug
+    include mixin/userTable
     +Usertable(undefined, infosys, usersId, ownUser)

@@ -1,0 +1,169 @@
+script.
+    function SelectCategory(index){
+        ClearSpecificInfoFields(index)
+        AddSpecificInfoFields(index)
+    }
+
+    function AddSpecificInfoFields(index){
+        var categories = $("#storedData").data("categories");
+        var category = categories[index.value]
+
+        for(info in category.specificInfo){
+            console.log(info)
+            if (info != "Type"){
+                AddInputInSpecificInfoDiv(info, category.specificInfo[info].type)
+            }
+            else{
+                var specificType = document.createElement("select")
+                specificType.setAttribute("class", "form-control")
+                specificType.setAttribute("id", info)
+                specificType.setAttribute("style", "margin-left:auto")
+
+                for (var i = 0; i < category.specificInfo[info].options.length; i++){
+                    specificType.appendChild(AddOptionToSelect(category.specificInfo[info].options[i]))
+                }
+                index.parentNode.insertBefore(specificType, index.nextSibling)
+            }
+        }
+
+        if (index.value == "Film"){
+            var verifyBtn = document.createElement("input")
+            verifyBtn.setAttribute("type", "button")
+            verifyBtn.setAttribute("class", "btn btn-success")
+            verifyBtn.setAttribute("id", "verifyBtn")
+            verifyBtn.setAttribute("style", "margin-left:auto")
+            verifyBtn.setAttribute("value", "Verify")
+            verifyBtn.setAttribute("onClick", "FillInfoFromOMDB(this)")
+            index.parentNode.insertBefore(verifyBtn, index.nextSibling)
+        }
+    }
+
+    function AddInputInSpecificInfoDiv(name, type){
+        var specificField = document.createElement(type)
+        specificField.setAttribute("class", "form-control")
+        specificField.setAttribute("id", name)
+        specificField.setAttribute("name", name)
+
+        var divSpecificInfo = document.getElementById("SpecificInfoDiv")
+
+        var divInputGroup = document.createElement("div")
+        divInputGroup.setAttribute("class", "input-group form-group")
+        var divPrepend = document.createElement("div")
+        divPrepend.setAttribute("class", "input-group-prepend")
+        var divText = document.createElement("div")
+        divText.setAttribute("class", "input-group-text")
+        divText.innerHTML = name
+        divPrepend.appendChild(divText)
+        divInputGroup.appendChild(divPrepend)
+        divInputGroup.appendChild(specificField)
+        divSpecificInfo.appendChild(divInputGroup)
+    }
+
+    function AddOptionToSelect(value){
+        var option = document.createElement("option")
+        option.value = value
+        option.text = value
+        return option
+    }
+
+    function ClearSpecificInfoFields(index){
+        var divSpecificInfo = document.getElementById("SpecificInfoDiv");
+
+        while (divSpecificInfo.firstChild) {
+            divSpecificInfo.removeChild(divSpecificInfo.firstChild);
+        }
+
+        var verifyBtn = document.getElementById("verifyBtn")
+        if (verifyBtn){
+            verifyBtn.parentNode.removeChild(verifyBtn)
+        }
+
+        var selectType = document.getElementById("Type")
+        if (selectType){
+            selectType.parentNode.removeChild(selectType)
+        }
+    }
+
+    function FillInfoFromOMDB(index){
+        var suggestionName = document.getElementById("suggestionName")
+
+        $.get("http://www.omdbapi.com/?t="+suggestionName.value+"&apikey=d9916e3d", {}, function(data){
+            console.log(data)
+            if (!data.Error){
+
+                suggestionName.value = data.Title
+
+                var plot = document.getElementById("Plot")
+                plot.value = data.Plot
+
+                var genre = document.getElementById("Genre")
+                genre.value = data.Genre
+
+                var year = document.getElementById("Year")
+                year.value = data.Year
+
+                var director = document.getElementById("Director")
+                director.value = data.Director
+
+                var urlTextField = document.getElementsByName("url")
+                for (var i = 0; i < urlTextField.length; i++){
+                    if (urlTextField[i].value == ""){
+                        urlTextField[i].value = "https://www.imdb.com/title/" + data.imdbID + "/";
+                        i = urlTextField.length
+                    }
+                }
+            }
+
+            else {
+                alert("Error! Film does not exist!")
+            }
+        });
+    }
+
+    function CreateJSONExtraInfo(category){
+
+        var categories = $("#storedData").data("categories");
+        var extraInfo = {};
+
+        for (info in categories[category].specificInfo){
+            extraInfo[info] = document.getElementById(info).value
+        }
+
+        console.log(extraInfo)
+        return extraInfo;
+    }
+
+    function urlToLinkJSON(urlName){
+
+        var urlField = document.getElementsByName(urlName)
+        var link = {}
+
+        for (var i = 0; i < urlField.length; i++){
+            if (urlField[i].value){
+                var url = urlField[i].value
+                var a = document.createElement("a")
+                if (url.indexOf("//") == -1){
+                    url = "//"+url
+                }
+                a.href = url;
+                link[HostnameToIcon(a.hostname, i)] = url
+            }
+        }
+
+        return link;
+    }
+
+    function HostnameToIcon(hostname, index){
+        if (hostname.indexOf("youtube") != -1 || hostname.indexOf("youtu.be") != -1){
+            return "YouTube"
+        }
+        else if(hostname.indexOf("imdb") != -1){
+            return "IMDb"
+        }
+        else if(hostname.indexOf("spotify") != -1){
+            return "Spotify"
+        }
+        else{
+            return "Icon"+index
+        }
+    }

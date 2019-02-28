@@ -3,8 +3,8 @@ var mongoose = require('mongoose');
 var infosysSchema = mongoose.Schema({
 
 	usernames: {type: Object, default: {}}, // {_id: name}
-	categories: {type: [String], default: []},
-	types: {type: Object, default: {}}
+	categories: {type: Object, default: {}},
+	types: {type: Object, default: {}}, // icons
 
 }, {minimize: false});
 

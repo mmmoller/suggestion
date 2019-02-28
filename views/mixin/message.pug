@@ -1,0 +1,8 @@
+mixin Message(message)
+    if (message != undefined && message.length)
+        if ( message.toString().charAt(0) == '!')
+            div#message.alert.alert-danger #{message.toString().slice(1)}
+        else
+            div#message.alert.alert-success #{message}
+    else
+        div#message

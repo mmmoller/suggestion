@@ -1,25 +1,44 @@
-extends layout_in
+extends layout/in
 
 block content
 
-    include mixin_rating.pug
+    include mixin/suggestionTable
 
-    include mixin_usertable.pug
-
-    .default-wrapper
+    .default-table-wrapper
         h1 #{suggestion.name}
 
-        | Friends: 
-        +Rating(true, suggestion, ownUser)
-        br
-        | All users: 
-        +Rating(false, suggestion, ownUser)
-
-
+        table.default-table.compact.row-border(
+        data-own-user = ownUser)
+            thead
+                tr
+                    th Link
+                    th Friends
+                    th All Users
+                    th Your Rating
+                    th Review
+                    th Action
+            tbody
+                tr(data-suggestion = suggestion)
+                    td
+                        
+                        -for (var key in suggestion.link) {
+                            if (suggestion.link.hasOwnProperty(key))
+                                +IconUrl(infosys, key, suggestion.link[key])
+                        -}
+                    td
+                        +RatingIcon(0, "FriendOnly")
+                    td
+                        +RatingIcon(0, "AllUsers")
+                    +ReviewSuggestion(suggestion, 0, ownUser._id, ownUser.bookmark)
+    
     -var usersId = []
     - for (var id in suggestion.userRating){
         if (suggestion.userRating.hasOwnProperty(id))
             -usersId.push(id)
     - }
 
+    include mixin/editSuggestion
+    +EditSuggestion(infosys, suggestion)
+
+    include mixin/userTable
     +Usertable(suggestion, infosys, usersId, ownUser)

@@ -1,0 +1,24 @@
+
+p#teste #{data}
+
+p#teste2(onLoad="Ah(this)") Haha
+
+-
+    function Ahh(){
+      console.log("trouxa")
+    }
+
+script.
+    $('#teste').html(Ahh());
+
+    //$('#teste2').html("banana")
+
+    function Ah(index){
+        console.log(index)
+        $(index).html("teste")
+        console.log(Ahh())
+        
+    }
+    function Ahh(){
+        return "batata"
+    }

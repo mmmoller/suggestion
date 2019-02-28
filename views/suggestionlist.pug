@@ -1,11 +1,9 @@
-extends layout_in
+extends layout/in
 
 block content
-    //.default-wrapper
-    //   h1 Suggestionlist
 
-    include mixin_suggestiontable.pug
+    include mixin/suggestionTable
     +Suggestiontable(undefined, suggestion, infosys, ownUser)
 
-    include mixin_createsuggestion.pug
+    include mixin/createSuggestion
     +CreateSuggestion(infosys)

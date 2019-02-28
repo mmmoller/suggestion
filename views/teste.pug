@@ -1,40 +1,21 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Add React in One Minute</title>
-  </head>
-  <body>
+extends layout/out
 
-    <h2>Add React in One Minute</h2>
-    <p>This page demonstrates using React with no build tooling.</p>
-    <p>React is loaded as a script tag.</p>
+block content
 
-    <p>
-      This is the first comment.
-      <!-- We will put our React component inside this div. -->
-      <div class="like_button_container" data-commentid="1"></div>
-    </p>
+    input(id="teste", value="https://mail.google.com/mail/u/0/#inbox", onload="T(this)")
+    button(onClick="Teste(this)")
 
-    <p>
-      This is the second comment.
-      <!-- We will put our React component inside this div. -->
-      <div class="like_button_container" data-commentid="2"></div>
-    </p>
+    script.
+        function Teste (index){
+            var t = document.getElementById("teste")
+            var a = document.createElement("a")
+            a.href = t.value;
+            console.log(a.hostname)
+        }
 
-    <p>
-      This is the third comment.
-      <!-- We will put our React component inside this div. -->
-      <div class="like_button_container" data-commentid="3"></div>
-    </p>
-
-    <!-- Load React. -->
-    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-
-    <!-- Load our React component. -->
-    <script src="/scripts/testee.js"></script>
-
-  </body>
-</html>
+        function T(index) {
+            console.log("banana")
+            var a = document.createElement("a")
+            a.href = index.value;
+            console.log(a.hostname)
+        }

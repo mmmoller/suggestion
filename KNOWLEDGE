@@ -1,0 +1,11 @@
+this.getAttribute("data-a") => returns a fucking String.
+$(this).data("a") => returns JSON.
+
+$(this).data("a", newData) => does NOT change HTML.
+$(this).attr("data-a", newData) => DOES change HTML.
+
+// to USE HTML AGAIN TO SORT.
+$("#table").DataTable().cell(this).invalidate().draw();
+$("#table").DataTable().row( $(this).parents('tr') ).invalidate().draw();
+
+// If there is a "data-sort" ATTRIBUTE at declaration, dataTable will use it and not going ot use "data-sort" DATA.

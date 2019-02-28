@@ -23,7 +23,7 @@ var userSchema = mongoose.Schema({
     bookmark: [String],
     dontshow: [String],
 
-    permission: {type: Number, default: 0}, // 0: normal, 1 moderator, 2 admin
+    permission: {type: Number, default: 0}, // 0: normal, 1: moderator, 2: admin
 
     local            : {
         email        : String,

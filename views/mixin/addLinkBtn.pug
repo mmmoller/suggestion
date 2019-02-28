@@ -1,0 +1,48 @@
+mixin AddLinkBtn()
+    button.form-control.btn.btn-primary.btn-block(id="addLinkBtn", 
+    value="", onclick="AddLink(this)", style="margin-left:auto") Add Link
+
+// To AddLink
+script.
+    function AddLink(index){
+        var div = document.getElementById("LinkDiv")
+
+        var urlTextField = document.createElement("input")
+        urlTextField.setAttribute("name", "url")
+        urlTextField.setAttribute("class", "form-control")
+        urlTextField.setAttribute("style", "margin:auto")
+
+        var removeButton = document.createElement("input")
+        removeButton.setAttribute("type", "button")
+        removeButton.setAttribute("class", "btn btn-danger")
+        removeButton.setAttribute("onclick", "DeleteUrl(this)")
+        removeButton.setAttribute("value", "X")
+        removeButton.setAttribute("style", "margin-left:auto")
+
+        var divInputGroup = document.createElement("div")
+        divInputGroup.setAttribute("class", "input-group form-group")
+
+        var divText = document.createElement("div")
+        divText.setAttribute("class", "input-group-text")
+        divText.innerHTML = "Url"
+
+        var divPrepend = document.createElement("div")
+        divPrepend.setAttribute("class", "input-group-prepend")
+        divPrepend.appendChild(divText)
+
+        var divAppend = document.createElement("div")
+        divAppend.setAttribute("class", "input-group-append")
+        divAppend.appendChild(removeButton)
+        
+        divInputGroup.appendChild(divPrepend)
+        divInputGroup.appendChild(urlTextField)
+        divInputGroup.appendChild(divAppend)
+
+        div.appendChild(divInputGroup)
+
+    }
+
+    function DeleteUrl(index) {
+        var toDelete = index.parentNode.parentNode;
+        index.parentNode.parentNode.parentNode.removeChild(toDelete)
+    }

@@ -1,0 +1,5 @@
+mixin IconUrl(infosys, icon, url)
+    -icon = icon.replace(/\d+/g,'')
+    a(href=url, target="_blank", style=infosys.types[icon].color).margin
+        span(class=infosys.types[icon].fontAwesome, style=infosys.types[icon].size)
+        | #{""}

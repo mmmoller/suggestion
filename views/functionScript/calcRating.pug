@@ -1,0 +1,28 @@
+include ../functionScript/calcCoeficient
+
+script.
+    function CalcRating(friendsOnly, suggestion, ownUser){
+        var coeficient = 0;
+        var defaultCoeficient = 2.5;
+        var sum = defaultCoeficient;
+        var rating = defaultCoeficient*5;
+        for (var id in suggestion.userRating){
+            if (suggestion.userRating.hasOwnProperty(id)){
+                coeficient = 0;
+                if (ownUser.correlation[id] && (friendsOnly && ownUser.friendlist.indexOf(id) > -1 || !friendsOnly) ){
+                    if ( ownUser.correlation[id][suggestion.category] && ownUser.correlation[id][suggestion.category].ratingSum )
+                        coeficient = CalcCoeficient(ownUser.correlation[id][suggestion.category])
+                    else
+                        coeficient = defaultCoeficient;
+                }
+                else if (!friendsOnly /*&& ownUser._id != id*/)
+                    coeficient = defaultCoeficient;
+                rating += coeficient*suggestion.userRating[id]
+                sum += coeficient;
+            }
+        }
+        if (sum != defaultCoeficient)
+            return Number((rating)/(sum)).toFixed(2)
+        else
+            return "#"
+    }

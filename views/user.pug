@@ -1,4 +1,4 @@
-extends layout_in
+extends layout/in
 
 block content
     
@@ -14,9 +14,9 @@ block content
             -}
             br
 
-            include mixin_actionfriend.pug
+            include mixin/actionFriend
             +ActionFriend(0, usersId[0], ownUser)
 
-    include mixin_suggestiontable.pug
+    include mixin/suggestionTable
     +Suggestiontable(usersId[0], suggestion, infosys, ownUser)
     

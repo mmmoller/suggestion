@@ -1,0 +1,64 @@
+include ../functionScript/createSuggestion
+
+mixin EditSuggestion(infosys, suggestion)
+
+    .default-wrapper#storedData(data-categories=infosys.categories
+    data-specific-info=suggestion.extraInfo)
+
+        input(type='hidden', id='suggestionName', value=suggestion.name)
+
+        .form-inline.form-group
+            input.form-control(type='text', id='selectCategory', value=suggestion.category, readonly="readonly", style="width:115px")
+
+            include ../mixin/addLinkBtn
+            +AddLinkBtn()
+
+        div#LinkDiv
+            -for (var key in suggestion.link) {
+                if (suggestion.link.hasOwnProperty(key))
+                    .input-group.form-group
+                        .input-group-prepend
+                            .input-group-text Url
+                        input.form-control(name="url", placeholder="Url", value=suggestion.link[key])
+                        .input-group-append
+                            input.btn.btn-danger(type="button", value="X", onclick="DeleteUrl(this)")
+            -}
+
+        div#SpecificInfoDiv
+
+        button.form-group.btn.btn-primary.btn-block(id="btn", value=suggestion._id, onclick="EditSuggestion(this)", style="margin-left: auto") Edit Suggestion
+
+    script.
+        $(document).ready(function() {
+            var category = document.getElementById("selectCategory")
+            AddSpecificInfoFields(category)
+            FillSpecificInfoFields(category)
+        });
+
+        function FillSpecificInfoFields(index){
+            var categories = $("#storedData").data("categories");
+            var category = categories[index.value]
+
+            var suggestionExtraInfo = $("#storedData").data("specific-info");
+
+            for (info in category.specificInfo){
+                document.getElementById(info).value = suggestionExtraInfo[info]
+            }
+        }
+
+    // To POST (Edit Suggestion)
+    script.
+        function EditSuggestion(index){
+
+            var link = urlToLinkJSON("url")
+            var extraInfo = CreateJSONExtraInfo(category.value)
+
+            $.post("/edit_suggestion",{link:link, suggestionId:index.value,
+            extraInfo: extraInfo}, function(data){
+                
+                if (data.success){
+                }
+
+                alert(data.message)
+            });
+        }

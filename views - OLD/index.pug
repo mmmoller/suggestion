@@ -1,0 +1,33 @@
+extends layout_out
+
+block content
+        .default-wrapper(style="width:50%")
+                h1.form-group Suggester
+                p The right suggestions for you!
+                .container
+                        .row
+                                .col.vertical-bar
+                                        a(href="/auth/google", class="btn btn-danger btn-block margin", style="margin-top:10px")
+                                                | Continue with Google #{""}
+                                                span.fab.fa-google-plus-g
+                                        a(href="/auth/facebook", class="btn btn-primary btn-block margin", style="margin-top:20px;")
+                                                | Continue with Facebook #{""}
+                                                span.fab.fa-facebook
+                                        a(href="/signup", class="btn btn-primary btn-block button-margin", style="margin-top:20px")
+                                                | Sign up with email #{""}
+                                                span.fa.fa-user 
+                                .col
+                                        p(style="text-align: left")
+                                                strong Log in
+                                        form(action='/login', method='post')
+                                                input.form-group(type='text', name='email', class = 'form-control', placeholder="Email" required)
+                                                input.form-group(type='password', name='password', class = 'form-control', placeholder="Password" required)
+                                                .form-inline   
+                                                        a(href="/forgot_password") 
+                                                                | Forgot password? 
+                                                        button(type="submit", class="btn btn-primary", style="margin-left: auto") Log in
+
+        div(style="width:60%; margin-left: auto; margin-right: auto; margin-top:40px")
+                i "There are plenty of meaningful films and music out there.
+                i The immature gonna curse that he doesn't have enough life time to experience all.
+                i The mature gonna be grateful that there are enough masterpieces for him to enjoy during his whole life time."

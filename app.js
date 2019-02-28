@@ -18,11 +18,14 @@ var options = {
 	useNewUrlParser: true
 };
 
+
+
 if (process.env.MONGOLAB_URI)
 	mongoose.connect(process.env.MONGOLAB_URI, options);
 else
 	mongoose.connect("mongodb://127.0.0.1/test", options);
 
+    
 //#endregion
 
 var app = express();
@@ -40,7 +43,7 @@ app.use(bodyParser.urlencoded( {extended:true}));
 app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')))
+//app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')))
 
 app.use(expressSession({secret: 'mySecretKey', saveUninitialized: true, resave: true}));
 
@@ -61,9 +64,8 @@ require('./config/passport.js')(passport);
 var initPassport = require('./config/passport.js')(passport);
 initPassport(passport);*/
 
-var functions = require('./config/functions.js');
 
-var routes = require('./routes/index')(passport, functions);
+var routes = require('./routes/index')(passport);
 app.use('/', routes);
 
 /// catch 404 and forward to error handler
