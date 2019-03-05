@@ -2,20 +2,4 @@ extends layout/out
 
 block content
 
-    input(id="teste", value="https://mail.google.com/mail/u/0/#inbox", onload="T(this)")
-    button(onClick="Teste(this)")
-
-    script.
-        function Teste (index){
-            var t = document.getElementById("teste")
-            var a = document.createElement("a")
-            a.href = t.value;
-            console.log(a.hostname)
-        }
-
-        function T(index) {
-            console.log("banana")
-            var a = document.createElement("a")
-            a.href = index.value;
-            console.log(a.hostname)
-        }
+    h1 #{banana}

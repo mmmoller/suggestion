@@ -24,15 +24,15 @@ html
 						button(type="submit" class="btn btn-outline-primary")
 							span.fas.fa-search
 							| #{""}
-			//.dropdown.margin(style="margin-left: auto")
-				button(type="button", class="btn btn-primary dropdown-toggle", id="dropdownAccount", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") Lists
-				div.dropdown-menu(aria-labelledby="dropdownAccount")
-					a(href="/wishlist", class="dropdown-item")
-						| #{""} Wishlist
-					a(href="/dontshowlist", class="dropdown-item")
-						| #{""} Don't show me again list
-					a(href="/myuser", class="dropdown-item")
-						| #{""} Own suggestion list
+			select.form-control.margin(data-category=userCategory, id="userCategory", style="margin-left:auto", onChange="UserCategory(this)")
+				-for(var i = 0; i < categories.length;i++){
+					-if (categories[i] == userCategory)
+						option(value=categories[i], selected) #{categories[i]}
+					-else
+						option(value=categories[i]) #{categories[i]}
+				-}
+			- if (userPermission)
+				input(type="hidden", id="userPermission", value=userPermission)
 			a(href="/account", class="btn btn-outline-secondary", style="margin-left: auto").margin
 				span.fas.fa-cog
 				| #{""}
@@ -46,6 +46,22 @@ html
 
 		include ../mixin/message
 		+Message(message)
+
+		script.
+			function UserCategory(index){
+				$.post("/user_category",{category:index.value}, function(data){
+                
+					if (data.success){
+						console.log(window.location.pathname)
+						if (window.location.pathname == '/suggestionlist' || 
+						window.location.pathname == '/bookmarklist' || 
+						window.location.pathname == '/dontshowlist' || 
+						window.location.pathname.includes('/user/')){
+							window.location.reload();
+						}
+					}
+				});
+			}
 
 		block content
 

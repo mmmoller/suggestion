@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
+var isTeste = require('../functions/teste.js');
+
 var isAuthenticated = require('../functions/isAuthenticated.js');
 var handleError = require('../functions/handleError.js');
 var isModerator = require('../functions/isModerator.js');
@@ -34,7 +36,7 @@ module.exports = function(passport){
 		res.send("feito")
 	});
 
-	router.get('/teste', function(req, res){
+	router.get('/teste', isTeste, function(req, res){
 		res.render("teste", {})
 	});
 

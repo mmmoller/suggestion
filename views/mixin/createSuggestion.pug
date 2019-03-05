@@ -32,29 +32,30 @@ mixin CreateSuggestion(infosys)
 
         button.form-group.btn.btn-primary.btn-block(id="btn", value="", onclick="CreateSuggestion(this)", style="margin-left: auto") Create Suggestion
 
-    // To complete name with the search option
+    // Pages settings.
     script.
         $(document).ready(function() {
-            if (!window.location.search)
-                $('#storedData').hide()
-            else{
-                $('#suggestionName').val($.urlParam("search_name"))
-            }
+
+            FillSuggestionName()
+            FillCategory()
+            AddLink();
+
         });
-        $.urlParam = function(name){
-            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
+
+        function FillSuggestionName(){
+            var results = new RegExp('[\?&]' + "search_name" + '=([^&#]*)').exec(window.location.search);
             if (results==null) {
-                return null;
+                return
             }
-            return decodeURI(results[1].replace(/[+]/g, " ")) || "";
+            suggestionName.value = decodeURI(results[1].replace(/[+]/g, " ")) || "";
         }
 
-    // To add URL link field
-    script.
-        $(document).ready(function() {
-            AddLink();
-        });
-
+        function FillCategory(){
+            if (userCategory.value != "All"){
+                selectCategory.value = userCategory.value;
+                SelectCategory(selectCategory);
+            }
+        }
 
     // To POST (Create Suggestion)
     script.

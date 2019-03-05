@@ -16,25 +16,18 @@ module.exports = function(passport){
 
 		
 		var id = req.params["_id"];
-
-		/*
-		var option = "Add";
-		if (req.user.friendlist.indexOf(id) > -1){
-			option = "Remove";
-		}
-
-
-		if (id == req.user._id){
-			option = ""
-		}
-
-		console.log(id)*/
+		var categoryQuery = (req.user.category == "All") ? {} : {"category" : req.user.category}
+		var mainQuery = {["userRating." + id] : {$exists: true}}
+		var query = {$and: [
+			mainQuery,
+			categoryQuery,
+		]}
 
 		Infosys.findOne({}, function(err, infosys){
 			if (err) return handleError(err,req,res);
 			if (infosys){
 
-				Suggestion.find({["userRating." + id] : {$exists: true} }, function(err, suggestion){
+				Suggestion.find(query, function(err, suggestion){
 					if (err) return handleError(err,req,res);
 					if (suggestion){
 
@@ -52,7 +45,8 @@ module.exports = function(passport){
 
 
 						res.render('user', {usersId: usersId, ownUser: ownUser,
-							 suggestion: suggestion, infosys: infosys, message: req.flash("message")});
+							 suggestion: suggestion, infosys: infosys, message: req.flash("message"), 
+							userPermission: req.user.permission});
 
 					}
 					else{
@@ -88,25 +82,6 @@ module.exports = function(passport){
 			if (err) return handleError(err,req,res);
 			if (users){
 
-				/*
-				var user = [];
-				var user_name;
-				var user_button;
-				
-				for (var i = 0; i < users.length; i++){
-					if (String(users[i]._id) != String(req.user._id)){
-						user_name = users[i].username;
-						if (req.user.friendlist.indexOf(users[i]._id) > -1){
-							user_button = "Remove";
-						}
-						else {
-							user_button = "Add";
-						}
-						user.push({"username": user_name, "action": user_button, "_id": users[i].id})
-					}
-					
-				}*/
-
 				var usersId = []
 				for (var i = 0; i < users.length; i++){
 					usersId.push(String(users[i]._id))
@@ -121,7 +96,8 @@ module.exports = function(passport){
 							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
 
 						res.render('userlist', {ownUser: ownUser, usersId: usersId, 
-							infosys:infosys, message: req.flash("message")})
+							infosys:infosys, message: req.flash("message"), 
+							userPermission: req.user.permission})
 					}
 					else {
 						req.flash('message', "!Infosys does not exist! Contact Admin");
@@ -154,7 +130,8 @@ module.exports = function(passport){
 				
 
 				res.render('userlist', {ownUser: ownUser, usersId: usersId,
-					infosys:infosys, message: req.flash("message")})
+					infosys:infosys, message: req.flash("message"), 
+					userPermission: req.user.permission})
 			}
 			else {
 				req.flash('message', "!Infosys does not exist! Contact Admin");
@@ -188,6 +165,19 @@ module.exports = function(passport){
 		res.send({message: req.flash("message"), option: option})
 
 	});
+
+	router.post('/user_category', isAuthenticated, function(req, res){
+
+		req.user.category = req.body["category"]
+		req.user.markModified("category");
+		req.user.save(function (err) {
+			if (err) return handleError(err,req,res);
+		});
+
+		res.send({success: "success"})
+
+	});
+
 	//#endregion
 
 

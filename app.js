@@ -7,6 +7,9 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var expressSession = require('express-session');
+
+var MongoDBStore = require('connect-mongodb-session')(expressSession);
+
 var flash = require('connect-flash');
 
 //#region Mongo configurations
@@ -18,12 +21,17 @@ var options = {
 	useNewUrlParser: true
 };
 
+var dbUri = "mongodb://127.0.0.1/test"
+if (process.env.MONGOLAB_URI){
+    dbUri = process.env.MONGOLAB_URI;
+}
 
+mongoose.connect(dbUri, options);
 
-if (process.env.MONGOLAB_URI)
-	mongoose.connect(process.env.MONGOLAB_URI, options);
-else
-	mongoose.connect("mongodb://127.0.0.1/test", options);
+var store = new MongoDBStore({
+    uri: dbUri,
+    collection: "expressSession"
+});
 
     
 //#endregion
@@ -40,12 +48,16 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded( {extended:true}));
 
-app.use(cookieParser());
+//app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')))
 
-app.use(expressSession({secret: 'mySecretKey', saveUninitialized: true, resave: true}));
+app.use(expressSession({
+    secret: 'mySecretKey',
+    saveUninitialized: true,
+    resave: true,
+    store: store,
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());

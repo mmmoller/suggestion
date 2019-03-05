@@ -51,6 +51,8 @@ mixin EditSuggestion(infosys, suggestion)
         function EditSuggestion(index){
 
             var link = urlToLinkJSON("url")
+
+            var category = document.getElementById("selectCategory")
             var extraInfo = CreateJSONExtraInfo(category.value)
 
             $.post("/edit_suggestion",{link:link, suggestionId:index.value,

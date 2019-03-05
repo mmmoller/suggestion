@@ -25,6 +25,8 @@ var userSchema = mongoose.Schema({
 
     permission: {type: Number, default: 0}, // 0: normal, 1: moderator, 2: admin
 
+    category: {type: String, default: "All"},
+
     local            : {
         email        : String,
         password     : String,

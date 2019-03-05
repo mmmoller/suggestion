@@ -13,51 +13,7 @@ module.exports = function(passport){
     //#region SUGGESTION
 
 	router.get('/suggestionlist', isAuthenticated, function(req,res){
-
-		var query = {$and: [
-			{ ["userRating." + req.user._id] : {$exists: false} },
-			{"_id" : {$nin: req.user.dontshow}}
-		]}
-
-		if (req.query["search_name"]){
-			query = {$or: [
-				{'name': {'$regex': req.query["search_name"], "$options": "i"}},
-				{'tag': {'$regex': req.query["search_name"], "$options": "i"}}
-			]}
-		}
-		if (req.query["search_name"] == ""){
-			query = {}
-		}
-
-		Suggestion.find(query, function (err, suggestion){
-			if (err) return handleError(err,req,res);
-			if (suggestion){
-				
-				Infosys.findOne({}, function (err, infosys){
-					if (err) return handleError(err,req,res);
-					if (infosys){
-						// Usar ratings e coeficientes
-
-						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-
-						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
-							message: req.flash("message"), ownUser: ownUser})
-					}
-					else{
-						req.flash('message', "!Infosys don't exist");
-						res.redirect('/account');
-					}
-				});
-			}
-			else{
-				req.flash('message', "!Suggestion don't exist");
-				res.redirect('/account');
-			}
-		});
-
-	
-
+		SuggestionList(req,res)
 	});
 	
 	router.get('/suggestion/:_id', isAuthenticated, function(req, res) {
@@ -75,11 +31,9 @@ module.exports = function(passport){
 						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
 							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
 
-						var usersId = [];
-
-
 						res.render('suggestion', {suggestion: suggestion, infosys: infosys,
-							message: req.flash("message"), ownUser: ownUser})
+							message: req.flash("message"), ownUser: ownUser, 
+							userPermission: req.user.permission})
 					}
 					else{
 						req.flash('message', "!Infosys don't exist");
@@ -151,6 +105,7 @@ module.exports = function(passport){
 				else{
 					suggestion.link = {};
 				}
+				suggestion.extraInfo = req.body["extraInfo"];
 
 				suggestion.save(function (err) {
 					if (err) return handleError(err,req,res);
@@ -278,33 +233,7 @@ module.exports = function(passport){
 	});
 
 	router.get('/bookmarklist', isAuthenticated, function(req,res){
-		Suggestion.find({_id : {$in : req.user.bookmark}}, function (err, suggestion){
-			if (err) return handleError(err,req,res);
-			if (suggestion){
-				
-				Infosys.findOne({}, function (err, infosys){
-					if (err) return handleError(err,req,res);
-					if (infosys){
-
-						//var user = {"_id": req.user._id, "correlation": req.user.correlation, "friendlist": req.user.friendlist}
-						
-						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-						
-						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
-								message: req.flash("message"), ownUser: ownUser});
-					}
-					else{
-						req.flash('message', "!Infosys don't exist");
-						res.redirect('/account');
-					}
-				});
-			}
-			else{
-				req.flash('message', "!Suggestion don't exist");
-				res.redirect('/account');
-			}
-		});
+		SuggestionList(req,res)
 	});
 
 	router.post('/action_bookmark', isAuthenticated, function(req, res) {
@@ -331,34 +260,7 @@ module.exports = function(passport){
 	});
 
 	router.get('/dontshowlist', isAuthenticated, function(req,res){
-		console.log(req.user)
-		Suggestion.find({_id : {$in : req.user.dontshow}}, function (err, suggestion){
-			if (err) return handleError(err,req,res);
-			if (suggestion){
-				
-				Infosys.findOne({}, function (err, infosys){
-					if (err) return handleError(err,req,res);
-					if (infosys){
-
-						//var user = {"_id": req.user._id, "correlation": req.user.correlation, "friendlist": req.user.friendlist}
-						
-						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-						
-						res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
-								message: req.flash("message"), ownUser: ownUser});
-					}
-					else{
-						req.flash('message', "!Infosys don't exist");
-						res.redirect('/account');
-					}
-				});
-			}
-			else{
-				req.flash('message', "!Suggestion don't exist");
-				res.redirect('/account');
-			}
-		});
+		SuggestionList(req,res);
 	});
 
 	router.post('/action_dontshow', isAuthenticated, function(req, res) {
@@ -386,9 +288,90 @@ module.exports = function(passport){
 
 	});
 
-	
-
 	//#endregion
 
     return router;
+}
+
+function SuggestionList(req, res){
+	
+	var mainQuery = MainQuery(req)
+	var categoryQuery = CategoryQuery(req)
+	
+	var query = {$and: [
+		mainQuery,
+		categoryQuery,
+	]}
+
+	var showCreateSuggestion = false;
+	if (req.query["search_name"] != undefined){
+		showCreateSuggestion = true;
+	}
+
+
+	Suggestion.find(query, function (err, suggestion){
+		if (err) return handleError(err,req,res);
+		if (suggestion){
+			
+			Infosys.findOne({}, function (err, infosys){
+				if (err) return handleError(err,req,res);
+				if (infosys){
+					// Usar ratings e coeficientes
+
+					var ownUser = {_id: req.user._id, correlation: req.user.correlation,
+						friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+
+					res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
+						message: req.flash("message"), ownUser: ownUser, showCreateSuggestion: showCreateSuggestion})
+				}
+				else{
+					req.flash('message', "!Infosys don't exist");
+					res.redirect('/account');
+				}
+			});
+		}
+		else{
+			req.flash('message', "!Suggestion don't exist");
+			res.redirect('/account');
+		}
+	});
+}
+
+function CategoryQuery (req){
+	var categoryQuery = (req.user.category == "All") ? {} : {"category" : req.user.category}
+	return categoryQuery
+}
+
+function MainQuery(req){
+	var mainQuery = {};
+	if (req.path == "/suggestionlist"){
+		// SEARCHING
+		if (req.query["search_name"] != undefined){
+			if (req.query["search_name"] == ""){
+				mainQuery = {}
+			}
+			else {
+				mainQuery = {$or: [
+					{'name': {'$regex': req.query["search_name"], "$options": "i"}},
+					{'tag': {'$regex': req.query["search_name"], "$options": "i"}}
+				]}
+			}
+		}
+		// DISCOVER NEW
+		else {
+			console.log("oi")
+			mainQuery = {$and: [
+				{ ["userRating." + req.user._id] : {$exists: false} },
+				{"_id" : {$nin: req.user.dontshow}}
+			]}
+		}
+	}
+	else if (req.path == "/bookmarklist"){
+		mainQuery = {_id : {$in : req.user.bookmark}}
+	}
+	else if (req.path == "/dontshowlist"){
+		mainQuery = {_id : {$in : req.user.dontshow}}
+	}
+
+	return mainQuery
 }
