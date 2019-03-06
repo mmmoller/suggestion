@@ -1,9 +1,8 @@
-var CategoryUpdate = require('../functions/category.js');
+var menuCategory = require('./menuCategory.js');
 
 module.exports = function (req, res, next) {
     if (req.isAuthenticated()){
-        CategoryUpdate(req, res);
-        return next();
+        return menuCategory(req, res, next);
     }
 
     res.redirect('/');

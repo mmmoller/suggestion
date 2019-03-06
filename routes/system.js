@@ -7,6 +7,10 @@ var User = require('../models/user');
 var Infosys = require('../models/infosys');
 var Suggestion = require('../models/suggestion');
 
+var Username = require('../models/username');
+var Category = require('../models/category');
+var Icon = require('../models/icon');
+
 module.exports = function(passport){
 
     // System 
@@ -41,7 +45,25 @@ module.exports = function(passport){
             console.log('Suggestions removed')
         });
 
-        Infosys.remove({}, function(err) {
+        Category.remove({}, function(err) { 
+            var newCategory = new Category();
+            newCategory.categories = categories;
+            newCategory.save(function (err) {
+                if (err) return handleError(err,req,res);
+            });
+            console.log('Categories recreated')
+        });
+
+        Icon.remove({}, function(err) { 
+            var newIcon = new Icon();
+            newIcon.icons = icons;
+            newIcon.save(function (err) {
+                if (err) return handleError(err,req,res);
+            });
+            console.log('Icons recreated')
+        });
+
+        Username.remove({}, function(err) {
 
             User.remove({}, function(err) { 
 
@@ -52,18 +74,15 @@ module.exports = function(passport){
                 newUser.username = "admin"
                 newUser.permission = 2;
 
-                console.log('Infosys removed')
-                var newInfosys = new Infosys();
-                newInfosys.usernames = {};
-                newInfosys.usernames[newUser._id] = newUser.username;
-                newInfosys.markModified("usernames");
-
-                newInfosys.categories = infosysCategories;
-                newInfosys.types = infosysTypes;
+                console.log('Usernames removed')
+                var newUsername = new Username();
+                newUsername.usernames = {};
+                newUsername.usernames[newUser._id] = newUser.username;
+                newUsername.markModified("usernames");
 
                 newUser.save(function(err) {
                     if (err) return handleError(err,req,res);
-                    newInfosys.save(function (err) {
+                    newUsername.save(function (err) {
                         if (err) return handleError(err,req,res);
                         res.redirect("/");
                     });
@@ -77,9 +96,7 @@ module.exports = function(passport){
     return router;
 }
 
-//var infosysCategories = ["Film", "Music", "Book"];
-
-var infosysCategories = {
+var categories = {
     "Film" : {
         specificInfo : {
             "Plot" : {type: "textarea"},
@@ -112,35 +129,35 @@ var infosysCategories = {
     },
 }
 
-var infosysTypes = {
+var icons = {
     "IMDb" : {
         fontAwesome: "fab fa-imdb",
         color: {color: "goldenrod"},
         size: {"font-size": "35px"},
-        category: ["Film"]
+        hostname: ["imdb"],
     },
     "YouTube" : {
         fontAwesome: "fab fa-youtube",
         color: {color: "red"},
         size: {"font-size": "35px"},
-        category: ["Film", "Music"]
+        hostname: ["youtube", "youtu.be"]
     },
     "Spotify" : {
         fontAwesome: "fab fa-spotify",
         color: {color: "green"},
         size: {"font-size": "35px"},
-        category: ["Music"]
+        hostname: ["spotify"],
     },
     "Wikipedia" : {
         fontAwesome: "fab fa-wikipedia-w",
         color: {color: "grey"},
         size: {"font-size": "35px"},
-        category: ["Book"]
+        hostname: ["wikipedia"],
     },
-    "Icon" : {
+    "Unknown" : {
         fontAwesome: "fa fa-question-circle",
         color: {color: "black"},
         size: {"font-size": "35px"},
-        category: ["Music"]
+        hostname: ["unknown"],
     },
 };

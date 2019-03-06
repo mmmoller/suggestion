@@ -1,14 +1,15 @@
-var CategoryUpdate = require('../functions/category.js');
+var menuCategory = require('./menuCategory.js');
 
 module.exports = function (req, res, next) {
     if (req.isAuthenticated()){
-        CategoryUpdate(req, res);
-        return next();
+        menuCategory(req, res, next);
     }
+    else{
 
-    var id = req.params["_id"];
-    
-    console.log(id)
+        var id = req.params["_id"];
+        
+        console.log(id)
 
-    res.redirect('/user_external/:'+id);
+        res.redirect('/user_external/:'+id);
+    }
 }

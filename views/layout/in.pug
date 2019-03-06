@@ -25,11 +25,12 @@ html
 							span.fas.fa-search
 							| #{""}
 			select.form-control.margin(data-category=userCategory, id="userCategory", style="margin-left:auto", onChange="UserCategory(this)")
-				-for(var i = 0; i < categories.length;i++){
-					-if (categories[i] == userCategory)
-						option(value=categories[i], selected) #{categories[i]}
+				option(value="All") All
+				-for(var i = 0; i < menuCategories.length;i++){
+					-if (menuCategories[i] == userCategory)
+						option(value=menuCategories[i], selected) #{menuCategories[i]}
 					-else
-						option(value=categories[i]) #{categories[i]}
+						option(value=menuCategories[i]) #{menuCategories[i]}
 				-}
 			- if (userPermission)
 				input(type="hidden", id="userPermission", value=userPermission)

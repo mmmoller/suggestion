@@ -4,6 +4,10 @@ var isAuthenticated = require('../functions/isAuthenticated.js');
 var isAuthenticatedWithRedirect = require('../functions/isAuthenticatedWithRedirect.js');
 var handleError = require('../functions/handleError.js');
 
+var infoCategory = require('../functions/infoCategory.js');
+var infoIcon = require('../functions/infoIcon.js');
+var infoUsername = require('../functions/infoUsername.js');
+
 var User = require('../models/user');
 var Infosys = require('../models/infosys');
 var Suggestion = require('../models/suggestion');
@@ -12,7 +16,7 @@ module.exports = function(passport){
 
 
     //#region USER
-	router.get('/user/:_id', isAuthenticatedWithRedirect, function(req, res) {
+	router.get('/user/:_id', isAuthenticatedWithRedirect, infoIcon, infoUsername, function(req, res) {
 
 		
 		var id = req.params["_id"];
@@ -72,7 +76,7 @@ module.exports = function(passport){
 		res.redirect('/user/' + req.user._id);
 	});
 
-	router.get('/userlist', isAuthenticated, function(req, res) {
+	router.get('/userlist', isAuthenticated, infoCategory, infoUsername, function(req, res) {
 		var name = req.query["search_name"];
 		User.find({$or: [
 			{'username': {'$regex': name, "$options": "i"}},
@@ -113,7 +117,7 @@ module.exports = function(passport){
 		});
 	});
 
-	router.get('/friendlist', isAuthenticated, function(req, res){
+	router.get('/friendlist', isAuthenticated, infoUsername, function(req, res){
 
 		Infosys.findOne({}, function(err, infosys){
 			if (err) return handleError(err,req,res);

@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var isTeste = require('../functions/teste.js');
+var isTeste = require('../functions/infoCategory.js');
 
 var isAuthenticated = require('../functions/isAuthenticated.js');
 var handleError = require('../functions/handleError.js');

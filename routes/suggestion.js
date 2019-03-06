@@ -4,6 +4,10 @@ var router = express.Router();
 var isAuthenticated = require('../functions/isAuthenticated.js');
 var handleError = require('../functions/handleError.js');
 
+var infoCategory = require('../functions/infoCategory.js');
+var infoIcon = require('../functions/infoIcon.js');
+var infoUsername = require('../functions/infoUsername.js');
+
 var User = require('../models/user');
 var Infosys = require('../models/infosys');
 var Suggestion = require('../models/suggestion');
@@ -12,11 +16,11 @@ module.exports = function(passport){
 
     //#region SUGGESTION
 
-	router.get('/suggestionlist', isAuthenticated, function(req,res){
+	router.get('/suggestionlist', isAuthenticated, infoCategory, infoIcon, function(req,res){
 		SuggestionList(req,res)
 	});
 	
-	router.get('/suggestion/:_id', isAuthenticated, function(req, res) {
+	router.get('/suggestion/:_id', isAuthenticated, infoCategory, infoIcon, infoUsername, function(req, res) {
 
 		var id = req.params["_id"];
 
@@ -232,7 +236,7 @@ module.exports = function(passport){
 		});
 	});
 
-	router.get('/bookmarklist', isAuthenticated, function(req,res){
+	router.get('/bookmarklist', isAuthenticated, infoIcon, function(req,res){
 		SuggestionList(req,res)
 	});
 
@@ -259,7 +263,7 @@ module.exports = function(passport){
 
 	});
 
-	router.get('/dontshowlist', isAuthenticated, function(req,res){
+	router.get('/dontshowlist', isAuthenticated, infoIcon, function(req,res){
 		SuggestionList(req,res);
 	});
 

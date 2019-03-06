@@ -5,7 +5,7 @@ include ../mixin/iconUrl
 include ../functionScript/fillRatingIcon
 include ../dependency/datatable
 
-mixin Suggestiontable(targetUserId, suggestion, infosys, ownUser)
+mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
     
     .default-table-wrapper(style="max-height:60vh")
         table#suggestionTable.default-table.compact.row-border(
@@ -16,8 +16,8 @@ mixin Suggestiontable(targetUserId, suggestion, infosys, ownUser)
                     th Name
                     th Link
                     if (targetUserId)
-                        th #{infosys.usernames[targetUserId]} Rating
-                        th #{infosys.usernames[targetUserId]} Comment
+                        th #{infoUsername[targetUserId]} Rating
+                        th #{infoUsername[targetUserId]} Comment
                     else
                         th Friends
                         th All Users
@@ -32,7 +32,7 @@ mixin Suggestiontable(targetUserId, suggestion, infosys, ownUser)
                         td
                             -for (var key in suggestion[i].link) {
                                 if (suggestion[i].link.hasOwnProperty(key))
-                                    +IconUrl(infosys, key, suggestion[i].link[key])
+                                    +IconUrl(infoIcon, key, suggestion[i].link[key])
                             -}
                         if (targetUserId)
                             td(data-sort=suggestion[i].userRating[targetUserId])

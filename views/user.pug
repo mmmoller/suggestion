@@ -3,7 +3,7 @@ extends layout/in
 block content
     
     .default-wrapper
-        h1 #{infosys.usernames[usersId[0]]}
+        h1 #{infoUsername[usersId[0]]}
         if (ownUser._id != usersId[0])
             -for (var key in ownUser.correlation[usersId[0]]) {
                 if (ownUser.correlation[usersId[0]].hasOwnProperty(key))
@@ -18,5 +18,5 @@ block content
             +ActionFriend(0, usersId[0], ownUser)
 
     include mixin/suggestionTable
-    +Suggestiontable(usersId[0], suggestion, infosys, ownUser)
+    +Suggestiontable(usersId[0], suggestion, infoIcon, infoUsername, ownUser)
     

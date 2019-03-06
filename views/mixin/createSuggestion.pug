@@ -2,9 +2,9 @@ include ../functionScript/message
 include ../functionScript/checkRating
 include ../functionScript/createSuggestion
 
-mixin CreateSuggestion(infosys)
+mixin CreateSuggestion(infoCategory)
 
-    .default-wrapper#storedData(data-categories=infosys.categories)
+    .default-wrapper#storedData(data-categories=infoCategory)
 
         .form-inline.form-group
             .input-group.form-group
@@ -17,7 +17,7 @@ mixin CreateSuggestion(infosys)
         .form-inline.form-group
             select.form-control(id="selectCategory", onChange="SelectCategory(this)")
                 option(value="" selected disabled hidden) Category
-                -for(var category in infosys.categories){
+                -for(var category in infoCategory){
                     option(value=category) #{category}
                 -}
 

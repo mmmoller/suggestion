@@ -3,8 +3,8 @@ extends layout/in
 block content
 
     include mixin/suggestionTable
-    +Suggestiontable(undefined, suggestion, infosys, ownUser)
+    +Suggestiontable(undefined, suggestion, infoIcon, infoUsername, ownUser)
 
     if (showCreateSuggestion)
         include mixin/createSuggestion
-        +CreateSuggestion(infosys)
+        +CreateSuggestion(infoCategory)

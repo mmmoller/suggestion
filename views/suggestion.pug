@@ -23,7 +23,7 @@ block content
                         
                         -for (var key in suggestion.link) {
                             if (suggestion.link.hasOwnProperty(key))
-                                +IconUrl(infosys, key, suggestion.link[key])
+                                +IconUrl(infoIcon, key, suggestion.link[key])
                         -}
                     td
                         +RatingIcon(0, "FriendOnly")
@@ -38,7 +38,7 @@ block content
     - }
 
     include mixin/editSuggestion
-    +EditSuggestion(infosys, suggestion)
+    +EditSuggestion(infoCategory, suggestion)
 
     include mixin/userTable
-    +Usertable(suggestion, infosys, usersId, ownUser)
+    +Usertable(suggestion, infoCategory, infoUsername, usersId, ownUser)

@@ -4,7 +4,7 @@ include ../dependency/datatable
 include ../functionScript/fillRatingIcon
 
 
-mixin Usertable(suggestion, infosys, usersId, ownUser)
+mixin Usertable(suggestion, infoCategory, infoUsername, usersId, ownUser)
 
     .default-table-wrapper
         table#usertable.default-table.compact.row-border
@@ -14,7 +14,7 @@ mixin Usertable(suggestion, infosys, usersId, ownUser)
                     th Alias
                     if (suggestion)
                         th Rating
-                    -for(var category in infosys.categories){
+                    -for(var category in infoCategory){
                         th #{category} Coeficient
                     -}
                     th Action
@@ -22,7 +22,7 @@ mixin Usertable(suggestion, infosys, usersId, ownUser)
                 - for (var i = 0; i < usersId.length; i++)
                     tr
                         td
-                            a(href='/user/'+ usersId[i], id="userhref"+i) #{infosys.usernames[usersId[i]]}
+                            a(href='/user/'+ usersId[i], id="userhref"+i) #{infoUsername[usersId[i]]}
                         td
                             | Alias
 
@@ -31,7 +31,7 @@ mixin Usertable(suggestion, infosys, usersId, ownUser)
                                 +RatingIcon(i, "UserOnSuggestion")
                         
                         // era j e eu coloquei category
-                        -for(var category in infosys.categories){
+                        -for(var category in infoCategory){
                             if ((ownUser.correlation[usersId[i]]) && (ownUser.correlation[usersId[i]][category]))
                                 td(data-correlation= ownUser.correlation[usersId[i]][category])
                                     +RatingIcon(i + "-" + category, "UserCorrelation")

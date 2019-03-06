@@ -1,8 +1,8 @@
 include ../functionScript/createSuggestion
 
-mixin EditSuggestion(infosys, suggestion)
+mixin EditSuggestion(infoCategory, suggestion)
 
-    .default-wrapper#storedData(data-categories=infosys.categories
+    .default-wrapper#storedData(data-categories=infoCategory
     data-specific-info=suggestion.extraInfo)
 
         input(type='hidden', id='suggestionName', value=suggestion.name)
