@@ -96,7 +96,7 @@ script.
     function FillInfoFromOMDB(index){
         var suggestionName = document.getElementById("suggestionName")
 
-        $.get("http://www.omdbapi.com/?t="+suggestionName.value+"&apikey=d9916e3d", {}, function(data){
+        $.get("https://www.omdbapi.com/?t="+suggestionName.value+"&apikey=d9916e3d", {}, function(data){
             console.log(data)
             if (!data.Error){
 
