@@ -109,6 +109,7 @@ module.exports = function(passport){
                 if (err) return handleError(err,req,res);
             });
             console.log('Categories recreated')
+            res.redirect("/");
         });
     });
     
