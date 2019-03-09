@@ -51,8 +51,6 @@ module.exports = function(passport){
             newUser.username = "admin"
             newUser.permission = 2;
 
-            
-
             newUser.save(function(err) {
                 if (err) return handleError(err,req,res);
                 res.redirect("/");
@@ -102,6 +100,18 @@ module.exports = function(passport){
         });*/
             
     });
+
+    router.get('/category', function(req, res){
+        Category.remove({}, function(err) { 
+            var newCategory = new Category();
+            newCategory.categories = categories;
+            newCategory.save(function (err) {
+                if (err) return handleError(err,req,res);
+            });
+            console.log('Categories recreated')
+        });
+    });
+    
     
     return router;
 }
@@ -112,6 +122,7 @@ var categories = {
             "Plot" : {type: "textarea"},
             "Genre" : {type: "input"},
             "Director" : {type: "input"},
+            "Country" : {type: "input"},
             "Year" : {type: "input"},
         }
     },
