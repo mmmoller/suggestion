@@ -1,0 +1,50 @@
+extends layout/out
+
+mixin RatingIcon(index, iconType)
+    .hvrbox
+        button.btn(name="ratingIcon"+iconType, style="background-color:"+rgb+"; padding: 25px; border-radius:8px", value=index)
+        .hvrbox-layer_top
+            .hvrbox-text(id="ratingText"+iconType+index)
+
+block content
+    //include mixin/ratingIcon
+    include functionScript/ratingToRGB
+    link(rel='stylesheet', href='/stylesheets/hover.css')
+
+    -for(var i = 0; i <= 100; i++){
+        +RatingIcon(i, "Teste")
+    -}
+
+    script.
+        $(document).ready(function() {
+            $('[name=ratingIconTeste]').each(function(){
+                var index = this.value
+                console.log(this.value)
+
+                $(this).css("background-color", RatingToRGB(index/10))
+                $(this).css("padding", 12.5+(index/10)*1.25)
+                $(this).css("border-top-right-radius", 12.5+(index/10)*1.25)
+
+                $('#ratingTextTeste'+index).html(index/10)
+            });
+        });
+    
+
+    script.
+        $(function() {
+            var mobileScreenTreshold = 1024;
+            $(".hvrbox").click(function(e) {
+                if($(window).width() <= mobileScreenTreshold) {
+                    if($(this).hasClass("active")) {
+                        $(this).removeClass("active");
+                    } else {
+                        e.preventDefault();
+                        $(this).addClass("active");
+                    }
+                } else {
+                    $(this).removeClass("active");
+                }
+            });
+        });
+
+    

@@ -6,13 +6,13 @@ module.exports = function (req, res, next) {
         Category.findOne({}, function (err, category){
             if (err) return handleError(err,req,res);
             if (category){
-                console.log("teste")
                 
                 for (key in category.categories){
                     categories.push(key)
                 }
 
-                res.locals.userCategory = req.user.category;
+                res.locals.ownCategory = req.user.category;
+                res.locals.ownPermission = req.user.permission;
                 res.locals.menuCategories = categories;
 
             }
@@ -23,9 +23,9 @@ module.exports = function (req, res, next) {
         });
     }
     else{
-        console.log("not using DB anymore")
 
-        res.locals.userCategory = req.user.category;
+        res.locals.ownCategory = req.user.category;
+        res.locals.ownPermission = req.user.permission;
         res.locals.menuCategories = categories;
 
         return next()

@@ -1,10 +1,10 @@
-include ../mixin/actionFriend
+include ../mixin/actionUser
 include ../mixin/ratingIcon
 include ../dependency/datatable
 include ../functionScript/fillRatingIcon
 
 
-mixin Usertable(suggestion, infoCategory, infoUsername, usersId, ownUser)
+mixin Usertable(suggestion, infoCategory, infoUsername, infoPermission, usersId, ownUser, ownPermission)
 
     .default-table-wrapper
         table#usertable.default-table.compact.row-border
@@ -41,7 +41,7 @@ mixin Usertable(suggestion, infoCategory, infoUsername, usersId, ownUser)
                         -}
 
                         td
-                            +ActionFriend(i, usersId[i], ownUser)
+                            +ActionUser(usersId[i], ownUser, ownPermission, infoPermission)
 
     script.
         $(document).ready(function(){

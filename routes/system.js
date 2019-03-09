@@ -4,43 +4,62 @@ var isAuthenticated = require('../functions/isAuthenticated.js');
 var handleError = require('../functions/handleError.js');
 
 var User = require('../models/user');
-var Infosys = require('../models/infosys');
 var Suggestion = require('../models/suggestion');
 
-var Username = require('../models/username');
 var Category = require('../models/category');
 var Icon = require('../models/icon');
+
+var mongoose = require('mongoose');
 
 module.exports = function(passport){
 
     // System 
-    router.get('/infosys', function(req, res) {
-        var newInfosys = new Infosys();
-        newInfosys.usernames = {};
-        newInfosys.categories = infosysCategories;
-        newInfosys.types = infosysTypes;
-
-        newInfosys.save(function (err) {
-            if (err) return handleError(err,req,res);
-            res.send("teste");
-        });
-    })
 
     router.get('/delete', function(req, res){
-        User.remove({}, function(err) { 
-            console.log('Users removed')
-        });
-        Infosys.remove({}, function(err) { 
-            console.log('Infosys removed')
-        });
-        Suggestion.remove({}, function(err) { 
-            console.log('Suggestions removed')
-        });
+        //mongoose.connection.collections['User'].drop( function(err) {
+       //     console.log('collection dropped');
+        //});
+
+        mongoose.connection.db.dropDatabase(function (err) {
+            console.log('db dropped');
+            process.exit(0);
+          });
         res.send("Deletado");
     });
 
     router.get('/r', function(req, res){
         
+        mongoose.connection.db.dropDatabase(function (err) {
+            var newCategory = new Category();
+            newCategory.categories = categories;
+            newCategory.save(function (err) {
+                if (err) return handleError(err,req,res);
+            });
+            console.log('Categories recreated')
+
+            var newIcon = new Icon();
+            newIcon.icons = icons;
+            newIcon.save(function (err) {
+                if (err) return handleError(err,req,res);
+            });
+            console.log('Icons recreated')
+
+            console.log('Users removed')
+            var newUser = new User();
+            newUser.local.email = "admin";
+            newUser.local.password = newUser.generateHash("admin");
+            newUser.username = "admin"
+            newUser.permission = 2;
+
+            
+
+            newUser.save(function(err) {
+                if (err) return handleError(err,req,res);
+                res.redirect("/");
+            });
+        });
+
+        /*
         Suggestion.remove({}, function(err) { 
             console.log('Suggestions removed')
         });
@@ -63,34 +82,25 @@ module.exports = function(passport){
             console.log('Icons recreated')
         });
 
-        Username.remove({}, function(err) {
 
-            User.remove({}, function(err) { 
+        User.remove({}, function(err) { 
 
-                console.log('Users removed')
-                var newUser = new User();
-                newUser.local.email = "admin";
-                newUser.local.password = newUser.generateHash("admin");
-                newUser.username = "admin"
-                newUser.permission = 2;
+            console.log('Users removed')
+            var newUser = new User();
+            newUser.local.email = "admin";
+            newUser.local.password = newUser.generateHash("admin");
+            newUser.username = "admin"
+            newUser.permission = 2;
 
-                console.log('Usernames removed')
-                var newUsername = new Username();
-                newUsername.usernames = {};
-                newUsername.usernames[newUser._id] = newUser.username;
-                newUsername.markModified("usernames");
-
-                newUser.save(function(err) {
-                    if (err) return handleError(err,req,res);
-                    newUsername.save(function (err) {
-                        if (err) return handleError(err,req,res);
-                        res.redirect("/");
-                    });
-                });
-
-            });
             
-        });
+
+            newUser.save(function(err) {
+                if (err) return handleError(err,req,res);
+                res.redirect("/");
+            });
+
+        });*/
+            
     });
     
     return router;

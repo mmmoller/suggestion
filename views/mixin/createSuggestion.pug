@@ -6,6 +6,9 @@ mixin CreateSuggestion(infoCategory)
 
     .default-wrapper#storedData(data-categories=infoCategory)
 
+        include ../mixin/message
+        +Message
+
         .form-inline.form-group
             .input-group.form-group
                 .input-group-prepend
@@ -51,8 +54,8 @@ mixin CreateSuggestion(infoCategory)
         }
 
         function FillCategory(){
-            if (userCategory.value != "All"){
-                selectCategory.value = userCategory.value;
+            if (ownCategory.value != "All"){
+                selectCategory.value = ownCategory.value;
                 SelectCategory(selectCategory);
             }
         }
@@ -85,22 +88,18 @@ mixin CreateSuggestion(infoCategory)
                 
                 if (data.success){
 
-                    name.value = "";
 
+                    name.value = "";
                     category.value = "";
                     category.text = "Category"
-                    
-                    var addLinkDiv = document.getElementById("LinkDiv")
-                    while (addLinkDiv.firstChild) {
-                        addLinkDiv.removeChild(addLinkDiv.firstChild);
-                    }
 
-                    rating.value = "";
+                    ClearSpecificInfoFields()
+                    ClearUrlFields()
+
+                    rating.value = ""
                 }
-
-                alert(data.message)
-
-                //Message(data.message)
+                
+                Message(data.message)
             });
         }
 

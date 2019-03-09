@@ -1,6 +1,6 @@
 include ../functionScript/createSuggestion
 
-mixin EditSuggestion(infoCategory, suggestion)
+mixin EditSuggestion(infoCategory, suggestion, ownPermission)
 
     .default-wrapper#storedData(data-categories=infoCategory
     data-specific-info=suggestion.extraInfo)
@@ -10,8 +10,9 @@ mixin EditSuggestion(infoCategory, suggestion)
         .form-inline.form-group
             input.form-control(type='text', id='selectCategory', value=suggestion.category, readonly="readonly", style="width:115px")
 
-            include ../mixin/addLinkBtn
-            +AddLinkBtn()
+            if (ownPermission)
+                include ../mixin/addLinkBtn
+                +AddLinkBtn()
 
         div#LinkDiv
             -for (var key in suggestion.link) {
@@ -20,19 +21,26 @@ mixin EditSuggestion(infoCategory, suggestion)
                         .input-group-prepend
                             .input-group-text Url
                         input.form-control(name="url", placeholder="Url", value=suggestion.link[key])
-                        .input-group-append
-                            input.btn.btn-danger(type="button", value="X", onclick="DeleteUrl(this)")
+                        if (ownPermission)
+                            .input-group-append
+                                input.btn.btn-danger(type="button", value="X", onclick="DeleteUrl(this)")
             -}
 
         div#SpecificInfoDiv
 
-        button.form-group.btn.btn-primary.btn-block(id="btn", value=suggestion._id, onclick="EditSuggestion(this)", style="margin-left: auto") Edit Suggestion
+        if (ownPermission)
+            button.form-group.btn.btn-primary.btn-block(id="btn", value=suggestion._id, onclick="EditSuggestion(this)", style="margin-left: auto") Edit Suggestion
 
     script.
         $(document).ready(function() {
             var category = document.getElementById("selectCategory")
+            var permission = document.getElementById("ownPermission")
+            console.log(permission)
             AddSpecificInfoFields(category)
             FillSpecificInfoFields(category)
+            if(permission.value==0){
+                DisableSpecificInfoFields(category)
+            }
         });
 
         function FillSpecificInfoFields(index){
@@ -43,7 +51,32 @@ mixin EditSuggestion(infoCategory, suggestion)
 
             for (info in category.specificInfo){
                 document.getElementById(info).value = suggestionExtraInfo[info]
+                
             }
+
+
+            
+        }
+
+        function DisableSpecificInfoFields(index){
+
+            var categories = $("#storedData").data("categories");
+            var category = categories[index.value]
+
+            for (info in category.specificInfo){
+                document.getElementById(info).setAttribute("disabled", "true")
+                
+            }
+
+            removeVerify = document.getElementById("verifyBtn")
+            if (removeVerify)
+                removeVerify.remove();
+
+            var urls = document.getElementsByName("url");
+            for (var i = 0; i < urls.length;i++){
+                urls[i].setAttribute("disabled", "true")
+            }
+                    
         }
 
     // To POST (Edit Suggestion)

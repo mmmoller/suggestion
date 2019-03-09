@@ -31,14 +31,9 @@ block content
                         +RatingIcon(0, "AllUsers")
                     +ReviewSuggestion(suggestion, 0, ownUser._id, ownUser.bookmark)
     
-    -var usersId = []
-    - for (var id in suggestion.userRating){
-        if (suggestion.userRating.hasOwnProperty(id))
-            -usersId.push(id)
-    - }
 
     include mixin/editSuggestion
-    +EditSuggestion(infoCategory, suggestion)
+    +EditSuggestion(infoCategory, suggestion, ownPermission)
 
     include mixin/userTable
-    +Usertable(suggestion, infoCategory, infoUsername, usersId, ownUser)
+    +Usertable(suggestion, infoCategory, infoUsername, infoPermission, usersId, ownUser, ownPermission)

@@ -1,24 +1,23 @@
 var express = require('express');
 var router = express.Router();
+var isAdmin = require('../functions/isAdmin.js');
 var isAuthenticated = require('../functions/isAuthenticated.js');
 var isAuthenticatedWithRedirect = require('../functions/isAuthenticatedWithRedirect.js');
 var handleError = require('../functions/handleError.js');
 
 var infoCategory = require('../functions/infoCategory.js');
 var infoIcon = require('../functions/infoIcon.js');
-var infoUsername = require('../functions/infoUsername.js');
+var infoUser = require('../functions/infoUser.js');
 
 var User = require('../models/user');
-var Infosys = require('../models/infosys');
 var Suggestion = require('../models/suggestion');
 
 module.exports = function(passport){
 
 
     //#region USER
-	router.get('/user/:_id', isAuthenticatedWithRedirect, infoIcon, infoUsername, function(req, res) {
+	router.get('/user/:_id', isAuthenticatedWithRedirect, infoIcon, function(req, res) {
 
-		
 		var id = req.params["_id"];
 		var categoryQuery = (req.user.category == "All") ? {} : {"category" : req.user.category}
 		var mainQuery = {["userRating." + id] : {$exists: true}}
@@ -27,43 +26,30 @@ module.exports = function(passport){
 			categoryQuery,
 		]}
 
-		Infosys.findOne({}, function(err, infosys){
+		Suggestion.find(query, function(err, suggestion){
 			if (err) return handleError(err,req,res);
-			if (infosys){
-
-				Suggestion.find(query, function(err, suggestion){
-					if (err) return handleError(err,req,res);
-					if (suggestion){
-
-						/*
-						var correlation = {}
-						if (req.user.correlation[id])
-							correlation = req.user.correlation[id];
-						var user = {_id : id, name: infosys.usernames[id], correlation: correlation}
-						console.log(user);*/
-
-						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-						
-						var usersId = [id]
+			if (suggestion){
 
 
-						res.render('user', {usersId: usersId, ownUser: ownUser,
-							 suggestion: suggestion, infosys: infosys, message: req.flash("message"), 
-							userPermission: req.user.permission});
+				var ownUser = {_id: req.user._id, correlation: req.user.correlation,
+					friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+				
+				var usersId = [id]
 
-					}
-					else{
-						req.flash('message', "!Suggestions does not exist! Contact Admin");
-						res.redirect("/account")
-					}
+				infoUser(true, true, usersId, req, res, function(){
+
+					res.render('user', {usersId: usersId, ownUser: ownUser, 
+						suggestion: suggestion, message: req.flash("message"), 
+						userPermission: req.user.permission});
 				});
+
 			}
-			else {
-				req.flash('message', "!Infosys does not exist! Contact Admin");
+			else{
+				req.flash('message', "!Suggestions does not exist! Contact Admin");
 				res.redirect("/account")
 			}
 		});
+			
 	});
 
 	// IMPLEMENT
@@ -76,7 +62,7 @@ module.exports = function(passport){
 		res.redirect('/user/' + req.user._id);
 	});
 
-	router.get('/userlist', isAuthenticated, infoCategory, infoUsername, function(req, res) {
+	router.get('/userlist', isAuthenticated, infoCategory, function(req, res) {
 		var name = req.query["search_name"];
 		User.find({$or: [
 			{'username': {'$regex': name, "$options": "i"}},
@@ -91,22 +77,14 @@ module.exports = function(passport){
 					usersId.push(String(users[i]._id))
 				}
 
+				var ownUser = {_id: req.user._id, correlation: req.user.correlation,
+					friendlist: req.user.friendlist, bookmark: req.user.bookmark}
 
-				Infosys.findOne({}, function(err, infosys){
-					if (err) return handleError(err,req,res);
-					if (infosys){
-
-						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-
-						res.render('userlist', {ownUser: ownUser, usersId: usersId, 
-							infosys:infosys, message: req.flash("message"), 
-							userPermission: req.user.permission})
-					}
-					else {
-						req.flash('message', "!Infosys does not exist! Contact Admin");
-						res.redirect("/account")
-					}
+				infoUser(true, true, usersId, req, res, function(){
+					
+					res.render('userlist', {ownUser: ownUser, usersId: usersId, 
+						message: req.flash("message"), userPermission: req.user.permission})
+						
 				});
 
 			}
@@ -117,30 +95,21 @@ module.exports = function(passport){
 		});
 	});
 
-	router.get('/friendlist', isAuthenticated, infoUsername, function(req, res){
+	router.get('/friendlist', isAuthenticated, function(req, res){
 
-		Infosys.findOne({}, function(err, infosys){
-			if (err) return handleError(err,req,res);
-			if (infosys){
-				
-				var usersId = [];
+		var usersId = [];
 
-				for (var i = 0; i < req.user.friendlist.length; i++) {
-					usersId.push(req.user.friendlist[i])
-				}
+		for (var i = 0; i < req.user.friendlist.length; i++) {
+			usersId.push(req.user.friendlist[i])
+		}
 
-				var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-					friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-				
-
-				res.render('userlist', {ownUser: ownUser, usersId: usersId,
-					infosys:infosys, message: req.flash("message"), 
-					userPermission: req.user.permission})
-			}
-			else {
-				req.flash('message', "!Infosys does not exist! Contact Admin");
-				res.redirect("/account")
-			}
+		var ownUser = {_id: req.user._id, correlation: req.user.correlation,
+			friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+		
+		infoUser(true, true, usersId, req, res, function(){
+			
+			res.render('userlist', {ownUser: ownUser, usersId: usersId, 
+				message: req.flash("message"), userPermission: req.user.permission})
 		});
 
 	});
@@ -170,7 +139,7 @@ module.exports = function(passport){
 
 	});
 
-	router.post('/user_category', isAuthenticated, function(req, res){
+	router.post('/own_category', isAuthenticated, function(req, res){
 
 		req.user.category = req.body["category"]
 		req.user.markModified("category");
@@ -180,6 +149,22 @@ module.exports = function(passport){
 
 		res.send({success: "success"})
 
+	});
+
+	router.post('/user_permission', isAdmin, function(req, res){
+		User.findOne({_id : req.body["userId"]}, function(err, user){
+			if (err) return handleError(err,req,res);
+			if (user){
+				user.permission = req.body["permission"]
+				user.save(function (err) {
+					if (err) return handleError(err,req,res);
+				});
+				res.send({success: "Success"})
+			}
+			else{
+				res.send({})
+			}
+		})
 	});
 
 	//#endregion

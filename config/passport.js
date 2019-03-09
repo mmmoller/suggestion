@@ -3,7 +3,6 @@ var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 
 var User       = require('../models/user');
-var Infosys = require('../models/infosys');
 
 module.exports = function(passport) {
 
@@ -102,30 +101,13 @@ module.exports = function(passport) {
 
                     newUser.local.email    = email;
                     newUser.local.password = newUser.generateHash(password);
-
-                    Infosys.findOne({}, function(err, infosys){
+                    newUser.username = newUser.local.email;
+                    newUser.save(function(err) {
                         if (err)
                             return done(err);
-                        if (infosys){
-                            
-                            newUser.username = newUser.local.email;
-                            infosys.usernames[newUser._id] = newUser.username;
-                            infosys.markModified("usernames");
-                            infosys.save(function(err){
-                                if (err)
-                                    return done(err);
-                                newUser.save(function(err) {
-                                    if (err)
-                                        return done(err);
-                                    return done(null, newUser);
-                                });
-                            });
-
-                        }
-                        else {
-                            console.log("bugou");
-                        }
+                        return done(null, newUser);
                     });
+
                 }
 
             });
@@ -151,6 +133,8 @@ module.exports = function(passport) {
             // check if the user is already logged in
             if (!req.user) {
 
+                console.log("wtf?")
+
                 User.findOne({ 'google.id' : profile.id }, function(err, user) {
                     if (err)
                         return done(err);
@@ -167,30 +151,16 @@ module.exports = function(passport) {
                         newUser.google.name  = profile.displayName;
                         newUser.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
 
-                        Infosys.findOne({}, function(err, infosys){
+
+                                
+                        newUser.username = profile.displayName;
+
+                        newUser.save(function(err) {
                             if (err)
                                 return done(err);
-                            if (infosys){
-                                
-                                newUser.username = profile.displayName;
-                                infosys.usernames[newUser._id] = newUser.username;
-                                infosys.markModified("usernames");
-                                infosys.save(function(err){
-                                    if (err)
-                                        return done(err);
-                                    newUser.save(function(err) {
-                                        if (err)
-                                            return done(err);
-                                        return done(null, newUser);
-                                    });
-                                });
-
-                            }
-                            else {
-                                req.flash("message", "!Infosys not created. Contact admin");
-                                return done(null, false);
-                            }
+                            return done(null, newUser);
                         });
+
                     }
                 });
 
@@ -206,7 +176,7 @@ module.exports = function(passport) {
                     }
                     else {
 
-
+                        console.log("foi aqui")
                         // user already exists and is logged in, we have to link accounts
                         var user_               = req.user; // pull the user out of the session
 
@@ -268,30 +238,15 @@ module.exports = function(passport) {
                         newUser.facebook.email = profile.emails[0].value;
 
 
-                        Infosys.findOne({}, function(err, infosys){
+                        
+                        newUser.username = newUser.facebook.name;
+                        
+                        newUser.save(function(err) {
                             if (err)
                                 return done(err);
-                            if (infosys){
-                                
-                                newUser.username = newUser.facebook.name;
-                                infosys.usernames[newUser._id] = newUser.username;
-                                infosys.markModified("usernames");
-                                infosys.save(function(err){
-                                    if (err)
-                                        return done(err);
-                                    newUser.save(function(err) {
-                                        if (err)
-                                            return done(err);
-                                        return done(null, newUser);
-                                    });
-                                });
-
-                            }
-                            else {
-                                req.flash("message", "!Infosys not created. Contact admin");
-                                return done(null, false);
-                            }
+                            return done(null, newUser);
                         });
+
                     }
                 });
 

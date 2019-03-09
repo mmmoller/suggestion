@@ -1,6 +1,7 @@
 script.
     function SelectCategory(index){
-        ClearSpecificInfoFields(index)
+        ClearSpecificInfoFields()
+        ClearUrlFields()
         AddSpecificInfoFields(index)
     }
 
@@ -66,7 +67,7 @@ script.
         return option
     }
 
-    function ClearSpecificInfoFields(index){
+    function ClearSpecificInfoFields(){
         var divSpecificInfo = document.getElementById("SpecificInfoDiv");
 
         while (divSpecificInfo.firstChild) {
@@ -82,6 +83,14 @@ script.
         if (selectType){
             selectType.parentNode.removeChild(selectType)
         }
+    }
+
+    function ClearUrlFields(){
+        var addLinkDiv = document.getElementById("LinkDiv")
+        while (addLinkDiv.firstChild) {
+            addLinkDiv.removeChild(addLinkDiv.firstChild);
+        }
+        AddLink()
     }
 
     function FillInfoFromOMDB(index){
@@ -165,6 +174,6 @@ script.
             return "Spotify"
         }
         else{
-            return "Icon"+index
+            return "Unknown"+index
         }
     }

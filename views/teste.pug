@@ -2,4 +2,15 @@ extends layout/out
 
 block content
 
-    h1 #{banana}
+    button.btn(style="margin:auto", onclick="Teste(this)")
+
+    script.
+        function Teste(index){
+            $.post("/teste",{}, function(data){
+                if (data.success){
+                }
+                else{
+                    alert("Wtf you doing? You don't have permission!")
+                }
+            });
+        }

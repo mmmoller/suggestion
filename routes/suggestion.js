@@ -6,10 +6,10 @@ var handleError = require('../functions/handleError.js');
 
 var infoCategory = require('../functions/infoCategory.js');
 var infoIcon = require('../functions/infoIcon.js');
-var infoUsername = require('../functions/infoUsername.js');
+var infoUser = require('../functions/infoUser.js');
 
 var User = require('../models/user');
-var Infosys = require('../models/infosys');
+
 var Suggestion = require('../models/suggestion');
 
 module.exports = function(passport){
@@ -20,7 +20,7 @@ module.exports = function(passport){
 		SuggestionList(req,res)
 	});
 	
-	router.get('/suggestion/:_id', isAuthenticated, infoCategory, infoIcon, infoUsername, function(req, res) {
+	router.get('/suggestion/:_id', isAuthenticated, infoCategory, infoIcon, function(req, res) {
 
 		var id = req.params["_id"];
 
@@ -28,22 +28,23 @@ module.exports = function(passport){
 			if (err) return handleError(err,req,res);
 
 			if (suggestion){
-				Infosys.findOne({}, function (err, infosys){
-					if (err) return handleError(err,req,res);
-					if (infosys){
+				
+				var ownUser = {_id: req.user._id, correlation: req.user.correlation,
+					friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+				
+				var usersId = []
+				for (var id in suggestion.userRating){
+					if (suggestion.userRating.hasOwnProperty(id))
+						usersId.push(id)
+				}
+				
+				infoUser(true, true, usersId, req, res, function(){
 
-						var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-							friendlist: req.user.friendlist, bookmark: req.user.bookmark}
-
-						res.render('suggestion', {suggestion: suggestion, infosys: infosys,
-							message: req.flash("message"), ownUser: ownUser, 
-							userPermission: req.user.permission})
-					}
-					else{
-						req.flash('message', "!Infosys don't exist");
-						res.redirect('/account');
-					}
+					res.render('suggestion', {suggestion: suggestion, usersId: usersId, 
+						message: req.flash("message"), ownUser: ownUser, 
+						userPermission: req.user.permission})
 				});
+
 			}
 
 			else{
@@ -55,47 +56,37 @@ module.exports = function(passport){
 
 	router.post('/create_suggestion', isAuthenticated, function(req, res) {
 
-		Infosys.findOne({}, function (err, infosys){
+		var name = req.body["name"];
+		var category = req.body["category"];
+
+		Suggestion.findOne({$and: [{name: name}, {category: category}]}, function (err, suggestion){
 			if (err) return handleError(err,req,res);
-			if (infosys){
-
-				var name = req.body["name"];
-				var category = req.body["category"];
-
-				Suggestion.findOne({$and: [{name: name}, {category: category}]}, function (err, suggestion){
-					if (err) return handleError(err,req,res);
-					if (suggestion){
-						req.flash('message', "!Suggestion already exists");
-						res.send({success:false, message:req.flash("message")});
-					}
-					else{
-
-						var newSuggestion = new Suggestion();
-						newSuggestion.name = name;
-						newSuggestion.category = category;
-						if (req.body["rating"])
-							newSuggestion.userRating[req.user._id] = req.body["rating"];
-						if (req.body["link"])
-							newSuggestion.link = req.body["link"];
-						newSuggestion.extraInfo = req.body["extraInfo"];
-
-						console.log(newSuggestion);
-
-						newSuggestion.save(function (err) {
-							if (err) return handleError(err,req,res);
-						});
-
-						req.flash('message', "Suggestion successfully created");
-						res.send({success:true, message:req.flash("message")});
-					}
-				});
-		
-			}	
-			else{
-				req.flash('message', "!Infosys don't exist");
+			if (suggestion){
+				req.flash('message', "!Suggestion already exists");
 				res.send({success:false, message:req.flash("message")});
 			}
+			else{
+
+				var newSuggestion = new Suggestion();
+				newSuggestion.name = name;
+				newSuggestion.category = category;
+				if (req.body["rating"])
+					newSuggestion.userRating[req.user._id] = req.body["rating"];
+				if (req.body["link"])
+					newSuggestion.link = req.body["link"];
+				newSuggestion.extraInfo = req.body["extraInfo"];
+
+				console.log(newSuggestion);
+
+				newSuggestion.save(function (err) {
+					if (err) return handleError(err,req,res);
+				});
+
+				req.flash('message', "Suggestion successfully created");
+				res.send({success:true, message:req.flash("message")});
+			}
 		});
+		
 	});
 
 	router.post('/edit_suggestion', isAuthenticated, function(req, res) {
@@ -317,22 +308,14 @@ function SuggestionList(req, res){
 		if (err) return handleError(err,req,res);
 		if (suggestion){
 			
-			Infosys.findOne({}, function (err, infosys){
-				if (err) return handleError(err,req,res);
-				if (infosys){
-					// Usar ratings e coeficientes
+			// Usar ratings e coeficientes
 
-					var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-						friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+			var ownUser = {_id: req.user._id, correlation: req.user.correlation,
+				friendlist: req.user.friendlist, bookmark: req.user.bookmark}
 
-					res.render('suggestionlist', {suggestion: suggestion, infosys: infosys,
-						message: req.flash("message"), ownUser: ownUser, showCreateSuggestion: showCreateSuggestion})
-				}
-				else{
-					req.flash('message', "!Infosys don't exist");
-					res.redirect('/account');
-				}
-			});
+			res.render('suggestionlist', {suggestion: suggestion, 
+				message: req.flash("message"), ownUser: ownUser, showCreateSuggestion: showCreateSuggestion})
+		
 		}
 		else{
 			req.flash('message', "!Suggestion don't exist");

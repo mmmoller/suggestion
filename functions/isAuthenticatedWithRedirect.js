@@ -1,8 +1,8 @@
-var menuCategory = require('./menuCategory.js');
+var infoMenu = require('./infoMenu.js');
 
 module.exports = function (req, res, next) {
     if (req.isAuthenticated()){
-        menuCategory(req, res, next);
+        infoMenu(req, res, next);
     }
     else{
 

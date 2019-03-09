@@ -14,8 +14,8 @@ block content
             -}
             br
 
-            include mixin/actionFriend
-            +ActionFriend(0, usersId[0], ownUser)
+            include mixin/actionUser
+            +ActionUser(usersId[0], ownUser, ownPermission, infoPermission)
 
     include mixin/suggestionTable
     +Suggestiontable(usersId[0], suggestion, infoIcon, infoUsername, ownUser)

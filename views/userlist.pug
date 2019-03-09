@@ -3,6 +3,6 @@ extends layout/in
 block content
     .default-wrapper
         h1 Userlist
-
+        
     include mixin/userTable
-    +Usertable(undefined, infoCategory, infoUsername, usersId, ownUser)
+    +Usertable(undefined, infoCategory, infoUsername, infoPermission, usersId, ownUser, ownPermission)

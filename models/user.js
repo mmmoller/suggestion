@@ -10,7 +10,7 @@ var userSchema = mongoose.Schema({
     /*correlation:{
         _id : {
             //isFriend: Boolean, (OLD, NOT WORKING ANYMORE)
-            (forEach Category in Infosys){
+            (forEach Category in infoCategory){
                 Category: {
                     ratingSum : Number
                     ratingCount : Number

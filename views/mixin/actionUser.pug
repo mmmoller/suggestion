@@ -1,0 +1,52 @@
+include ../functionScript/message
+
+mixin ActionUser(userId, ownUser, ownPermission, infoPermission)
+    .form-inline
+        +ActionFriend(userId, ownUser)
+        if (ownPermission == 2)
+            +ActionPermission(userId, infoPermission[userId])
+
+mixin ActionPermission(userId, userPermission)
+    select.form-control(data-user-id=userId, style="margin-left:auto", onChange="UserPermission(this)")
+        -for(var i = 0; i < 3; i++){
+            -if (userPermission == i)
+                option(value=i, selected) #{i}
+            -else
+                option(value=i) #{i}
+        -}
+
+script.
+    function UserPermission(index){
+        var userId = $(index).data("user-id");
+        var permission = index.value
+        $.post("/user_permission",{userId:userId, permission:permission}, function(data){
+            if (data.success){
+            }
+            else{
+                alert("Wtf you doing? You don't have permission!")
+            }
+        });
+    }
+
+mixin ActionFriend(userId, ownUser)
+
+    if (userId != ownUser._id)
+        - var option = (ownUser.friendlist.indexOf(userId) > -1) ? "fas fa-user-minus" : "fas fa-user-plus"
+        //input(type='hidden', id="targetUserid"+index, value=userId)
+        button.btn(class=option, style="margin:auto" value=userId, onclick="ActionFriend(this)")
+
+script.
+    function ActionFriend(index){
+
+        //var target_id = document.getElementById("targetUserid"+index.value);
+
+        $.post("/action_friend",{target_id:index.value}, function(data){
+
+            if (data.option == "fa-user-minus")
+                $(index).removeClass("fa-user-plus").addClass("fa-user-minus")
+            else
+                $(index).removeClass("fa-user-minus").addClass("fa-user-plus")
+
+            //Message(data.message)
+        });
+    }   

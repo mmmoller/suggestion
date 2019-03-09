@@ -8,7 +8,7 @@ var async = require('async');
 var crypto = require('crypto')
 
 var User = require('../models/user');
-var Infosys = require('../models/infosys');
+
 var Suggestion = require('../models/suggestion');
 
 module.exports = function(passport){
@@ -152,20 +152,9 @@ module.exports = function(passport){
 			if (err) return handleError(err,req,res);
 		});
 
-		Infosys.findOne({}, function(err, infosys){
-			if (err) return handleError(err,req,res);
-			if (infosys){
-				infosys.usernames[req.user._id] = req.user.username;
-				infosys.markModified("usernames");
-				infosys.save(function (err) {
-					if (err) return handleError(err,req,res);
-				});
-			}
-			req.flash('message', "Username has been changed");
-			res.redirect('/account');
-		});
+		req.flash('message', "Username has been changed");
+		res.redirect('/account');
 
-		
 	});
 
 	router.post('/change_password', isAuthenticated, function(req, res) {
@@ -200,51 +189,41 @@ module.exports = function(passport){
 					});
 				}
 
-				Infosys.findOne({}, function(err, infosys){
+
+				var query = {$or : [
+					{["userRating."+ req.user._id] : {$exists: true}},
+					{["userComment."+ req.user._id] : {$exists: true}},
+				]}
+
+				Suggestion.find(query, function(err, suggestions){
 					if (err) return handleError(err,req,res);
-					if (infosys){
-						delete infosys.usernames[req.user._id];
-						infosys.markModified("usernames");
-						infosys.save(function (err) {
+					for (var i = 0; i < suggestions.length; i++){
+						delete suggestions[i].userRating[req.user._id];
+						delete suggestions[i].userComment[req.user._id];
+						suggestions[i].markModified("userRating");
+						suggestions[i].markModified("userComment");
+						suggestions[i].save(function (err) {
 							if (err) return handleError(err,req,res);
 						});
 					}
 
-					var query = {$or : [
-						{["userRating."+ req.user._id] : {$exists: true}},
-						{["userComment."+ req.user._id] : {$exists: true}},
-					]}
-
-					Suggestion.find(query, function(err, suggestions){
+					User.findOne({_id: req.user._id}, function(err, user){
 						if (err) return handleError(err,req,res);
-						for (var i = 0; i < suggestions.length; i++){
-							delete suggestions[i].userRating[req.user._id];
-							delete suggestions[i].userComment[req.user._id];
-							suggestions[i].markModified("userRating");
-							suggestions[i].markModified("userComment");
-							suggestions[i].save(function (err) {
+						if (user){
+							user.remove();
+							user.save(function (err) {
 								if (err) return handleError(err,req,res);
 							});
+							req.flash('message', "Account has been deleted");
+							res.redirect('/logout');
 						}
-
-						User.findOne({_id: req.user._id}, function(err, user){
-							if (err) return handleError(err,req,res);
-							if (user){
-								user.remove();
-								user.save(function (err) {
-									if (err) return handleError(err,req,res);
-								});
-								req.flash('message', "Account has been deleted");
-								res.redirect('/logout');
-							}
-							else{
-								req.flash('message', "!User not found");
-								res.redirect('/account');
-							}
-						});
+						else{
+							req.flash('message', "!User not found");
+							res.redirect('/account');
+						}
 					});
-
 				});
+
 
 			});
 		}
