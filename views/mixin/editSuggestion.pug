@@ -1,4 +1,6 @@
+include ../functionScript/message
 include ../functionScript/createSuggestion
+
 
 mixin EditSuggestion(infoCategory, suggestion, ownPermission)
 
@@ -6,6 +8,9 @@ mixin EditSuggestion(infoCategory, suggestion, ownPermission)
     data-specific-info=suggestion.extraInfo)
 
         input(type='hidden', id='suggestionName', value=suggestion.name)
+
+        include ../mixin/message
+        +Message
 
         .form-inline.form-group
             input.form-control(type='text', id='selectCategory', value=suggestion.category, readonly="readonly", style="width:115px")
@@ -94,6 +99,6 @@ mixin EditSuggestion(infoCategory, suggestion, ownPermission)
                 if (data.success){
                 }
 
-                alert(data.message)
+                Message(data.message)
             });
         }

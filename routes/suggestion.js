@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var isAuthenticated = require('../functions/isAuthenticated.js');
+var isModerator = require('../functions/isModerator.js');
 var handleError = require('../functions/handleError.js');
 
 var infoCategory = require('../functions/infoCategory.js');
@@ -89,7 +90,7 @@ module.exports = function(passport){
 		
 	});
 
-	router.post('/edit_suggestion', isAuthenticated, function(req, res) {
+	router.post('/edit_suggestion', isModerator, function(req, res) {
 		Suggestion.findOne({_id: req.body["suggestionId"]}, function (err, suggestion){
 			if (err) return handleError(err,req,res);
 			if (suggestion){
