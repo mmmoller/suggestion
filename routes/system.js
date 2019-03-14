@@ -106,7 +106,7 @@ var categories = {
         specificInfo : {
             "Type" : {
                 type: "select",
-                options: ["Music", "Artist", "Album", "Playlist"],
+                options: ["Music", "Artist", "Album", "Playlist", "Radio"],
                 addTag: true,
             },
             "Artist" : {type: "input", addTag: true},

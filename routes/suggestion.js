@@ -99,6 +99,8 @@ module.exports = function(passport){
 			if (err) return handleError(err,req,res);
 			if (suggestion){
 
+				suggestion.name = req.body["name"]
+
 				if (req.body["link"]){
 					suggestion.link = req.body["link"];
 				}

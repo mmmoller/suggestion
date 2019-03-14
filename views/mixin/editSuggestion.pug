@@ -105,11 +105,12 @@ mixin EditSuggestion(infoCategory, infoIcon, suggestion, ownPermission)
             var link = urlToLinkJSON("url")
 
             var category = document.getElementById("selectCategory")
+            var name = document.getElementById("suggestionName")
             var extraInfo = CreateJSONExtraInfo(category.value)
             var tag = CreateJSONTag(category.value)
 
             $.post("/edit_suggestion",{link:link, suggestionId:index.value,
-            extraInfo: extraInfo, tag:tag}, function(data){
+            extraInfo: extraInfo, tag:tag, name:name.value}, function(data){
                 
                 Toastr(data.message, data.type)
             });
