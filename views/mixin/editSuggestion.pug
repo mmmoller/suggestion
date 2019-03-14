@@ -8,8 +8,15 @@ mixin EditSuggestion(infoCategory, infoIcon, suggestion, ownPermission)
     data-icons=infoIcon,
     data-specific-info=suggestion.extraInfo)
 
-        input(type='hidden', id='suggestionName', value=suggestion.name)
-
+        
+        if (ownPermission)
+            .form-inline.form-group
+                .input-group.form-group
+                    .input-group-prepend
+                        .input-group-text Name
+                    input.form-control(type='text', id='suggestionName', value=suggestion.name)
+        else
+            input(type='hidden', id='suggestionName', value=suggestion.name)
         
 
         .form-inline.form-group
