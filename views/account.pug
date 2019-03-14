@@ -1,24 +1,27 @@
 extends layout/in
 
 block content
-    script.
-        function CheckPassword(){
-            if (document.getElementById('new_password').value ==
-             document.getElementById('confirm_password').value &&
-             document.getElementById('new_password').value != ""){
-                document.getElementById('submit').disabled = false;
-                document.getElementById('submit').setAttribute("class", "btn btn-primary form-group")
-            }
-            else{
-                document.getElementById('submit').disabled = true;
-                document.getElementById('submit').setAttribute("class", "btn btn-secondary form-group")
-            }
-        }
+
+    include functionScript/message
+    include functionScript/toastr
+    
     include mixin/message
     +Message(message)
 
     .default-wrapper(style="width:90%")
         h1 #{user.username}
+        .input-group.form-group
+            .input-group-prepend
+                .input-group-text User's Description
+            textarea.form-control(id="ownDescription", value=user.description) #{user.description}
+            .input-group-append
+                input.btn.btn-primary(type="button", value="Update", onclick="OwnDescription(this)")
+        .input-group.form-group
+            .input-group-prepend
+                .input-group-text User's Url
+            input.form-control(id="ownUrl", value=user.url)
+            .input-group-append
+                input.btn.btn-primary(type="button", value="Update", onclick="OwnUrl(this)")
         .container(style="margin-top:40px")
             .row
                 .col.vertical-bar
@@ -89,6 +92,35 @@ block content
                     else
                         br
                         a.btn.btn-outline-primary(href="/connect/facebook") Link Facebook Account
-                    
+
+    script.
+        function CheckPassword(){
+            if (document.getElementById('new_password').value ==
+             document.getElementById('confirm_password').value &&
+             document.getElementById('new_password').value != ""){
+                document.getElementById('submit').disabled = false;
+                document.getElementById('submit').setAttribute("class", "btn btn-primary form-group")
+            }
+            else{
+                document.getElementById('submit').disabled = true;
+                document.getElementById('submit').setAttribute("class", "btn btn-secondary form-group")
+            }
+        }
+
+        function OwnDescription(index){
+            var description = document.getElementById("ownDescription").value
+            $.post("/own_description",{description:description}, function(data){
+                
+                Toastr(data.message, "success")
+            });
+        }
+
+        function OwnUrl(index){
+            var url = document.getElementById("ownUrl").value
+            $.post("/own_url",{url:url}, function(data){
+                
+                Toastr(data.message, "success")
+            });
+        }
     
             

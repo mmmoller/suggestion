@@ -1,13 +1,14 @@
 include ../functionScript/message
 
 mixin ActionUser(userId, ownUser, ownPermission, infoPermission)
-    .form-inline
-        +ActionFriend(userId, ownUser)
-        if (ownPermission == 2)
-            +ActionPermission(userId, infoPermission[userId])
+    if (userId != ownUser._id)
+        .form-inline
+            +ActionFriend(userId, ownUser)
+            if (ownPermission == 2)
+                +ActionPermission(userId, infoPermission[userId])
 
 mixin ActionPermission(userId, userPermission)
-    select.form-control(data-user-id=userId, style="margin-left:auto", onChange="UserPermission(this)")
+    select.form-control(data-user-id=userId, style="margin:auto", onChange="UserPermission(this)")
         -for(var i = 0; i < 3; i++){
             -if (userPermission == i)
                 option(value=i, selected) #{i}
@@ -29,11 +30,8 @@ script.
     }
 
 mixin ActionFriend(userId, ownUser)
-
-    if (userId != ownUser._id)
-        - var option = (ownUser.friendlist.indexOf(userId) > -1) ? "fas fa-user-minus" : "fas fa-user-plus"
-        //input(type='hidden', id="targetUserid"+index, value=userId)
-        button.btn(class=option, style="margin:auto" value=userId, onclick="ActionFriend(this)")
+    - var option = (ownUser.friendlist.indexOf(userId) > -1) ? "fas fa-user-minus" : "fas fa-user-plus"
+    button.btn(class=option, style="margin:auto" value=userId, onclick="ActionFriend(this)")
 
 script.
     function ActionFriend(index){

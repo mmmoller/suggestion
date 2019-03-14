@@ -10,10 +10,6 @@ input {
     text-align:center;
 }
 
-h1 {
-	margin-bottom: 20px;
-}
-
 .btn-group+.btn-group{
     margin-left: -5px;
 }
@@ -24,13 +20,13 @@ h1 {
 	font-size: 25px
 }
 
-.fa-user-plus, .fa-plus{
+.fa-user-plus, .fa-plus, .fa-eye{
 	background-color: transparent;
 	color: blue;
 	font-size: 25px;
 }
 
-.fa-user-minus, .fa-times{
+.fa-user-minus, .fa-times, .fa-eye-slash{
 	background-color: transparent;
 	color:crimson;
 	font-size: 25px;

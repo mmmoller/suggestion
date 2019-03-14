@@ -22,8 +22,8 @@ block content
                 console.log(this.value)
 
                 $(this).css("background-color", RatingToRGB(index/10))
-                $(this).css("padding", 12.5+(index/10)*1.25)
-                $(this).css("border-top-right-radius", 12.5+(index/10)*1.25)
+                $(this).css("padding", 10+(index/10))
+                $(this).css("border-radius", 10+(index/10))
 
                 $('#ratingTextTeste'+index).html(index/10)
             });

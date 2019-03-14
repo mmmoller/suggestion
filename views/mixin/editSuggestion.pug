@@ -1,16 +1,16 @@
-include ../functionScript/message
+include ../functionScript/toastr
 include ../functionScript/createSuggestion
 
 
-mixin EditSuggestion(infoCategory, suggestion, ownPermission)
+mixin EditSuggestion(infoCategory, infoIcon, suggestion, ownPermission)
 
-    .default-wrapper#storedData(data-categories=infoCategory
+    .default-wrapper#storedData(data-categories=infoCategory,
+    data-icons=infoIcon,
     data-specific-info=suggestion.extraInfo)
 
         input(type='hidden', id='suggestionName', value=suggestion.name)
 
-        include ../mixin/message
-        +Message
+        
 
         .form-inline.form-group
             input.form-control(type='text', id='selectCategory', value=suggestion.category, readonly="readonly", style="width:115px")
@@ -33,8 +33,15 @@ mixin EditSuggestion(infoCategory, suggestion, ownPermission)
 
         div#SpecificInfoDiv
 
+        .input-group.form-group
+            .input-group-prepend
+                .input-group-text Tag
+            textarea.form-control(id="suggestionTag", readonly="readonly") #{suggestion.tag}
+
         if (ownPermission)
-            button.form-group.btn.btn-primary.btn-block(id="btn", value=suggestion._id, onclick="EditSuggestion(this)", style="margin-left: auto") Edit Suggestion
+            button.form-group.btn.btn-primary.btn-block(id="btnEditSuggestion", value=suggestion._id, onclick="EditSuggestion(this)", style="margin-left: auto") Edit Suggestion
+        if (ownPermission == 2)
+            button.form-group.btn.btn-danger.btn-block(id="btnDeleteSuggestion", value=suggestion._id, onclick="DeleteSuggestion(this)", style="margin-left: auto") Delete Suggestion
 
     script.
         $(document).ready(function() {
@@ -92,13 +99,21 @@ mixin EditSuggestion(infoCategory, suggestion, ownPermission)
 
             var category = document.getElementById("selectCategory")
             var extraInfo = CreateJSONExtraInfo(category.value)
+            var tag = CreateJSONTag(category.value)
 
             $.post("/edit_suggestion",{link:link, suggestionId:index.value,
-            extraInfo: extraInfo}, function(data){
+            extraInfo: extraInfo, tag:tag}, function(data){
                 
-                if (data.success){
-                }
+                Toastr(data.message, data.type)
+            });
+        }
 
-                Message(data.message)
+        function DeleteSuggestion(index){
+
+
+            $.post("/delete_suggestion",{suggestionId:index.value}, function(data){
+                
+
+                Toastr(data.message, data.type)
             });
         }

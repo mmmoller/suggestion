@@ -1,4 +1,5 @@
 var User= require('../models/user');
+var handleError = require('../functions/handleError.js');
 
 module.exports = function (usernameBool, permissionBool, usersId, req, res, cb){
 	User.find( {_id : {$in : usersId}}, function(err, users){
@@ -18,6 +19,6 @@ module.exports = function (usernameBool, permissionBool, usersId, req, res, cb){
 			}
 			res.locals.infoPermission = permissions;
 		}
-		cb();
+		cb(users);
 	})
 }

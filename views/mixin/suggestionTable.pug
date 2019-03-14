@@ -15,6 +15,7 @@ mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
                 tr
                     th Name
                     th Link
+                    th Category
                     if (targetUserId)
                         th #{infoUsername[targetUserId]} Rating
                         th #{infoUsername[targetUserId]} Comment
@@ -34,6 +35,8 @@ mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
                                 if (suggestion[i].link.hasOwnProperty(key))
                                     +IconUrl(infoIcon, key, suggestion[i].link[key])
                             -}
+                        td
+                            | #{suggestion[i].category}
                         if (targetUserId)
                             td(data-sort=suggestion[i].userRating[targetUserId])
                                 +RatingIcon(i, "UserOnSuggestion")
@@ -45,7 +48,7 @@ mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
                             td
                                 +RatingIcon(i, "AllUsers")
                         
-                        +ReviewSuggestion(suggestion[i], i, ownUser._id, ownUser.bookmark)
+                        +ReviewSuggestion(suggestion[i], i, ownUser._id, ownUser.bookmark, ownUser.dontshow)
                 -}
 
     script.

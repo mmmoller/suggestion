@@ -1,0 +1,43 @@
+extends layout/out
+
+block content
+    include dependency/datatable
+    include functionScript/toastr
+
+    h1 #{location}
+    
+    .default-table-wrapper
+        table#table.default-table.compact.row-border
+            thead
+                tr  
+                    th Time
+                    th User
+                    th Path
+                    th Body
+            tbody
+                - for (var i = 0; i < logs.length; i++)
+                    tr
+                        td
+                            | #{logs[i].date}
+                        td
+                            a(href='/user/'+ logs[i].user._id, id="userhref"+i) #{logs[i].user.username}
+                        td
+                            | #{logs[i].path}
+                        td
+                            | {
+                            -for(var info in logs[i].body)
+                                | #{info}:#{logs[i].body[info]}, 
+                            | }
+    script.
+        $(document).ready(function() {
+            $('#table').DataTable({
+                "language": {
+                "emptyTable": "No logs"
+                },
+                "ordering": true,
+                "paging": true,
+            });
+
+            Toastr("Banana", "info")
+
+        });

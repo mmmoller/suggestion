@@ -29,11 +29,11 @@ block content
                         +RatingIcon(0, "FriendOnly")
                     td
                         +RatingIcon(0, "AllUsers")
-                    +ReviewSuggestion(suggestion, 0, ownUser._id, ownUser.bookmark)
+                    +ReviewSuggestion(suggestion, 0, ownUser._id, ownUser.bookmark, ownUser.dontshow)
     
 
     include mixin/editSuggestion
-    +EditSuggestion(infoCategory, suggestion, ownPermission)
+    +EditSuggestion(infoCategory, infoIcon, suggestion, ownPermission)
 
     include mixin/userTable
     +Usertable(suggestion, infoCategory, infoUsername, infoPermission, usersId, ownUser, ownPermission)

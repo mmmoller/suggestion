@@ -16,7 +16,7 @@ module.exports = function(passport){
 
 
     //#region USER
-	router.get('/user/:_id', isAuthenticatedWithRedirect, infoIcon, function(req, res) {
+	router.get('/user/:_id', isAuthenticatedWithRedirect, infoIcon, infoCategory, function(req, res) {
 
 		var id = req.params["_id"];
 		var categoryQuery = (req.user.category == "All") ? {} : {"category" : req.user.category}
@@ -32,15 +32,21 @@ module.exports = function(passport){
 
 
 				var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-					friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+					friendlist: req.user.friendlist, bookmark: req.user.bookmark,
+					dontshow: req.user.dontshow}
 				
 				var usersId = [id]
 
-				infoUser(true, true, usersId, req, res, function(){
+				infoUser(true, true, usersId, req, res, function(users){
+
+					console.log(users)
+					var userDescription = users[0].description;
+					var userUrl = users[0].url
 
 					res.render('user', {usersId: usersId, ownUser: ownUser, 
 						suggestion: suggestion, message: req.flash("message"), 
-						userPermission: req.user.permission});
+						ownPermission: req.user.permission, 
+						userDescription: userDescription, userUrl: userUrl});
 				});
 
 			}
@@ -148,6 +154,30 @@ module.exports = function(passport){
 		});
 
 		res.send({success: "success"})
+
+	});
+
+	router.post('/own_description', isAuthenticated, function(req, res){
+
+		req.user.description = req.body["description"]
+		req.user.markModified("description");
+		req.user.save(function (err) {
+			if (err) return handleError(err,req,res);
+		});
+
+		res.send({message: "Description successfully updated!"})
+
+	});
+
+	router.post('/own_url', isAuthenticated, function(req, res){
+
+		req.user.url = req.body["url"]
+		req.user.markModified("url");
+		req.user.save(function (err) {
+			if (err) return handleError(err,req,res);
+		});
+
+		res.send({message: "Url successfully updated!"})
 
 	});
 

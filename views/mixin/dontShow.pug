@@ -1,6 +1,8 @@
-mixin Dontshow(suggestionId, i)
-    
-    button.btn.fas.fa-times(value=i, onclick="ActionDontshow(this)")
+mixin Dontshow(suggestionId, i, dontshow)
+    -var option = "far fa-eye-slash"
+    if (dontshow.indexOf(suggestionId) != -1)
+        - option = "far fa-eye"
+    button.btn(class=option, value=i, onclick="ActionDontshow(this)")
 
 script.
     function ActionDontshow(index){
@@ -8,7 +10,15 @@ script.
         $.post("/action_dontshow",{target_id:target_id.value}, function(data){
 
             if (data.option != ""){
-                $(index).parents("tr").fadeOut(200);
+                if ((window.location.pathname == '/suggestionlist' ||
+                window.location.pathname == '/dontshowlist') &&
+                data.option == "fa-eye"){
+                    $(index).parents("tr").fadeOut(200);
+                }
+                else{
+                    $(index).removeClass("fa-eye-slash fa-eye").addClass(data.option)
+                }
             }
+            
         });
     }

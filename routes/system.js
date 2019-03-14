@@ -8,6 +8,7 @@ var Suggestion = require('../models/suggestion');
 
 var Category = require('../models/category');
 var Icon = require('../models/icon');
+var Log = require('../models/log');
 
 var mongoose = require('mongoose');
 
@@ -16,15 +17,13 @@ module.exports = function(passport){
     // System 
 
     router.get('/delete', function(req, res){
-        //mongoose.connection.collections['User'].drop( function(err) {
-       //     console.log('collection dropped');
-        //});
+        /*
 
         mongoose.connection.db.dropDatabase(function (err) {
             console.log('db dropped');
             process.exit(0);
           });
-        res.send("Deletado");
+        res.send("Deletado");*/
     });
 
     router.get('/r', function(req, res){
@@ -55,50 +54,7 @@ module.exports = function(passport){
                 if (err) return handleError(err,req,res);
                 res.redirect("/");
             });
-        });
-
-        /*
-        Suggestion.remove({}, function(err) { 
-            console.log('Suggestions removed')
-        });
-
-        Category.remove({}, function(err) { 
-            var newCategory = new Category();
-            newCategory.categories = categories;
-            newCategory.save(function (err) {
-                if (err) return handleError(err,req,res);
-            });
-            console.log('Categories recreated')
-        });
-
-        Icon.remove({}, function(err) { 
-            var newIcon = new Icon();
-            newIcon.icons = icons;
-            newIcon.save(function (err) {
-                if (err) return handleError(err,req,res);
-            });
-            console.log('Icons recreated')
-        });
-
-
-        User.remove({}, function(err) { 
-
-            console.log('Users removed')
-            var newUser = new User();
-            newUser.local.email = "admin";
-            newUser.local.password = newUser.generateHash("admin");
-            newUser.username = "admin"
-            newUser.permission = 2;
-
-            
-
-            newUser.save(function(err) {
-                if (err) return handleError(err,req,res);
-                res.redirect("/");
-            });
-
-        });*/
-            
+        });     
     });
 
     router.get('/category', function(req, res){
@@ -113,6 +69,24 @@ module.exports = function(passport){
         });
     });
     
+    router.get('/icon', function(req, res){
+        Icon.remove({}, function(err) { 
+            var newIcon = new Icon();
+            newIcon.icons = icons;
+            newIcon.save(function (err) {
+                if (err) return handleError(err,req,res);
+            });
+            console.log('Icons recreated')
+            res.redirect("/");
+        });
+    });
+
+    router.get('/log', function(req, res){
+        Log.find({}, function(err, logs) { 
+            if (err) return handleError(err,req,res);
+            res.render("log", {logs: logs})
+        });
+    });
     
     return router;
 }
@@ -121,9 +95,10 @@ var categories = {
     "Film" : {
         specificInfo : {
             "Plot" : {type: "textarea"},
-            "Genre" : {type: "input"},
-            "Director" : {type: "input"},
-            "Country" : {type: "input"},
+            "Genre" : {type: "input", addTag: true},
+            "Director" : {type: "input", addTag: true},
+            "Country" : {type: "input", addTag: true},
+            "Runtime" : {type: "input"},
             "Year" : {type: "input"},
         }
     },
@@ -131,10 +106,11 @@ var categories = {
         specificInfo : {
             "Type" : {
                 type: "select",
-                options: ["Music", "Artist", "Album", "Playlist"]
+                options: ["Music", "Artist", "Album", "Playlist"],
+                addTag: true,
             },
-            "Artist" : {type: "input"},
-            "Album" : {type: "input"},
+            "Artist" : {type: "input", addTag: true},
+            "Album" : {type: "input", addTag: true},
             "Year" : {type: "input"},
         }
     },
@@ -142,10 +118,11 @@ var categories = {
         specificInfo : {
             "Type" : {
                 type: "select",
-                options: ["Book", "Series"]
+                options: ["Book", "Series"],
+                addTag: true
             },
-            "Author" : {type: "input"},
-            "Genre" : {type: "input"},
+            "Author" : {type: "input", addTag: true},
+            "Genre" : {type: "input", addTag: true},
             "Year" : {type: "input"},
         }
     },

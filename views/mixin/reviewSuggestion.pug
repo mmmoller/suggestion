@@ -5,7 +5,7 @@ include ../functionScript/reviewSuggestion
 include ../mixin/bookmark
 include ../mixin/dontShow
 
-mixin ReviewSuggestion(suggestion, i, ownId, bookmark)
+mixin ReviewSuggestion(suggestion, i, ownId, bookmark, dontshow)
 
     input(type='hidden', id='suggestionid'+i, value=suggestion._id)
     -var ratingValue = ""
@@ -19,4 +19,4 @@ mixin ReviewSuggestion(suggestion, i, ownId, bookmark)
         button.btn.btn-primary.btn-block.margin(id="btn"+i, value=i, onclick="ReviewSuggestion(this)", style="max-width:100px;margin: auto") #{btnInnerHTML}
     td
         +Bookmark(suggestion._id, i, bookmark)
-        +Dontshow(suggestion._id, i)
+        +Dontshow(suggestion._id, i, dontshow)

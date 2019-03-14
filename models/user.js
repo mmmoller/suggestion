@@ -9,7 +9,6 @@ var userSchema = mongoose.Schema({
 
     /*correlation:{
         _id : {
-            //isFriend: Boolean, (OLD, NOT WORKING ANYMORE)
             (forEach Category in infoCategory){
                 Category: {
                     ratingSum : Number
@@ -24,8 +23,10 @@ var userSchema = mongoose.Schema({
     dontshow: [String],
 
     permission: {type: Number, default: 0}, // 0: normal, 1: moderator, 2: admin
-
     category: {type: String, default: "All"},
+
+    description: {type: String, default: ""},
+    url: {type: String, default: ""},
 
     local            : {
         email        : String,

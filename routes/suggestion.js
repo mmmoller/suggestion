@@ -9,6 +9,8 @@ var infoCategory = require('../functions/infoCategory.js');
 var infoIcon = require('../functions/infoIcon.js');
 var infoUser = require('../functions/infoUser.js');
 
+var toLog = require('../functions/log.js');
+
 var User = require('../models/user');
 
 var Suggestion = require('../models/suggestion');
@@ -31,7 +33,8 @@ module.exports = function(passport){
 			if (suggestion){
 				
 				var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-					friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+					friendlist: req.user.friendlist, bookmark: req.user.bookmark,
+					dontshow: req.user.dontshow}
 				
 				var usersId = []
 				for (var id in suggestion.userRating){
@@ -55,7 +58,7 @@ module.exports = function(passport){
 		});
 	});
 
-	router.post('/create_suggestion', isAuthenticated, function(req, res) {
+	router.post('/create_suggestion', isAuthenticated, toLog, function(req, res) {
 
 		var name = req.body["name"];
 		var category = req.body["category"];
@@ -63,8 +66,9 @@ module.exports = function(passport){
 		Suggestion.findOne({$and: [{name: name}, {category: category}]}, function (err, suggestion){
 			if (err) return handleError(err,req,res);
 			if (suggestion){
-				req.flash('message', "!Suggestion already exists");
-				res.send({success:false, message:req.flash("message")});
+
+				res.send({type:"error", message:"Suggestion already exists"});
+
 			}
 			else{
 
@@ -76,6 +80,7 @@ module.exports = function(passport){
 				if (req.body["link"])
 					newSuggestion.link = req.body["link"];
 				newSuggestion.extraInfo = req.body["extraInfo"];
+				newSuggestion.tag = req.body["tag"]
 
 				console.log(newSuggestion);
 
@@ -83,14 +88,13 @@ module.exports = function(passport){
 					if (err) return handleError(err,req,res);
 				});
 
-				req.flash('message', "Suggestion successfully created");
-				res.send({success:true, message:req.flash("message")});
+				res.send({type:"success", message:"Suggestion successfully created"});
 			}
 		});
 		
 	});
 
-	router.post('/edit_suggestion', isModerator, function(req, res) {
+	router.post('/edit_suggestion', isModerator, toLog, function(req, res) {
 		Suggestion.findOne({_id: req.body["suggestionId"]}, function (err, suggestion){
 			if (err) return handleError(err,req,res);
 			if (suggestion){
@@ -102,18 +106,17 @@ module.exports = function(passport){
 					suggestion.link = {};
 				}
 				suggestion.extraInfo = req.body["extraInfo"];
+				suggestion.tag = req.body["tag"]
 
 				suggestion.save(function (err) {
 					if (err) return handleError(err,req,res);
 				});
 				
-				req.flash('message', "Suggestion successfully edited");
-				res.send({success:true, message:req.flash("message")});
+				res.send({type:"success", message:"Suggestion successfully edited"});
 
 			}
 			else{
-				req.flash('message', "!Suggestion doesn't exist");
-				res.send({success:false, message:req.flash("message")});
+				res.send({type:"error", message:"Suggestion doesn't exist"});
 			}
 		});
 	});
@@ -228,6 +231,63 @@ module.exports = function(passport){
 		});
 	});
 
+	// GOTTA IMPLEMENT NOT WORKING, IT'S COPY PASTA FROM REVIEW
+	router.post('/delete_suggestion', isModerator, toLog, function(req, res) {
+
+		Suggestion.findOne({_id: req.body["suggestionId"]}, function (err, suggestion){
+			if (err) return handleError(err,req,res);
+			if (suggestion){
+
+				var usersId = [];
+
+				var category = suggestion.category;
+
+				for (var id in suggestion.userRating) {
+					if (suggestion.userRating.hasOwnProperty(id)) {
+						usersId.push(id);
+					}
+				}
+
+				User.find({_id : {$in : usersId}}, function(err, user){
+					if (err) return handleError(err,req,res);
+
+					for (var i = 0; i < user.length; i++){
+						for (var j = 0; j < usersId.length; j++){
+							if (user[i]._id != usersId[j]){
+								user[i].correlation[usersId[j]][category].ratingSum -= 
+									Number(10 - Math.abs(suggestion.userRating[user[i]._id] - suggestion.userRating[usersId[j]]))
+								user[i].correlation[usersId[j]][category].ratingCount -= 1
+								if (user[i].correlation[usersId[j]][category].ratingCount == 0){
+									delete user[i].correlation[usersId[j]][category];
+									if (!Object.keys(user[i].correlation[usersId[j]]).length){
+										delete user[i].correlation[usersId[j]]
+									}
+								}
+							}
+						}
+
+						user[i].markModified("correlation");
+						user[i].save(function (err) {
+							if (err) return handleError(err,req,res);
+						});
+					}
+
+					suggestion.remove(function (err) {
+						if (err) return handleError(err,req,res);
+					});
+
+					
+					res.send({type:"success", message:"Suggestion successfully deleted"});
+
+				});
+				
+			}
+			else{
+				res.send({type:"error", message:"Suggestion doesn't exist"});
+			}
+		});
+	});
+
 	router.get('/bookmarklist', isAuthenticated, infoIcon, function(req,res){
 		SuggestionList(req,res)
 	});
@@ -267,11 +327,11 @@ module.exports = function(passport){
 
 		if (req.user.dontshow.indexOf(String(target_id)) == -1){
 			req.user.dontshow.push(target_id);
-			option = "fas fa-times"
+			option = "fa-eye"
 		}
 		else if (req.user.dontshow.indexOf(String(target_id)) > -1){
 			req.user.dontshow.splice(req.user.dontshow.indexOf(String(target_id)), 1)
-			option = "fas fa-plus"
+			option = "fa-eye-slash"
 		}
 		else
 			option = ""
@@ -312,7 +372,8 @@ function SuggestionList(req, res){
 			// Usar ratings e coeficientes
 
 			var ownUser = {_id: req.user._id, correlation: req.user.correlation,
-				friendlist: req.user.friendlist, bookmark: req.user.bookmark}
+				friendlist: req.user.friendlist, bookmark: req.user.bookmark,
+				dontshow: req.user.dontshow}
 
 			res.render('suggestionlist', {suggestion: suggestion, 
 				message: req.flash("message"), ownUser: ownUser, showCreateSuggestion: showCreateSuggestion})
@@ -339,15 +400,20 @@ function MainQuery(req){
 				mainQuery = {}
 			}
 			else {
+				
+				var split = req.query["search_name"].split(/[\s\p{P}]+/)
+				regex = split.map(function (e) { return new RegExp(e, "i"); });
+
+				console.log(regex)
+
 				mainQuery = {$or: [
 					{'name': {'$regex': req.query["search_name"], "$options": "i"}},
-					{'tag': {'$regex': req.query["search_name"], "$options": "i"}}
+					{'tag': { $all: regex }}
 				]}
 			}
 		}
 		// DISCOVER NEW
 		else {
-			console.log("oi")
 			mainQuery = {$and: [
 				{ ["userRating." + req.user._id] : {$exists: false} },
 				{"_id" : {$nin: req.user.dontshow}}

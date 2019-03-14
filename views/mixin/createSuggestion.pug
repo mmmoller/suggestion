@@ -1,13 +1,12 @@
-include ../functionScript/message
+include ../functionScript/toastr
 include ../functionScript/checkRating
 include ../functionScript/createSuggestion
 
-mixin CreateSuggestion(infoCategory)
 
-    .default-wrapper#storedData(data-categories=infoCategory)
+mixin CreateSuggestion(infoCategory, infoIcon)
 
-        include ../mixin/message
-        +Message
+    .default-wrapper#storedData(data-categories=infoCategory,
+    data-icons=infoIcon)
 
         .form-inline.form-group
             .input-group.form-group
@@ -39,9 +38,10 @@ mixin CreateSuggestion(infoCategory)
     script.
         $(document).ready(function() {
 
+            AddLink();
             FillSuggestionName()
             FillCategory()
-            AddLink();
+            
 
         });
 
@@ -80,26 +80,27 @@ mixin CreateSuggestion(infoCategory)
             }
 
             var extraInfo = CreateJSONExtraInfo(category.value)
+            var tag = CreateJSONTag(category.value)
 
             var link = urlToLinkJSON("url")
             
             $.post("/create_suggestion",{name:name.value, rating:rating.value,
-            category:category.value, link:link, extraInfo:extraInfo}, function(data){
+            category:category.value, link:link, extraInfo:extraInfo, tag:tag}, function(data){
                 
-                if (data.success){
+                if (data.type == "success"){
 
 
                     name.value = "";
-                    category.value = "";
-                    category.text = "Category"
+                    //category.value = "";
+                    //category.text = "Category"
 
-                    ClearSpecificInfoFields()
-                    ClearUrlFields()
+                    SelectCategory(category)
+
 
                     rating.value = ""
                 }
                 
-                Message(data.message)
+                Toastr(data.message, data.type)
             });
         }
 

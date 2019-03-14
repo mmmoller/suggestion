@@ -139,6 +139,7 @@ module.exports = function(passport){
 	});
 
     router.get('/account', isAuthenticated, function(req, res) {
+		console.log(req.user)
         res.render('account', {
 			user : req.user,
 			message: req.flash('message')
@@ -211,9 +212,9 @@ module.exports = function(passport){
 						if (err) return handleError(err,req,res);
 						if (user){
 							user.remove();
-							user.save(function (err) {
-								if (err) return handleError(err,req,res);
-							});
+							//user.save(function (err) {
+							//	if (err) return handleError(err,req,res);
+							//});
 							req.flash('message', "Account has been deleted");
 							res.redirect('/logout');
 						}

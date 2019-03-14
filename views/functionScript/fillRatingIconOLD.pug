@@ -58,8 +58,7 @@ script.
             var rating = CalcRating(true, suggestion, ownUser)
 
             $(this).parents("td").data("sort", rating)
-            
-            StylingIcon(this, rating)
+            $(this).css("background-color", RatingToRGB(rating))
 
             $('#ratingTextFriendOnly'+index).html(rating)
         });
@@ -77,8 +76,7 @@ script.
 
 
             $(this).parents("td").data("sort", rating)
-
-            StylingIcon(this, rating)
+            $(this).css("background-color", RatingToRGB(rating))
 
             $('#ratingTextAllUsers'+index).html(rating)
         });
@@ -92,8 +90,7 @@ script.
             var rating = "#"
 
             $(this).parents("td").data("sort", rating)
-
-            StylingIcon(this, rating)
+            $(this).css("background-color", RatingToRGB(rating))
 
             $('#ratingTextSharp'+index).html(rating)
         });
@@ -104,11 +101,12 @@ script.
             var index = this.value
 
             var correlation = $(this).parents("td").data("correlation")
-
+            console.log(correlation)
             var rating = CalcCoeficient(correlation).toFixed(2);
+            console.log(rating)
+            console.log(Math.pow(Number((25+5)/(2+1)), 2)/10)
 
-            StylingIcon(this, rating)
-
+            $(this).css("background-color", RatingToRGB(rating))
             $('#ratingTextUserCorrelation'+index).html(rating)
         })
     }
@@ -119,8 +117,7 @@ script.
 
             //SHOULD BE ATTRIBUTE
             var rating = $(this).parents("td").data("sort")
-
-            StylingIcon(this, rating)
+            $(this).css("background-color", RatingToRGB(rating))
 
             $('#ratingTextUserOnSuggestion'+index).html(rating)
         })

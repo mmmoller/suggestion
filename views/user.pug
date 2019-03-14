@@ -2,20 +2,40 @@ extends layout/in
 
 block content
     
-    .default-wrapper
-        h1 #{infoUsername[usersId[0]]}
-        if (ownUser._id != usersId[0])
-            -for (var key in ownUser.correlation[usersId[0]]) {
-                if (ownUser.correlation[usersId[0]].hasOwnProperty(key))
-                    .form-inline
-                        span #{key}
-                        span(style="margin-left: auto") Sum: #{ownUser.correlation[usersId[0]][key].ratingSum}
-                        span(style="margin-left: auto") Count: #{ownUser.correlation[usersId[0]][key].ratingCount}
-            -}
-            br
+    include mixin/userTable
 
-            include mixin/actionUser
-            +ActionUser(usersId[0], ownUser, ownPermission, infoPermission)
+    .default-table-wrapper
+        h1 #{infoUsername[usersId[0]]}
+
+        p #{userDescription}
+        
+        if (userUrl && userUrl.indexOf("//") == -1)
+            - userUrl = "//"+userUrl
+        a(href=userUrl, target="_blank") #{userUrl}
+
+        br
+        br
+
+        table#usertable.default-table.compact.row-border
+            thead
+                tr  
+                    -for(var category in infoCategory){
+                        th #{category} Coeficient
+                    -}
+                    th Action
+            tbody
+                - for (var i = 0; i < usersId.length; i++)
+                    tr
+                        -for(var category in infoCategory){
+                            if ((ownUser.correlation[usersId[i]]) && (ownUser.correlation[usersId[i]][category]))
+                                td(data-correlation= ownUser.correlation[usersId[i]][category])
+                                    +RatingIcon(i + "-" + category, "UserCorrelation")
+                            else
+                                td
+                                    +RatingIcon(i + "-" + category, "Sharp")
+                        -}
+                        td
+                            +ActionUser(usersId[i], ownUser, ownPermission, infoPermission)
 
     include mixin/suggestionTable
     +Suggestiontable(usersId[0], suggestion, infoIcon, infoUsername, ownUser)

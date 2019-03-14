@@ -8,7 +8,7 @@ var suggestionSchema = mongoose.Schema({
     userRating: {type: Object, default: {}}, // {_id : rating}
     userComment: {type: Object, default: {}}, //{_id : comment},
     extraInfo: {type: Object, default:{}}, //{description: blablabla, autor, blablabla, etc}
-    tag: String,
+    tag: [String],
 
 }, {minimize: false});
 

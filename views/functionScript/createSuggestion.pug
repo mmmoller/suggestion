@@ -10,7 +10,6 @@ script.
         var category = categories[index.value]
 
         for(info in category.specificInfo){
-            console.log(info)
             if (info != "Type"){
                 AddInputInSpecificInfoDiv(info, category.specificInfo[info].type)
             }
@@ -93,8 +92,14 @@ script.
         AddLink()
     }
 
-    function FillInfoFromOMDB(index){
+    function FillInfoFromOMDB(){
         var suggestionName = document.getElementById("suggestionName")
+
+        var categories = $("#storedData").data("categories");
+
+        var selectedCategory = document.getElementById("selectCategory").value
+
+        var category = categories[selectedCategory]
 
         $.get("https://www.omdbapi.com/?t="+suggestionName.value+"&apikey=d9916e3d", {}, function(data){
             console.log(data)
@@ -102,21 +107,14 @@ script.
 
                 suggestionName.value = data.Title
 
-                var plot = document.getElementById("Plot")
-                plot.value = data.Plot
-
-                var genre = document.getElementById("Genre")
-                genre.value = data.Genre
-
-                var year = document.getElementById("Year")
-                year.value = data.Year
-
-                var director = document.getElementById("Director")
-                director.value = data.Director
+                for(info in category.specificInfo){
+                    var field = document.getElementById(info)
+                    field.value = data[info]
+                }
 
                 var urlTextField = document.getElementsByName("url")
                 for (var i = 0; i < urlTextField.length; i++){
-                    if (urlTextField[i].value == ""){
+                    if (urlTextField[i].value == "" || urlTextField[i].value.includes("imdb")){
                         urlTextField[i].value = "https://www.imdb.com/title/" + data.imdbID + "/";
                         i = urlTextField.length
                     }
@@ -142,6 +140,27 @@ script.
         return extraInfo;
     }
 
+    function CreateJSONTag(category){
+        var categories = $("#storedData").data("categories");
+        var tag = [];
+
+        for (info in categories[category].specificInfo){
+            if (categories[category].specificInfo[info].addTag == true){
+                var string = document.getElementById(info).value
+                var split = string.split(/[,\s]+/)
+                for (var i = 0; i < split.length;i++){
+                    tag.push(split[i])
+                }
+            }
+        }
+
+        if (document.getElementById("suggestionTag")){
+            document.getElementById("suggestionTag").innerHTML = tag
+        }
+
+        return tag;
+    }
+
     function urlToLinkJSON(urlName){
 
         var urlField = document.getElementsByName(urlName)
@@ -163,17 +182,13 @@ script.
     }
 
     function HostnameToIcon(hostname, index){
-        console.log(hostname)
-        if (hostname.indexOf("youtube") != -1 || hostname.indexOf("youtu.be") != -1){
-            return "YouTube"
+        var icons = $("#storedData").data("icons");
+        for (var icon in icons){
+            for (var i = 0; i < icons[icon].hostname.length; i++){
+                if (hostname.indexOf(icons[icon].hostname[i]) != -1){
+                    return icon+index
+                }
+            }
         }
-        else if(hostname.indexOf("imdb") != -1){
-            return "IMDb"
-        }
-        else if(hostname.indexOf("spotify") != -1){
-            return "Spotify"
-        }
-        else{
-            return "Unknown"+index
-        }
+        return "Unknown"+index
     }
