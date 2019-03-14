@@ -20,8 +20,8 @@ mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
                         th #{infoUsername[targetUserId]} Rating
                         th #{infoUsername[targetUserId]} Comment
                     else
-                        th Friends
                         th All Users
+                        th Friends 
                     th Your Rating
                     th Review
                     th Action
@@ -44,9 +44,10 @@ mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
                                 | #{suggestion[i].userComment[targetUserId]}
                         else
                             td
-                                +RatingIcon(i, "FriendOnly")
-                            td
                                 +RatingIcon(i, "AllUsers")
+                            td
+                                +RatingIcon(i, "FriendOnly")
+                            
                         
                         +ReviewSuggestion(suggestion[i], i, ownUser._id, ownUser.bookmark, ownUser.dontshow)
                 -}
@@ -62,7 +63,7 @@ mixin Suggestiontable(targetUserId, suggestion, infoIcon, infoUsername, ownUser)
                 "emptyTable": "No suggestions"
                 },
                 "ordering": true,
-                "order": [[2, "desc"]],
+                "order": [[4, "desc"]],
                 "paging": false,
                 "info": false,
             });
