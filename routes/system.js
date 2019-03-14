@@ -59,6 +59,7 @@ module.exports = function(passport){
 
     router.get('/category', function(req, res){
         Category.remove({}, function(err) { 
+            console.log(categories)
             var newCategory = new Category();
             newCategory.categories = categories;
             newCategory.save(function (err) {
