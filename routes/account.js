@@ -16,7 +16,7 @@ module.exports = function(passport){
     //#region INDEX/ACCOUNT
 	router.get('/', function(req, res) {
 		if (req.user){
-			res.redirect('/account');
+			res.redirect('/suggestionlist');
 		}
 		else{
 			res.render('index', {message: req.flash('message')});
