@@ -15,7 +15,6 @@ var mongoose = require('mongoose');
 module.exports = function(passport){
 
     // System 
-
     router.get('/delete', function(req, res){
         /*
 
@@ -27,7 +26,7 @@ module.exports = function(passport){
     });
 
     router.get('/r', function(req, res){
-        
+        /*
         mongoose.connection.db.dropDatabase(function (err) {
             var newCategory = new Category();
             newCategory.categories = categories;
@@ -54,7 +53,8 @@ module.exports = function(passport){
                 if (err) return handleError(err,req,res);
                 res.redirect("/");
             });
-        });     
+        });
+        */
     });
 
     router.get('/category', function(req, res){
