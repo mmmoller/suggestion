@@ -139,7 +139,6 @@ module.exports = function(passport){
 	});
 
     router.get('/account', isAuthenticated, function(req, res) {
-		console.log(req.user)
         res.render('account', {
 			user : req.user,
 			message: req.flash('message')

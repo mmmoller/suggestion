@@ -22,7 +22,7 @@ module.exports = function(passport){
 
 	// LOGIN
 	router.post('/login', passport.authenticate('local-login', {
-		successRedirect : '/account', // redirect to the secure account section
+		successRedirect : '/suggestionlist', // redirect to the secure account section
 		failureRedirect : '/', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
@@ -34,7 +34,7 @@ module.exports = function(passport){
 	});
 	// process the signup form
 	router.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/account', // redirect to the secure account section
+		successRedirect : '/suggestionlist', // redirect to the secure account section
 		failureRedirect : '/signup', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
@@ -69,7 +69,7 @@ module.exports = function(passport){
 	router.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
 	// the callback after google has authenticated the user
 	router.get('/auth/google/callback', passport.authenticate('google', {
-		successRedirect : '/account',
+		successRedirect : '/suggestionlist',
 		failureRedirect : '/'
 	}));
 
@@ -106,7 +106,7 @@ module.exports = function(passport){
 	// handle the callback after facebook has authenticated the user
 	router.get('/auth/facebook/callback',
 		passport.authenticate('facebook', {
-			successRedirect : '/account',
+			successRedirect : '/suggestionlist',
 			failureRedirect : '/'
 		}));
 

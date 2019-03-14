@@ -82,7 +82,6 @@ module.exports = function(passport){
 				newSuggestion.extraInfo = req.body["extraInfo"];
 				newSuggestion.tag = req.body["tag"]
 
-				console.log(newSuggestion);
 
 				newSuggestion.save(function (err) {
 					if (err) return handleError(err,req,res);
@@ -125,8 +124,6 @@ module.exports = function(passport){
 
 	router.post('/review_suggestion', isAuthenticated, function(req, res) {
 
-		//console.log("Suggestion ID: " + req.body.target_id)
-		//console.log("Rating: " + req.body.rating)
 
 		Suggestion.findOne({_id: req.body["target_id"]}, function (err, suggestion){
 			if (err) return handleError(err,req,res);
@@ -141,8 +138,6 @@ module.exports = function(passport){
 				}
 
 				var oldRating = "";
-				//console.log("my id: " + req.user._id);
-				//console.log(usersRatedIds)
 
 				if (suggestion.userRating[req.user._id]){
 					oldRating = suggestion.userRating[req.user._id]
@@ -151,7 +146,6 @@ module.exports = function(passport){
 
 				User.find({_id : {$in : usersRatedIds}}, function(err, user){
 					if (err) return handleError(err,req,res);
-					//console.log(user)
 					for (var i = 0; i < user.length; i++){
 
 						if (req.body.rating == ""){
@@ -406,7 +400,6 @@ function MainQuery(req){
 				var split = req.query["search_name"].split(/[\s\p{P}]+/)
 				regex = split.map(function (e) { return new RegExp(e, "i"); });
 
-				console.log(regex)
 
 				mainQuery = {$or: [
 					{'name': {'$regex': req.query["search_name"], "$options": "i"}},
