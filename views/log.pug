@@ -18,7 +18,7 @@ block content
                 - for (var i = 0; i < logs.length; i++)
                     tr
                         td
-                            | #{logs[i].date}
+                            | #{moment(logs[i].date).format("YY/MM/DD hh:mm")}
                         td
                             a(href='/user/'+ logs[i].user._id, id="userhref"+i) #{logs[i].user.username}
                         td
