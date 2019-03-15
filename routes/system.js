@@ -154,6 +154,12 @@ var icons = {
         size: {"font-size": "35px"},
         hostname: ["wikipedia"],
     },
+    "Goodreads" : {
+        fontAwesome: "fab fa-goodreads",
+        color: {color: "grey"},
+        size: {"font-size": "35px"},
+        hostname: ["goodreads"],
+    },
     "Unknown" : {
         fontAwesome: "fa fa-question-circle",
         color: {color: "black"},
