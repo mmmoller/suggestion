@@ -72,6 +72,7 @@ module.exports = function(passport){
     
     router.get('/icon', function(req, res){
         Icon.remove({}, function(err) { 
+            console.log(icons)
             var newIcon = new Icon();
             newIcon.icons = icons;
             newIcon.save(function (err) {
@@ -156,7 +157,7 @@ var icons = {
     },
     "Goodreads" : {
         fontAwesome: "fab fa-goodreads",
-        color: {color: "grey"},
+        color: {color: "brown"},
         size: {"font-size": "35px"},
         hostname: ["goodreads"],
     },
