@@ -1,5 +1,6 @@
 include ratingToRGB
 include ratingToSize
+include ratingToBorderRadius
 include calcRating
 include calcCoeficient
 
@@ -129,5 +130,5 @@ script.
     function StylingIcon(element, rating){
         $(element).css("background-color", RatingToRGB(rating))
         $(element).css("padding", RatingToSize(rating))
-        $(element).css("border-radius", RatingToSize(rating))
+        $(element).css("border-radius", RatingToBorderRadius(rating))
     }
