@@ -9,8 +9,11 @@ module.exports = function(passport){
     //#region LOGIN/LOGOUT/SIGNIN 
     // LOGOUT ==============================
     router.get('/logout', function(req, res) {
-        req.logout();
-        res.redirect('/');
+        req.logout(function(err) {
+			if (err) return handleError(err,req,res)
+			res.redirect('/');
+		});
+        //res.redirect('/');
     });
 
 	//#region LOCAL
