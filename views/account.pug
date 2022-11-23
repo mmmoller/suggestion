@@ -83,15 +83,6 @@ block content
                         br
                         a.btn.btn-outline-danger(href="/connect/google") Link Google Account
                 .col
-                    span.fab.fa-facebook(style="font-size: 35px; margin-bottom:10px; color: darkblue").margin
-                    if (user.facebook.token)
-                        p ID: #{user.facebook.id}
-                        p Email: #{user.facebook.email}
-                        p Name: #{user.facebook.name}
-                        a.btn.btn-outline-primary(href="/unlink/facebook") Unlink Facebook Account
-                    else
-                        br
-                        a.btn.btn-outline-primary(href="/connect/facebook") Link Facebook Account
 
     script.
         function CheckPassword(){

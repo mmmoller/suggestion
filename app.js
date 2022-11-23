@@ -12,6 +12,8 @@ var MongoDBStore = require('connect-mongodb-session')(expressSession);
 
 var flash = require('connect-flash');
 
+require('dotenv').config()
+
 //#region Mongo configurations
 mongoose.plugin(schema => { schema.options.usePushEach = true });
 mongoose.Promise = require('bluebird');
@@ -32,6 +34,7 @@ var store = new MongoDBStore({
     uri: dbUri,
     collection: "expressSession"
 });
+
 
     
 //#endregion
