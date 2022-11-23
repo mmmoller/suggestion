@@ -20,7 +20,8 @@ mongoose.Promise = require('bluebird');
 
 var options = {
 	socketTimeoutMS: 30000,
-	useNewUrlParser: true
+	useNewUrlParser: true,
+    useUnifiedTopology: true
 };
 
 var dbUri = "mongodb://127.0.0.1/test"

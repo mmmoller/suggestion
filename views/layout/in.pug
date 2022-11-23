@@ -1,15 +1,18 @@
 doctype html
 html
 	head
-		title= title
+		title Suggester
 
 		include ../dependency/all
 
 		.menu-bar.form-inline(style="overflow: visible")
-			a(href="/friendlist", class="btn btn-outline-primary").margin
+			a(href="/suggestionlist", class="btn btn-outline-primary").margin
+				| #{""} New Suggestions
+			a(href="/myuser", class="btn btn-outline-primary", style="margin-left: 20px").margin
+				| #{""} My Suggestions
+			a(href="/friendlist", class="btn btn-outline-primary", style="margin-left: 20px").margin
 				| #{""} Friends
-			a(href="/suggestionlist", class="btn btn-outline-primary", style="margin-left: 20px").margin
-				| #{""} Suggestions
+			
 			form(action='/suggestionlist', method='get', style="margin-left: auto").margin
 				.input-group
 					input.form-control(type='text', name='search_name', placeholder='Suggestion')
