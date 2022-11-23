@@ -1,13 +1,8 @@
 extends layout/out
 
-mixin RatingIcon(index, iconType)
-    .hvrbox
-        button.btn(name="ratingIcon"+iconType, style="background-color:"+rgb+"; padding: 25px; border-radius:8px", value=index)
-        .hvrbox-layer_top
-            .hvrbox-text(id="ratingText"+iconType+index)
 
 block content
-    //include mixin/ratingIcon
+    include mixin/ratingIcon
     include functionScript/fillRatingIcon
     link(rel='stylesheet', href='/stylesheets/hover.css')
 
