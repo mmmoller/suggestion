@@ -28,21 +28,21 @@ script.
 
         if (index.value == "Film"){
 
-            var linkA = document.createElement("a")
+            /*var linkA = document.createElement("a")
             linkA.setAttribute("id", "linkA")
             linkA.setAttribute("hidden", true)
             linkA.setAttribute("target", "_blank")
             linkA.setAttribute("style", "margin-left:auto")
             linkA.setAttribute("class", "margin")
             linkA.innerText = "Unknown"
-            index.parentNode.insertBefore(linkA, index.nextSibling)
+            index.parentNode.insertBefore(linkA, index.nextSibling)*/
 
             var verifyBtn = document.createElement("input")
             verifyBtn.setAttribute("type", "button")
             verifyBtn.setAttribute("class", "btn btn-success")
             verifyBtn.setAttribute("id", "verifyBtn")
             verifyBtn.setAttribute("style", "margin-left:auto")
-            verifyBtn.setAttribute("value", "Verify")
+            verifyBtn.setAttribute("value", "Verify IMDB")
             verifyBtn.setAttribute("onClick", "FillInfoFromOMDB(this)")
             index.parentNode.insertBefore(verifyBtn, index.nextSibling)
 
@@ -132,12 +132,12 @@ script.
                     }
                 }
 
-                //window.open("https://www.imdb.com/title/" + data.imdbID + "/")
+                window.open("https://www.imdb.com/title/" + data.imdbID + "/")
 
-                var linkA = document.getElementById("linkA")
+                /*var linkA = document.getElementById("linkA")
                 linkA.removeAttribute("hidden")
                 linkA.setAttribute("href", "https://www.imdb.com/title/" + data.imdbID + "/")
-                linkA.innerText = "IMDB Link"
+                linkA.innerText = "IMDB Link"*/
                 
 
             }
